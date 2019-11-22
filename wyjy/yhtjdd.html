@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>用户推荐订单</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<!-- <meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black"> -->
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			*{
+				font-family: "宋体";
+			}
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.all{display: flex;flex-direction: row;height: 55px;align-items: center;}
+			.item-all{background: white;padding: 0 15px;margin-bottom: 2px;}
+			.item{display: flex;flex-direction: row;align-items: center;height: 60px;}
+			/*----------------mui.showLoading---------------*/
+			.mui-show-loading {
+				position: fixed;
+				padding: 5px;
+				width: 120px;
+				min-height: 120px;
+				top: 45%;
+				left: 50%;
+				margin-left: -60px;
+				background: rgba(0, 0, 0, 0.6);
+				text-align: center;
+				border-radius: 5px;
+				color: #FFFFFF;
+				visibility: hidden;
+				margin: 0;
+				z-index: 2000;
+			
+				-webkit-transition-duration: .2s;
+				transition-duration: .2s;
+				opacity: 0;
+				-webkit-transform: scale(0.9) translate(-50%, -50%);
+				transform: scale(0.9) translate(-50%, -50%);
+				-webkit-transform-origin: 0 0;
+				transform-origin: 0 0;
+			}
+			.mui-show-loading.loading-visible {
+				opacity: 1;
+				visibility: visible;
+				-webkit-transform: scale(1) translate(-50%, -50%);
+				transform: scale(1) translate(-50%, -50%);
+			}
+			.mui-show-loading .mui-spinner{
+				margin-top: 24px;
+				width: 36px;
+				height: 36px;
+			}
+			.mui-show-loading .text {
+				line-height: 1.6;
+				font-family: -apple-system-font,"Helvetica Neue",sans-serif;
+				font-size: 14px;
+				margin: 10px 0 0;
+				color: #fff;
+			}
+			
+			.mui-show-loading-mask {
+			  position: fixed;
+			  z-index: 1000;
+			  top: 0;
+			  right: 0;
+			  left: 0;
+			  bottom: 0;
+			}
+			.mui-show-loading-mask-hidden{
+				display: none !important;
+			}
+			a{
+				color: black;
+			}
+		</style>
+		<script type="text/javascript">
+				//扩展mui.showLoading
+		(function($, window) {
+		    //显示加载框
+		    $.showLoading = function(message,type) {
+		        if ($.os.plus && type !== 'div') {
+		            $.plusReady(function() {
+		                plus.nativeUI.showWaiting(message);
+		            });
+		        } else {
+		            var html = '';
+		            html += '<i class="mui-spinner mui-spinner-white"></i>';
+		            html += '<p class="text">' + (message || "数据加载中") + '</p>';
+		
+		            //遮罩层
+		            var mask=document.getElementsByClassName("mui-show-loading-mask");
+		            if(mask.length==0){
+		                mask = document.createElement('div');
+		                mask.classList.add("mui-show-loading-mask");
+		                document.body.appendChild(mask);
+		                mask.addEventListener("touchmove", function(e){e.stopPropagation();e.preventDefault();});
+		            }else{
+		                mask[0].classList.remove("mui-show-loading-mask-hidden");
+		            }
+		            //加载框
+		            var toast=document.getElementsByClassName("mui-show-loading");
+		            if(toast.length==0){
+		                toast = document.createElement('div');
+		                toast.classList.add("mui-show-loading");
+		                toast.classList.add('loading-visible');
+		                document.body.appendChild(toast);
+		                toast.innerHTML = html;
+		                toast.addEventListener("touchmove", function(e){e.stopPropagation();e.preventDefault();});
+		            }else{
+		                toast[0].innerHTML = html;
+		                toast[0].classList.add("loading-visible");
+		            }
+		        }   
+		    };
+		
+				//隐藏加载框
+				  $.hideLoading = function(callback) {
+					if ($.os.plus) {
+						$.plusReady(function() {
+							plus.nativeUI.closeWaiting();
+						});
+					} 
+					var mask=document.getElementsByClassName("mui-show-loading-mask");
+					var toast=document.getElementsByClassName("mui-show-loading");
+					if(mask.length>0){
+						mask[0].classList.add("mui-show-loading-mask-hidden");
+					}
+					if(toast.length>0){
+						toast[0].classList.remove("loading-visible");
+						callback && callback();
+					}
+				  }
+			})(mui, window);
+			</script>
+	</head>
+	<body>
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">用户推荐订单</h1>
+		</header>
+		<div id="app">
+			<div v-if="hidden">
+				<div style="margin-top: 44px;height: calc(100vh - 44px - 55px);overflow-y: scroll;">
+					<div class="item-all" rel='false' v-for="(item,index) in list">
+						<div class="item">
+							<img src="../Common/image/bzfk/check.png" style="width: 25px;height: 25px;" >
+							<div style="display: flex;justify-content: space-between;align-items: center;width: 100%;">
+								<div style="height: 100%;padding: 5px;font-size: .7rem;padding-left: 10px;">
+									<div>订单号:{{item.PM0005_OUT_TRADE_NO}}</div>
+									<div>{{item.PM0005_CREATE_TIME}}</div>
+								</div>
+								<div style="text-align: right;color: red;" :rel="item.PM0006_AMOUNT" class="amount">￥<span>{{item.M9000_TOTAL_AMOUNT}}</span></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div style="height: 55px;background: white;padding: 0 15px;display: flex;justify-content: space-between;align-items: center;">
+					<div class="all" rel='false'>
+						<img src="../Common/image/bzfk/check.png" style="width: 25px;height: 25px;">
+						<div style="font-size: .8rem;margin-left: 5px;">全选</div>
+						<div id="" style="margin-left:15px;font-size: .8rem;">
+							已选金额:<span style="color: red;" class="price">0</span>元
+						</div>
+					</div>
+					<div class="TixiNA" style="height: 35px;border: 1px solid #ccc;line-height: 35px;padding: 0 25px;background: #00A2FF;color: white;">提现</div>
+				</div>
+			</div>
+			<div v-if="!hidden" style="margin-top: 100px;text-align: center;color: #ccc;">
+				暂无用户推广列表
+			</div>
+		</div>
+		
+	</body>
+	<script type="text/javascript">
+		var proc = "查询基本信息 " + Bill.userId;
+		var rst = $$.JSONDB.Query(proc);
+		var data = rst.Table[0];
+		var id=data.用户标识;
+		//var id='3090617304700000001'
+		new Vue({
+			el:'#app',
+			data:{
+				list:[],
+				hidden:false,
+			},
+			created(){
+				var _this=this
+				 mui.showLoading("正在加载..","div");
+				$.ajax({
+					type: "post",
+					url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetUserServicePromoteList",user_id:"${id}"}`,
+					data:{},
+					async:false,
+					success: function (res) {
+						if(JSON.parse(res).message=='获取购买服务推广信息列表成功'){
+							_this.list=JSON.parse(JSON.parse(res).data)
+							_this.list.forEach(function(item){
+								var day1=item.PM0005_CREATE_TIME.slice(0,10)
+								var day2=item.PM0005_CREATE_TIME.slice(11,19)
+								item.PM0005_CREATE_TIME=day1+' '+day2
+								console.log(day2)
+							})
+							console.log(_this.list)
+							_this.hidden=true
+						}
+						else{
+							_this.hidden=false
+							}
+						setTimeout(function() {
+							mui.hideLoading()
+						}, 1000);
+					},
+					error:function(err){
+						console.log(err)
+					}
+				});
+			}
+		})
+		$(function(){
+			$('.item-all').click(function(){
+				var price=parseFloat($('.price').text())
+				if($(this).attr('rel')=='false'){
+					$(this).find('img').attr('src','../Common/image/bzfk/checked.png')
+					$(this).attr('rel','true')
+					var amount=parseFloat($(this).find('.amount').children().eq(0).text())//金額
+					var amountbfb=parseFloat($(this).find('.amount').attr('rel'))//
+					price=price+parseFloat((amount*amountbfb))
+					$('.price').text(price)
+				}
+				else{
+					$(this).find('img').attr('src','../Common/image/bzfk/check.png')
+					$(this).attr('rel','false')
+					var amount=parseFloat($(this).find('.amount').children().eq(0).text())//金額
+					var amountbfb=parseFloat($(this).find('.amount').attr('rel'))//
+					price=price-parseFloat((amount*amountbfb))
+					$('.price').text(price)
+				}
+				var alllen=$('.item-all').length
+				var len=0
+				$('.item-all').each(function(){
+					if($(this).attr('rel')=='true'){
+						len++
+					}
+				})
+				if(len==alllen){
+					$('.all').find('img').attr('src','../Common/image/bzfk/checked.png')
+					$('.all').attr('rel','true')
+				}
+				else{
+					$('.all').find('img').attr('src','../Common/image/bzfk/check.png')
+					$('.all').attr('rel','false')
+				}
+			})
+			$('.all').click(function(){
+				var price=parseFloat($('.price').text())
+				if($(this).attr('rel')=='false'){
+					$(this).find('img').attr('src','../Common/image/bzfk/checked.png')
+					$(this).attr('rel','true')
+					$('.item-all').each(function(){
+						$(this).find('img').attr('src','../Common/image/bzfk/checked.png')
+						$(this).attr('rel','true')
+						var amount=parseFloat($(this).find('.amount').children().eq(0).text())//金額
+						var amountbfb=parseFloat($(this).find('.amount').attr('rel'))//
+						price=price+parseFloat((amount*amountbfb))
+						$('.price').text(price)
+					})
+				}
+				else{
+					$(this).find('img').attr('src','../Common/image/bzfk/check.png')
+					$(this).attr('rel','false')
+					$('.item-all').each(function(){
+						$(this).find('img').attr('src','../Common/image/bzfk/check.png')
+						$(this).attr('rel','false')
+						var amount=parseFloat($(this).find('.amount').children().eq(0).text())//金額
+						var amountbfb=parseFloat($(this).find('.amount').attr('rel'))//
+						price=price-parseFloat((amount*amountbfb))
+						$('.price').text(price)
+					})
+				}
+			})
+			$('.TixiNA').click(function(){
+				mui.showLoading("正在加载..","div");
+			})
+			
+		})
+	</script>
+</html>

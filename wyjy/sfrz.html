@@ -1,0 +1,354 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>身份认证</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/UploadPic.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/javascript">
+		$$.Page_Load = function(){
+			$.init();
+
+			My.GetAuthInfoStatus();
+			
+			My.ImageType = "";
+			My.CompressImage();
+			My.Event();
+		}
+		
+		var My = {
+			IMAGES: []
+		};
+		
+		My.CompressImage = function() {
+			var u = new UploadPic();
+			u.init({
+				input: document.querySelector('#imgUpload'),
+				maxWidth: 512,
+				maxHeight: 512,
+				callback: function(base64) {
+					My.IMAGES[My.ImageType] = encodeURIComponent(base64);
+					$("#card_" + My.ImageType).attr("src", base64);			
+				},
+				loading: function() {
+		
+				}
+			});
+		}
+		
+		My.GetAuthInfoStatus= function () {
+			var proc = "GetRegisterInfo " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+
+			if (!rst) {
+				return 0;
+			}
+			var data = rst.Table[0];
+			if (!data || data.M0001_PHONE == "") {
+				return 0;
+			}
+			
+			My.IMAGES['a'] = data.M0001_CARD_PHOTO_A;
+			My.IMAGES['b'] = data.M0001_CARD_PHOTO_B;
+			My.IMAGES['c'] = data.M0001_DRIVER_PHOTO;
+			$('#card_a').attr('src', decodeURIComponent(My.IMAGES['a']));
+			$('#card_b').attr('src', decodeURIComponent(My.IMAGES['b']));
+			$('#card_c').attr('src', decodeURIComponent(My.IMAGES['c']));
+			
+			return 1;
+		}
+		
+		My.HasCard = function () {
+			$(".has-card").show();
+		}
+
+		My.Commit = function () {
+			return;
+			
+			var data = {};
+			data.USER_ID = Bill.userId;
+			
+			data.身份证正 = My.IMAGES['a'];
+			if (!data.身份证正) {
+				layer.open({
+					content: '未上传身份证（正）'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;						
+			}
+			
+			data.身份证反 = My.IMAGES['b'];
+			if (!data.身份证反) {
+				layer.open({
+					content: '未上传身份证（反）'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;						
+			}
+			data.驾驶证 = My.IMAGES['c'];
+			if (!data.M0001_DRIVER_PHOTO) {
+				layer.open({
+					content: '未上传驾驶证'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;						
+			}
+			
+			$$.Log(JSON.stringify(data));
+			
+			var procTmpl = "AddRegisterInfo {{USER_ID}}, '{{M0001_PHONE}}', '{{M0001_EMAIL}}', '{{M0001_PASSWORD}}', '{{M0001_CARD_PHOTO_A}}', '{{M0001_CARD_PHOTO_B}}', '{{M0001_DRIVER_PHOTO}}', " +
+						"'{{M0001_SUPPLIER_COUNTRY}}', '{{M0001_SUPPLIER_PROVINCE}}', '{{M0001_SUPPLIER_CITY}}', '{{M0001_SUPPLIER_CONUNTY}}', '{{M0001_SUPPLIER_ADDRESS}}'";
+					
+			var proc = procTmpl.t(data);
+			layer.open({type:2});
+			$$.JSONDB.Query(proc);
+			layer.closeAll();
+			
+			My.GetUserInfo();
+		}
+		
+		My.Event = function () {
+			// 上传图片
+			$("#pictureId").change(function(event) {
+				page.isClick = true;
+				var files = event.target.files;
+				var file;
+				if(files && files.length > 0) {
+					file = files[0];
+					var type = file.type
+		
+					// 如果没有文件类型，则通过后缀名判断（解决微信及360浏览器无法获取图片类型问题）
+					var mime = {
+						'png': 'image/png',
+						'jpg': 'image/jpeg',
+						'jpeg': 'image/jpeg',
+						'bmp': 'image/bmp',
+						'svg': 'image/svg'
+					};
+					if(!type) {
+						type = mime[file.name.match(/\.([^\.]+)$/i)[1]];
+					}
+		
+					if(!/image.(png|jpg|jpeg|bmp)/.test(type)) {
+						alert('选择的文件类型不是图片');
+						return;
+					}
+		
+					if(file.size > 1024 * 2) {
+						alert('选择文件大于2M，请重新选择');
+						return;
+					}
+		
+					if($(".imgPic").show()) {
+						$(".uploadPictures").hide();
+					}
+				}
+			});
+			
+			//上传图片事件
+			$("#span_a").click(function() {
+				My.ImageType = 'a';
+			});
+			$("#span_b").click(function() {
+				My.ImageType = 'b';
+			});
+			$("#span_c").click(function() {
+				My.ImageType = 'c';
+			});
+			
+			if (!My.registed ) {
+				$("#city-picker").cityPicker({
+					toolbarTemplate: '<header class="bar bar-nav">\
+					<button class="button button-link pull-right close-picker">确定</button>\
+					<h1 class="title">选择地址</h1>\
+					</header>'
+				});
+			}
+		}
+	</script>
+	<style>
+		.Color_B1 {
+			background-color:#f57c59;
+		}
+		.card{
+			background: #fff;
+			box-shadow: 0 0 0.6rem rgba(245, 127, 89, 0.3);
+			margin: 0.5rem;
+			position: relative;
+			border-radius: 0.4rem;
+			font-size: 0.7rem;
+		}
+		.button:active  {
+			background: burlywood;
+		}
+		.button{
+			line-height: 1.7rem;
+			padding: 0 0.8rem;
+			height: 1.8rem;
+			border: 1px solid #f57c59;
+			color: #F57C59;
+		}
+		.card .namefont {
+			font-weight: lighter;
+			color: #666666;
+			font-size: 0.85rem;
+		}
+		.card-number{
+			width: 100%;
+			text-align: left;
+			font-size: 1.1rem;
+			border: 0;
+			border-bottom: 1px solid #f57e59;
+			color: #666;
+			font-weight: lighter;
+			padding: 0 0.5rem;
+		}
+		.item-content .query{
+			background-color: #f57e59;
+			color: #fff;
+			padding: 0 1rem;
+		}
+		.inner-box h3{
+			margin: 0;
+			font-weight: normal;
+		}
+		.inner-box p{
+			margin-top: 0;
+			color: #a5a5a5;
+			padding-left: 1rem;
+		}
+		.item-inner{
+			position: relative;
+		}
+		.inbtn{
+			position: absolute;
+			top: 50%;
+			right:0.6rem;
+			transform: translateY(-50%);
+		}
+		.item-img{
+			display: block;
+			margin-right: 3.8rem;
+			background: #eaeaea url("../Common/image/add.png") no-repeat center;
+			background-size: 1.4rem;
+			height: 2rem;
+			border-radius: 0.4rem;
+		}
+		.item-img img{
+			vertical-align: middle;
+		}
+		.tijiao{
+			background-color: #f57e59;
+			color: #fff;
+			padding: 0 1.4rem;
+			box-shadow: 0 0 0.8rem rgba(245,125,89,0.4);
+		}
+		.sui-bottom-text {
+			color: #666666;
+			margin: 0;
+			padding: 0.4rem 0.6rem;
+			margin-bottom: 1rem;
+		}
+		.list-block .item-input input{
+			font-size: 0.75rem;
+		}
+		.list-block .item-title.label {
+			width: 33%;
+		}
+	</style>
+</head>
+<body>
+	<div class="page-group">
+		<div id="MainPage" class="page page-current">
+			<header class="bar bar-nav Color_B1">
+				<a class="icon icon-left  pull-left" style="color: white;" onclick="$.router.back();"></a>
+				<h1 id="MainPage_Title" class="title" style="color: white;">身份认证</h1>
+			</header>
+
+			<div id="PageContent" class="content">
+				<div class="card" style="margin-top: 0.5rem;">
+					<div>
+						<div class="inner-box user-guide">
+							<h3 class="namefont">说明</h3>
+							<p>请上传您的身份证照片及驾驶执照照片用于身份认证。认证通过后可在线借款。</p>
+						</div>
+					</div>
+				</div>
+				<div class="card" style="margin-top: 0.5rem;">
+					<div class="card-content">
+						<div class="list-block">
+							<ul>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title label namefont">身份证(正)</div>
+											<label id="span_a" class="item-input item-img" for="imgUpload">
+												<img id="card_a" src="" style="width: 100%;" />
+											</label>
+											<!--<a class="button inbtn identity-card-positive">上传</a>-->
+										</div>
+									</div>
+								</li>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title label namefont">身份证(反)</div>
+											<label id="span_b" class="item-input item-img" for="imgUpload">
+												<img id="card_b" src="" style="width: 100%;" />
+											</label>
+											<!--<a class="button inbtn identity-card-negative">上传</a>-->
+										</div>
+									</div>
+								</li>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title label namefont">驾驶证</div>
+											<label id="span_c" class="item-input item-img" for="imgUpload">
+												<img id="card_c" src="" style="width: 100%;" />
+											</label>
+											<!--<a class="button inbtn driving-driving">上传</a>-->
+										</div>
+									</div>
+								</li>
+								<input id="imgUpload" style="display: none;" type="file" value="0" accept="image/*" />
+							</ul>
+						</div>
+					</div>
+					
+					<div class="card-footer">
+						<span></span>
+						<a class="button tijiao" onclick="My.Commit()">提交</a>
+						<span></span>
+					</div>
+				</div>
+				<p class="sui-bottom-text">说明:每月10日是出账单日</p>
+				
+			</div>
+			
+		</div>		
+	</div>
+</body>
+
+</html>

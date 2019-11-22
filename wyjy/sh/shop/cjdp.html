@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>店铺管理</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/iconfont.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<style>
+			label {
+				display: inline-block;
+				border: 1px solid #ddd;
+				background-color: #eeeeee;
+				width: 3rem;
+				height: 2.8rem;
+				line-height: 2.5rem;
+				text-align: center;
+			}
+			/*图片展示*/
+			
+			.img-box {
+				display: inline-block;
+				position: relative;
+				margin-bottom: 0.3rem;
+			}
+			
+			.dp-img {
+				width: 3rem;
+				height: 2.8rem;
+				vertical-align: middle;
+				margin-right: 0.5rem;
+			}
+			
+			.close {
+				display: inline-block;
+				width: 0.8rem;
+				height: 0.8rem;
+				border-radius: 50%;
+				text-align: center;
+				line-height: 0.8rem;
+				background-color: #E4393C;
+				color: #FFFFFF;
+				position: absolute;
+				top: 0;
+				right: 0.5rem;
+			}
+			
+			.list-block .item-title.label {
+				margin: 0;
+			}
+			
+			.iconfont {
+				font-size: 1rem;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<div class="content-block-title">店铺基本信息</div>
+			<div class="list-block">
+				<ul>
+					<li>
+						<div class="item-content">
+							<div class="item-media"><i class="iconfont icon-dianpuguanli"></i></div>
+							<div class="item-inner">
+								<div class="item-title label">名称</div>
+								<div class="item-input">
+									<input id="name" type="text" placeholder="请输入店铺名称" value="{{店铺名}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media"><i class="iconfont icon-shengshiqu"></i></div>
+							<div class="item-inner">
+								<div class="item-title label">省市区</div>
+								<div class="item-input">
+									<input data-toggle="city-picker" id="city" type="text" placeholder="请选择省市区" value="{{省}}{{市}}{{区}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media"><i class="iconfont icon-xiangxidizhi"></i></div>
+							<div class="item-inner">
+								<div class="item-title label">地址</div>
+								<div class="item-input">
+									<input id="addr" type="text" placeholder="请输入详细地址" value="{{地址}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media"><i class="iconfont icon-lianxiren"></i></div>
+							<div class="item-inner">
+								<div class="item-title label">联系人</div>
+								<div class="item-input">
+									<input id="lxr" type="text" placeholder="请输入联系人" value="{{联系人}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media"><i class="iconfont icon-lianxidianhua"></i></div>
+							<div class="item-inner">
+								<div class="item-title label">联系电话</div>
+								<div class="item-input">
+									<input id="tel" type="tel" placeholder="请输入联系电话" value="{{联系电话}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media"><i class="iconfont icon-lianxiyouxiang"></i></div>
+							<div class="item-inner">
+								<div class="item-title label">联系邮箱</div>
+								<div class="item-input">
+									<input id="email" type="email" placeholder="请输入联系邮箱" value="{{联系邮件}}">
+								</div>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+
+			<div class="content-block-title">店铺描述</div>
+			<div class="list-block">
+				<ul>
+					<li class="align-top">
+						<div class="item-content">
+							<div class="item-media"><i class="iconfont icon-bianjibanbenmiaoshu_bianjibanbenmiaoshu"></i></div>
+							<div class="item-inner">
+								<div class="item-title label">描述</div>
+								<div class="item-input">
+									<textarea id="des" placeholder="请输入店铺描述">{{店铺描述}}</textarea>
+								</div>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+
+			<div class="content-block-title">店铺图片</div>
+			<div class="list-block">
+				<ul>
+					<li class="item-content">
+						<div class="item-inner" style="display: block;">
+							<label for="file"> <span class="icon icon-picture" style="font-size: 1rem;"></span></label>
+							<input type="file" id="file" hidden>
+						</div>
+					</li>
+				</ul>
+			</div>
+
+			<div class="content-block">
+				<a href="#" class="button button-fill button-success" id="cj">创建</a>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<h1 class="title">创建店铺</h1>
+				</header>
+				<div class="content" id="list" hidden="hidden"></div>
+			</div>
+			<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+			<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+			<script type="text/javascript" src="//g.alicdn.com/msui/sm/0.6.2/js/sm-city-picker.min.js" charset="utf-8"></script>
+			<script type="text/javascript" src="../Common/js/sdk.js"></script>
+			<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+			<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+			<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+
+			<script type="text/javascript">
+				function plusReady() {
+					$("#list").on("focus", "#city", function() {
+						$(this).cityPicker({
+							toolbarTemplate: '<header class="bar bar-nav" style="background-color:#e4393c">' +
+								'<button class="button button-link pull-right close-picker" style="color:#fff">确定</button>' +
+								'<h1 class="title">选择收货地址</h1>' +
+								'</header>'
+						});
+					})
+
+					$("#list").on("click", ".close", function() {
+						$(this).parent().remove();
+					});
+
+					var dpID = $$.getParameterValue().dpID;
+					if(dpID) {
+						var proc = "店铺详情 " + dpID;
+						var rst = $$.JSONDB.Query(proc).Table;
+						for(var i = 0; i < rst.length; i++) {
+							var arr = rst[i].店铺图片.split(",");
+						}
+						$$.Fill("#list", rst);
+
+						// 图片展示
+						for(var k = 0; k < arr.length; k++) {
+							$("label").before("<div class='img-box'>" +
+								"<span class='close'>×</span>" +
+								"<img src='" + decodeURI(atob(arr[k])) + "'class='dp-img' />" +
+								"</div>");
+						}
+						$("#list").show();
+					} else {
+						dpID = "0";
+						var listData = [{
+							"店铺名": "",
+							"省": "",
+							"市": "",
+							"区": "",
+							"地址": "",
+							"联系人": "",
+							"联系电话": "",
+							"联系邮件": "",
+							"店铺描述": ""
+						}]
+						$$.Fill("#list", listData);
+						$("#list").show();
+					}
+
+					$("#file").change(function() {
+						//获取file对象
+						var file = this.files[0];
+
+						//判断file的类型是不是图片类型。
+						if(!/image\/\w+/.test(file.type)) {
+							alert("文件必须为图片！");
+							return false;
+						}
+
+						var reader = new FileReader(); //声明一个FileReader实例
+						reader.readAsDataURL(file); //调用readAsDataURL方法来读取选中的图像文件
+
+						//最后在onload事件中，获取到成功读取的文件内容，并以插入一个img节点的方式显示选中的图片
+						reader.onload = function(e) {
+							$("label").before("<div class='img-box'>" +
+								"<span class='close'>×</span>" +
+								"<img src='" + this.result + "'class='dp-img' />" +
+								"</div>");
+						}
+					});
+
+					// 创建店铺
+					$("#cj").click(function() {
+						var name = $("#name").val();
+						var city = $("#city").val();
+						var addr = $("#addr").val();
+						var lxr = $("#lxr").val();
+						var tel = $("#tel").val();
+						var email = $("#email").val();
+						var des = $("#des").val();
+						var imgs = $(".dp-img");
+						var imgSrc = [];
+						if(!name) {
+							layer.open({
+								content: '请输入店铺名称',
+								skin: 'msg',
+								time: 2
+							});
+							return
+						}
+
+						if(!city) {
+							layer.open({
+								content: '请选择省市区',
+								skin: 'msg',
+								time: 2
+							});
+							return
+						} else {
+							city = city.split(" ");
+						}
+
+						if(!addr) {
+							layer.open({
+								content: '请输入详细地址',
+								skin: 'msg',
+								time: 2
+							});
+							return
+						}
+
+						if(!lxr) {
+							layer.open({
+								content: '请输入联系人',
+								skin: 'msg',
+								time: 2
+							});
+							return
+						}
+
+						if(!tel) {
+							layer.open({
+								content: '请输入联系电话',
+								skin: 'msg',
+								time: 2
+							});
+							return
+						}
+
+						if(!email) {
+							layer.open({
+								content: '请输入联系邮箱',
+								skin: 'msg',
+								time: 2
+							});
+							return
+						}
+
+						if(!des) {
+							layer.open({
+								content: '请输入店铺描述',
+								skin: 'msg',
+								time: 2
+							});
+							return
+						}
+
+						if(imgs.length == "0") {
+							layer.open({
+								content: '请选择店铺图片',
+								skin: 'msg',
+								time: 2
+							});
+							return
+						} else {
+							for(var i = 0; i < imgs.length; i++) {
+								var item = $(imgs[i]).attr("src");
+								imgSrc.push(btoa(encodeURI(item)));
+							}
+						}
+
+						var shID = "{{CurrentMerchantID}}"
+						var data = {
+							"店铺标识v": dpID,
+							"商户标识": shID,
+							"店铺名称": name,
+							"店铺图片": imgSrc.join(),
+							"店铺描述": des,
+							"省": city[0],
+							"市": city[1],
+							"区": city[2],
+							"地址": addr,
+							"联系人": lxr,
+							"联系电话": tel,
+							"联系邮件": email,
+							"操作用户": shID
+						}
+						var tmpl = "'{{店铺标识v}}',{{商户标识}},'{{店铺名称}}','{{店铺图片}}','{{店铺描述}}',{{省}},{{市}},'{{区}}','{{地址}}','{{联系人}}','{{联系电话}}','{{联系邮件}}','{{操作用户}}'";
+						var params = tmpl.t(data);
+						var proc = "店铺创建修改 " + params;
+						var d1 = new Date();
+						var rst = $$.JSONDB.Query(proc).Table[0];
+						var d2 = new Date();
+						var x = d2 - d1;
+						console.log(x)
+
+						if(rst.RESULT == 0) {
+							var msg = dpID == "0" ? "创建成功" : "编辑成功";
+							layer.open({
+								content: '店铺创建成功',
+								skin: 'msg',
+								time: 2
+							});
+							plus.webview.create('shop.html').show();
+						}
+					})
+				}
+				if(window.plus) {
+					plusReady();
+				} else {
+					document.addEventListener('plusready', plusReady, false);
+				}
+			</script>
+	</body>
+
+</html>

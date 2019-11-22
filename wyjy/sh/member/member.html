@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>会员</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<script type="text/template" id="list_Template">
+			
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<!--会员列表-->
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a class="icon icon-left pull-left back"></a>
+					<h1 class="title  popup-manage">会员列表</h1>
+				</header>
+				<div class="content">
+					<div class="list-block media-list">
+						<ul id="list">
+							<li>
+								<div class="item-content">
+									<div class="item-media"><img src="../Common/image/hy.png" style='width: 1.8rem;'></div>
+									<div class="item-inner">
+										<div class="item-title-row">
+											<div class="item-title">会员名称</div>
+										</div>
+										<div class="item-subtitle">联系电话：15126064877</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><img src="../Common/image/hy.png" style='width: 1.8rem;'></div>
+									<div class="item-inner">
+										<div class="item-title-row">
+											<div class="item-title">会员名称</div>
+										</div>
+										<div class="item-subtitle">联系电话：15126064877</div>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript">
+			// 会员列表点击跳转至详情
+			$("#list").on("click", "li", function() {
+				window.location.href = "hyDetails.html"
+			});
+		</script>
+	</body>
+
+</html>

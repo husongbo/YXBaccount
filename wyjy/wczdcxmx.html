@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>未出账单明细</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/QuickStore.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    
+	<script id="Bill_Template" type="text/template">
+    	<div class="card" style="margin-top:0.5rem; margin-left: 0;margin-right: 0;">
+    		<div class="card-content">
+    			<div class="card-content-inner">
+    				<div style="text-align: center;">
+    					<h3 style="margin: 0;">油卡对账单（未出账）</h3>
+    				</div>
+    				<div style="text-align: center;">
+    					CARD STATEMENT
+    				</div>
+    			</div>
+    		</div>
+    	</div>
+    	<div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+			<ul>
+    			<li hidden="hidden">
+    				<div class="item-content">
+    					<div class="item-inner">
+    						<div class="item-title-row">
+    							<div class="item-title">账单日</div>
+    							<div class="item-after">2017-09-10</div>
+    						</div>
+    					</div>
+    				</div>
+    			</li>
+    			<li hidden="hidden">
+    				<div class="item-content">
+    					<div class="item-inner">
+    						<div class="item-title-row">
+    							<div class="item-title">账单周期</div>
+    							<div class="item-after">08-01&nbsp;至&nbsp;08-31</div>
+    						</div>
+    					</div>
+    				</div>
+    			</li>
+    			<li>
+    				<div class="item-content">
+    					<div class="item-inner">
+    						<div class="item-title-row">
+    							<div class="item-title">当前消费金额</div>
+    							<div class="item-after money" style="color: blue;">{{CONSUME}}</div>
+    						</div>
+    					</div>
+    				</div>
+    			</li>
+    			<li>
+    				<div class="item-content">
+    					<div class="item-inner">
+    						<div class="item-title-row">
+    							<div class="item-title">当前余额</div>
+    							<div class="item-after money" style="color: red;">{{BALANCE}}</div>
+    						</div>
+    					</div>
+    				</div>
+    			</li>
+    		</ul>
+    	</div>
+    	<div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+    		<ul id="TradingRecord">
+			</ul>
+		</div>
+    </script>
+
+	<script id="TradingRecord_Template" type="text/template">
+		<li>
+			<div class="item-content">
+				<div class="item-media">{{TYPE}}：</div>
+				<div class="item-inner">
+					<div class="item-title-row">
+						<div class="item-title"></div>
+						<div class="item-after money" style="color: blue;">{{AMOUNT}}</div>	
+					</div>
+					<div class="item-title-row">
+						<div class="item-title"></div>
+						<div class="item-after">{{YMD}}</div>	
+					</div>
+				</div>
+				
+			</div>
+		</li>
+	</script>
+
+    <script type="text/javascript">
+		var My = {
+			
+		};
+		$$.Page_Load = function() {
+			$.init();
+
+			// 取得未出账账单
+            var bills = Bill.QueryUnclosedBill();
+            
+            var bill = {};
+            var result = Bill.GetAccountBalance();
+            if (result.length == 1) {
+	            bill.BALANCE = result[0].REMAINING_SUM;
+            } else {
+	            bill.BALANCE = 0
+            }
+            bill.CONSUME = 0;
+            
+            var detail = [];
+            $.each(bills, function(index, item) {
+            	result = Bill.EnquiryHistoricalTransaction(item.BILL_YM);
+            	detail = detail.concat(result);
+            });
+
+			$.each(detail, function(index, item) {
+				item.YMD = item.YMD.substring(5);
+				bill.CONSUME += item.AMOUNT;
+			});
+
+			$$.Fill("#Bill", new Array(bill));
+			$$.Fill("#TradingRecord", detail);
+		}
+    </script>
+
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: white;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: white;">未出账单明细</h1>
+            </header>
+
+            <div id="PageContent" class="content">
+	    		<div id="Bill">
+	    			
+	    		</div>
+            	<h6 style="margin: 0;">说明</h6>
+        		<p style="margin: 0;">1,每月10号是账单日。</p>
+            </div>
+            
+        </div>        
+    </div>
+</body>
+</html>

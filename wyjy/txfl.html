@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>选择提现类型</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/city/loadings.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script type="text/javascript" src="../Common/js/city/loadings.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			*{font-family: '宋体';}
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			img{
+				width: 20px;height: 20px;
+			}
+			.mui-img{display: flex!important;align-items: center;}
+			.mui-table-view-cell span{margin-left: 10px;font-size: .8rem;}
+			.btn{position: fixed;bottom:20px;left:0;width: 60%;height: 40px;margin-left: 20%;background:#ff8200;
+			color: white;border-radius:35px;text-align: center;line-height: 40px;}
+			.form{padding: 0 20px;margin-top: 10%;}
+			.hiddens{display: none;}
+		</style>
+	</head>
+	<body style="background: white;">
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">提现类型</h1>
+		</header>
+		<ul class="mui-table-view mui-table-view-radio" style="margin-top: 44px;">
+			<li class="mui-table-view-cell mui-selected">
+				<a class="mui-navigate-right mui-img">
+					<img src="../Common/image/grxx/huafei.png" >
+					<span>话费充值</span>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a class="mui-navigate-right mui-img">
+					<img src="../Common/image/grxx/zhifubao.png" >
+					<span>支付宝转账</span>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a class="mui-navigate-right mui-img">
+					<img src="../Common/image/grxx/weixin.png" >
+					<span>微信转账</span>
+				</a>
+			</li>
+		</ul>
+		<div class="form">
+			<div class="Phone">
+				<div style="margin-bottom: 10px;">请输入您的充值号码</div>
+				<div class="mui-input-row mui-text-center">
+					<input type="text" class="mui-input-clear username" placeholder="请输入您的号码" style="border-radius: 5px;border-color:#1296db;">
+				</div>	
+			</div>
+			<div class="ZFB hiddens">
+				<div style="margin-bottom: 10px;">请输入您支付宝账号</div>
+				<div class="mui-input-row mui-text-center">
+					<input type="text" class="mui-input-clear username" placeholder="请输入您的账户" style="border-radius: 5px;border-color:#1296db;">
+				</div>	
+			</div>
+		</div>
+		<div class="btn mui-input-clear" onclick="withdrawal()">提现</div>
+	</body>
+	<script>
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+		document.querySelector('.mui-table-view.mui-table-view-radio').addEventListener('selected',function(e){
+			console.log("当前选中的为："+e.detail.el.innerText)
+			if(e.detail.el.innerText.trim()=='支付宝转账'.trim()){
+				$(".ZFB").removeClass('hiddens')
+				$(".Phone").addClass('hiddens')
+			}
+			else if(e.detail.el.innerText.trim()=='话费充值'.trim()){
+				$(".ZFB").addClass('hiddens')
+				$(".Phone").removeClass('hiddens')
+			}
+			else if(e.detail.el.innerText.trim()=='微信转账'.trim()){
+				$(".ZFB").addClass('hiddens')
+				$(".Phone").addClass('hiddens')
+			}
+		});
+		var proc = "查询基本信息 " + Bill.userId;
+		var rst = $$.JSONDB.Query(proc);
+		var data = rst.Table[0];
+		var id=data.用户标识;
+		// var id="2071611150600000001"
+		var numjson=JSON.parse(localStorage.getItem('Txdd'))
+		console.log(numjson)
+		function withdrawal(){
+			var btnArray = ['取消', '确定'];
+			mui.confirm(`共计￥${numjson.numpice}`, `当前选中${numjson.numindex}条订单`, btnArray, function(e) {
+				if (e.index == 1) {
+					$.ajax({
+						type: "post",
+						url: `http://192.168.1.6:2001/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"ApplayPromoteInfo",user_id:"${id}",promote_list:"${numjson.numbers}",state:"1"}`,
+						data:{},
+						success: function (res) {
+							console.log(res)
+							mui.showLoading("提交中...","div");
+							setTimeout(function(){
+								mui.hideLoading()
+								if(JSON.parse(res).result==1&&JSON.parse(res).message=='提交提现申请成功'){									
+									mui.toast(JSON.parse(res).message)
+									setTimeout(()=>{
+										history.back(-1)
+									},500)
+								}
+								else{
+									mui.toast(JSON.parse(res).message)	
+								}
+							},1000)
+							
+						},
+						error:function(err){
+							console.log(err)
+						}
+					});
+				} else {
+					return
+				}
+			})
+		}
+	</script>
+</html>

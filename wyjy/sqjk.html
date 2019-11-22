@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>申请借款</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/UploadPic.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/javascript">
+		$$.Page_Load = function(){
+			$.init();
+			
+			My.Event();
+		}
+
+		var My = {
+		};
+		
+		My.Commit = function() {
+			var amount = $("#amount").val();
+			if (amount == "") {
+				layer.open({
+					content: "请输入借款金额"
+					,skin: 'msg'
+					,time: 4 //4秒后自动关闭
+				});
+				return;
+			}
+			
+			var comment = $("#comment").val();
+		}
+		
+		My.Event = function () {
+			$('.tijiao').addClass("disabled");
+			
+			$("#agreement").click(function() {
+				if ($(this).get(0).checked) {
+					$('.tijiao').removeClass("disabled");
+				} else {
+					$('.tijiao').addClass("disabled");
+				}
+			});
+		}
+	</script>
+	<style>
+		.Color_B1 {
+			background-color:#f57c59;
+		}
+		.card{
+			background: #fff;
+			box-shadow: 0 0 0.6rem rgba(245, 127, 89, 0.3);
+			margin: 0.5rem;
+			position: relative;
+			border-radius: 0.4rem;
+			font-size: 0.7rem;
+		}
+		.button: active  {
+			background: burlywood;
+		}
+		.button{
+			line-height: 1.7rem;
+			padding: 0 0.8rem;
+			height: 1.8rem;
+			border: 1px solid #f57c59;
+			color: #f57c59;
+		}
+		.card .namefont {
+			font-weight: lighter;
+			color: #666666;
+			font-size: 0.85rem;
+		}
+		.card-number{
+			width: 100%;
+			text-align: left;
+			font-size: 1.1rem;
+			border: 0;
+			border-bottom: 1px solid #f57e59;
+			color: #666;
+			font-weight: lighter;
+			padding: 0 0.5rem;
+		}
+		.item-content .query{
+			background-color: #f57e59;
+			color: #fff;
+			padding: 0 1rem;
+		}
+		.inner-box h3{
+			margin: 0;
+			font-weight: normal;
+		}
+		.inner-box p{
+			margin-top: 0;
+			color: #a5a5a5;
+			padding-left: 1rem;
+		}
+		.item-inner{
+			position: relative;
+		}
+		.inbtn{
+			position: absolute;
+			top: 50%;
+			right:0.6rem;
+			transform: translateY(-50%);
+		}
+		.item-img{
+			display: block;
+			margin-right: 3.8rem;
+			background: #eaeaea url("../Common/image/add.png") no-repeat center;
+			background-size: 1.4rem;
+			height: 2rem;
+			border-radius: 0.4rem;
+		}
+		.item-img img{
+			vertical-align: middle;
+		}
+		.tijiao{
+			background-color: #f57e59;
+			color: #fff;
+			padding: 0 1.4rem;
+			box-shadow: 0 0 0.8rem rgba(245,125,89,0.4);
+		}
+		.sui-bottom-text {
+			color: #666666;
+			margin: 0;
+			padding: 0.4rem 0.6rem;
+			margin-bottom: 1rem;
+		}
+		.list-block .item-input input{
+			font-size: 0.75rem;
+		}
+		.list-block .item-title.label {
+			width: 33%;
+		}
+	</style>
+</head>
+<body>
+	<div class="page-group">
+		<div id="MainPage" class="page page-current">
+			<header class="bar bar-nav Color_B1">
+				<a class="icon icon-left  pull-left" style="color: white;" onclick="$.router.back();"></a>
+				<h1 id="MainPage_Title" class="title" style="color: white;">申请借款</h1>
+			</header>
+
+			<div id="PageContent" class="content">
+				<div class="card no-card" style="margin-top: 0.5rem;">
+					<div class="card-content">
+						<div class="list-block">
+							<ul>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title label namefont">借款金额</div>
+											<div class="item-input">
+												<input type="number" placeholder="请输入借款金额" id="amount"/>
+											</div>
+										</div>
+									</div>
+								</li>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title label namefont">备注</div>
+											<div class="item-input">
+												<input type="text" id="comment" placeholder="备注信息" maxlength="100"/>
+											</div>
+										</div>
+									</div>
+								</li>
+								<li>
+									<label class="label-checkbox item-content">
+										<input type="checkbox" name="agreement" id="agreement">
+										<div class="item-media"><i class="icon icon-form-checkbox"></i></div>
+										<div class="item-inner">
+											<div class="item-subtitle">已阅读并同意<a>相关协议</a></div>
+										</div>
+									</label>
+								</li>
+							</ul>
+						</div>
+					</div>
+					
+					<div class="card-footer">
+						<span></span>
+						<a class="button tijiao" onclick="My.Commit()">提交</a>
+						<span></span>
+					</div>
+				</div>
+				
+			</div>
+			
+		</div>		
+	</div>
+</body>
+
+<script>
+</script>
+</html>

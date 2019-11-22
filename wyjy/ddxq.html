@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>推荐订单详情</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<!-- <link rel="stylesheet" href="../Common/css/mui.min.css"> -->
+		<!-- <link rel="stylesheet" href="../Common/css/city/loadings.css"> -->
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/jquery-3.1.1.js"></script>
+		<!-- <script type="text/javascript" src="../Common/js/mui.js"></script> -->
+		<!-- <script type="text/javascript" src="../Common/js/city/loadings.js"></script> -->
+		<style type="text/css">
+			*{font-family: '宋体';}
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.bodys{
+				margin-top: 44px;
+			}
+			.items{display: flex;justify-content: flex-start;height: 45px;align-items: center;padding: 0 10px;
+			border-bottom: 1px solid rgb(240,240,240);}
+			.items div:first-child{min-width: 25%;}
+			.texts{margin-left: 15px;}
+			.hides{visibility: hidden;}
+		</style>	
+	</head>
+	<body style="background: white;">
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">推荐订单详情</h1>
+		</header>
+		<div class="bodys">
+			<div class="items">
+				<div>用户ID</div>
+				<div class="texts ID"></div>
+			</div>
+			<div class="items">
+				<div>创建时间</div>
+				<div class="texts Time"></div>
+			</div>
+			<div class="items">
+				<div>订单号</div>
+				<div class="texts OrderId"></div>
+			</div>
+			<div class="items">
+				<div>核销金额</div>
+				<div class="texts HXPrice"></div>
+			</div>
+			<div class="items">
+				<div>提现金额</div>
+				<div class="texts Price"></div>
+			</div>
+			<div class="items">
+				<div>提现活动</div>
+				<div class="texts HD"></div>
+			</div>
+			<div class="items">
+				<div>提现状态</div>
+				<div class="texts State"></div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(function(){
+				// mui.showLoading("正在加载..","div");
+				// setTimeout(()=>{
+				// 	mui.hideLoading()
+				// },500)
+				var obj=JSON.parse(localStorage.getItem('OrderJSOn'))
+				if(obj==null){
+					// alert("没有值")
+					return
+				}
+				var date=obj.PM0005_CREATE_TIME.slice(0,10)
+				var time=obj.PM0005_CREATE_TIME.slice(11,)
+				obj.PM0005_CREATE_TIME=date+' '+time
+				if(obj.PM0005_STATE==0){
+					obj.text='未提现'
+				}
+				else if(obj.PM0005_STATE==1){
+					obj.text='提现中'
+				}
+				else if(obj.PM0005_STATE==2){
+					obj.text='已提现'
+				}
+				else{
+					obj.text='提现失败'
+				}
+				$(".HXPrice").text(obj.COUPON_AMOUNT/100)
+				$(".ID").text(obj.PM0004_USER_ID)
+				$(".Time").text(obj.PM0005_CREATE_TIME)
+				$(".OrderId").text(obj.PM0005_OUT_TRADE_NO)
+				$(".Price").text(obj.price)
+				$(".HD").text(obj.PM0006_NAME)
+				$(".State").text(obj.text)
+				console.log(obj)
+			})	
+		</script>
+	</body>	
+</html>

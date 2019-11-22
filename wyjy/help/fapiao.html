@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>发票说明</title>
+    <link rel="stylesheet" href="../../Common/css/sm.css" />
+    <link rel="stylesheet" href="../../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../../Common/js/sm-extend.js"></script>
+	<style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+        .card {
+            background: #fff;
+            box-shadow: 0 0 0.6rem rgba(136, 130, 129, 0.3);
+            margin: 0.5rem;
+            position: relative;
+            border-radius: 0.4rem;
+            font-size: 0.7rem;
+        }
+		.card-content-inner {
+			text-indent:2em;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">发票说明</h1>
+            </header>
+
+			<div class="content">
+				<div class="card explain">
+					<div class="card-header">
+						"油信宝"电商平台开票说明
+					</div>
+					<div class="card-content">
+						<div class="card-content-inner" style="text-indent: 0rem;">
+							1、“油信宝”电商平台上的客户发票由中油九洲北斗科技能源有限公司开具 <br />
+							2、“油信宝”电商平台给客户开具增值税普通发票，并将折扣优惠金额一并在发票上体现。开票数据以中油北斗平台的消费数据为准，开票时间为每月最后一日之前<br />
+							3、在“油信宝”平台上消费的油品，平台以电子发票的形式推送到客户注册时预留的电子邮箱里，客户在终端机打印出来即可<br />
+							4、平台可按照客户输入的时间周期开具电子发票<br />
+							5、“油信宝”试运营期间给客户以线下纸质邮寄发票的形式开具<br />
+							<br />
+							开票流程<br />
+							“油信宝”平台客户消费后在平台系统上点击“个人中心”----“我的电子发票”提出开票申请（个人需要开具公司名称的发票，必须提供公司名称及纳税人识别号）
+						</div>
+					</div>
+				</div>
+			</div>
+        </div>     
+    </div>
+</body>
+</html>

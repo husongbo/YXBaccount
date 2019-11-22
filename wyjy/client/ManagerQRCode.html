@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>客户经理二维码</title>
+    <link rel="stylesheet" href="../../Common/css/sm.css" />
+    <link rel="stylesheet" href="../../Common/css/sm-extend.css" />
+    
+    <script type="text/javascript" src="../../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../../Common/js/sm-city-picker.js"></script>	
+    <script type="text/javascript" src="../../Common/js/sdk_sim.js"></script>
+    <script type="text/javascript" src="../../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../../Common/js/sdk_db.js?1=1"></script>
+
+	<script id="QRCode_Template" type="text/template">
+		<div class="card demo-card-header-pic">
+		    <div valign="bottom" class="card-header">
+		      <img class='card-cover' src="/images/manager/ManagerQRCode/{{QRCodeId}}" alt="">
+		    </div>
+			<div class="item-content">
+				<div class="item-media">客户经理：{{ManagerName}}</div>
+			</div>
+		 </div>
+	</script>
+
+    <script type="text/javascript">
+		var My = {
+		};
+		$$.Page_Load = function(){
+			My.GetManagerId();
+			My.CreateQRCode();
+		}
+
+        My.GetManagerId = function () {
+            My.ManagerId = 0;
+
+            if (window.external.GetAllViewSelectData || true) {
+                var allData = null;
+                allData = window.external.GetAllViewSelectData();
+                var obj = JSON.parse(allData);
+                var 列表;
+                if (obj.客户经理列表) {
+                    列表 = obj.客户经理列表[0]
+                }
+                else {  
+                    列表 = obj.售卡站点列表[0];
+                }
+                My.ManagerId = 列表._客户经理标识 + '';
+                My.ManagerName = 列表.姓名;
+            }
+        }
+		
+		My.CreateQRCode = function() {
+			var param = {
+				'type': 'manager',
+				'managerId': My.ManagerId
+			};
+
+			$.ajax({
+				type:"POST",
+				url:'/App/Common/CSharp/Manager/CardSales.ashx',
+				data:param,
+				success:function(data){
+					rst = [];
+					data = JSON.parse(data);
+					data.ManagerName = My.ManagerName;
+					rst.push(data);
+					$$.Fill("#QRCode", rst);
+				},
+				dataType:'JSONP',
+				async: false,
+			});
+			
+			return rst;
+		}
+    </script>
+
+	<style>
+		.card{
+			background: #fff;
+			box-shadow: 0 0 0.6rem rgba(245, 127, 89, 0.3);
+			margin: 0.5rem;
+			position: relative;
+			border-radius: 0.4rem;
+			font-size: 0.7rem;
+		}
+		.item-content:active  {
+			background: burlywood;
+		}
+		.button{
+			line-height: 1.7rem;
+			padding: 0 0.8rem;
+			height: 1.8rem;
+			border: 1px solid #f57c59;
+			color: #F57C59;
+		}
+		.mony strong{
+			font-size:1.2rem;
+			color: #fff;
+		}
+		.mony i{
+			font-style: normal;
+			color: #000000;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+                <h1 id="MainPage_Title" class="title" style="color: white;">客户经理二维码</h1>
+            </header>
+	    	<div id="PageContent" class="content">
+	    		<div id="QRCode">   			
+	    		</div>
+	        </div>
+        </div>
+    </div>
+</body>
+</html>

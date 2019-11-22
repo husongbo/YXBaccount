@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="pragma" content="no-cache">
+		<title>卡券详情</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<style>
+			.code {
+				text-align: center;
+				padding-top: 1.5rem;
+				font-size: 0.65rem;
+			}
+			
+			.code div {
+				margin-top: 0.5rem;
+			}
+			
+			.price {
+				color: #e4393c;
+				font-size: 0.85rem
+			}
+			
+			#qrcode img {
+				width: 40%;
+				margin-left: 30%;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<li class="item-content">
+				<div class="item-inner">
+					<div class="item-title">店铺名称</div>
+					<div class="item-after">{{店铺名称}}</div>
+				</div>
+			</li>
+			<li class="item-content">
+				<div class="item-inner">
+					<div class="item-title">商品名称</div>
+					<div class="item-after">{{商品名称}}</div>
+				</div>
+			</li>
+			<li class="item-content">
+				<div class="item-inner">
+					<div class="item-title">订单号</div>
+					<div class="item-after">{{订单ID}}</div>
+				</div>
+			</li>
+			<li class="item-content">
+				<div class="item-inner">
+					<div class="item-title">下单时间</div>
+					<div class="item-after">{{DATA_CREATE_TIME}}</div>
+				</div>
+			</li>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a class="icon icon-left pull-left back"></a>
+					<h1 class="title">卡券详情</h1>
+				</header>
+				<div class="content">
+					<div class="code">
+						<div id="qrcode"></div>
+						<div class="price"></div>
+						<div>1. 仅限中石油便利店使用</div>
+						<div>2. 每个二维码只能扫描一次，再次扫描将失效</div>
+					</div>
+					<div class="list-block" style="margin-top: 1.75rem;">
+						<ul id="list"></ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="Common/js/sdk.js"></script>
+		<script type="text/javascript" src="Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="Common/js/sdk_db.js?1=1"></script>
+		<script src="Common/js/qrcode.min.js"></script>
+		<script>
+			var code = $$.getParameterValue().code;
+
+			// 生成二维码
+			var qrcode = new QRCode('qrcode', {
+				text: code,
+				width: 256,
+				height: 256,
+				colorDark: '#000000',
+				colorLight: '#ffffff',
+				correctLevel: QRCode.CorrectLevel.H
+			});
+
+			var proc = "订单二维码查询 '" + code + "'";
+			var rst = $$.JSONDB.Query(proc).Table;
+			$(".price").text("￥"+rst[0].实付金额.toFixed(2))
+			$$.Fill("#list", rst);
+		</script>
+	</body>
+
+</html>

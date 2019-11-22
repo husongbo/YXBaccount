@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>活动管理</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/iconfont.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<style>
+			.layui-m-layercont {
+				padding: 30px;
+			}
+			
+			.list-block ul:before {
+				height: 0;
+			}
+			
+			.jxz {
+				float: right;
+				margin-top: -3rem;
+				width: 20%;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<div class="card">
+				<div class="card-header" style="min-height: 1.2rem;">
+					<span>{{T0001_ACTION_NAME}}</span>
+					<span class="iconfont icon-shezhi" style="font-size: 20px;" data-id="{{T0001_ID}}"></span>
+				</div>
+				<div class="card-content">
+					<div class="list-block media-list">
+						<ul>
+							<li class="item-content">
+								<div class="item-media">
+									<img src="{{T0001_IMAGE}}" width="54">
+								</div>
+								<div class="item-inner">
+									<div class="item-title-row">
+										<div class="item-title">
+											开始时间：{{T0001_START_TIME}}
+										</div>
+									</div>
+									<div class="item-title-row">
+										<div class="item-title">
+											结束时间：{{T0001_END_TIME}}
+										</div>
+									</div>
+									<div class="item-title-row">
+										<div class="item-title">{{MEMO}}</div>
+									</div>
+									<img src="{{stateImg}}" class="jxz" />
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="card-footer">
+					<span>状态</span>
+					<span>{{VALID_TYPE}}({{MEMBER_COUNT}}/{{M0003_SELLING_SALE}})</span>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<a class="icon iconfont icon-bangzhu pull-right rule"></a>
+					<h1 class="title  popup-manage">活动管理</h1>
+				</header>
+				<nav class="bar bar-tab">
+					<a class="tab-item external" id="scjq" style="background-color: hsl(130, 65%, 57%);color: #FFFFFF;">
+						<span class="tab-label">送抽奖券</span>
+					</a>
+					<a class="tab-item external" id="cjhd" style="background-color: #E4393C;color: #FFFFFF;">
+						<span class="tab-label">创建活动</span>
+					</a>
+				</nav>
+				<div class="content">
+					<div class="list-block" style="margin-bottom: 0.4rem;">
+						<ul>
+							<li class="item-content diy-header">
+								<div class="item-inner">
+									<div class="item-title">共有抽奖券：<span style="font-size: 0.85rem;color: #E4393C;" id="total"></span>&nbsp;张</div>
+									<div class="item-after" style="color: #E4393C;" id="buy">购买</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="list" hidden="hidden"></div>
+					<div class="null" style="margin-top: 3rem;">
+						<img src="../Common/image/null.png" alt="" />
+						<div>还没有已经创建活动的哦</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			function plusReady() {
+				// 购买抽奖券
+				$("#buy").click(function() {
+					plus.webview.create('gm.html').show();
+				});
+
+				// 送抽奖券
+				$("#scjq").click(function() {
+					plus.webview.create('scjq.html').show();
+				})
+
+				// 创建活动
+				$("#cjhd").click(function() {
+					plus.webview.create('cjhd.html').show();
+				});
+
+				// 帮助
+				$(".rule").click(function() {
+					plus.webview.create('gz.html').show();
+				});
+
+				// 活动设置
+				$("#list").on("click", ".icon-shezhi", function() {
+					var hdID = $(this).attr("data-id");
+					console.log(hdID)
+					var buttons1 = [{
+							text: '请选择',
+							label: true
+						},
+						{
+							text: '修改活动',
+							onClick: function() {
+								plus.webview.create('cjhd.html').show();
+							}
+						},
+						{
+							text: '关闭活动',
+							onClick: function() {
+								layer.open({
+									content: '您确定要关闭活动吗？',
+									btn: ['确定', '不要'],
+									yes: function(index) {
+										var data = {
+											"活动编码": hdID,
+											"操作用户": "1"
+										}
+										var tmpl = "{{活动编码}},{{操作用户}}";
+										var parms = tmpl.t(data);
+										var proc = "抽奖关闭 " + parms;
+										var rst = $$.JSONDB.Query(proc).Table;
+										console.log(rst)
+										layer.close(index);
+									}
+								});
+							}
+						}
+					];
+					var buttons2 = [{
+						text: '取消',
+						bg: 'danger'
+					}];
+					var groups = [buttons1, buttons2];
+					$.actions(groups);
+				});
+
+				// 查询列表数据  最新2  
+				var shID = "1";
+				var data = {
+					"展示类型": "2",
+					"商户标识": shID
+				}
+				var tmpl = "{{展示类型}},{{商户标识}}";
+				var params = tmpl.t(data);
+				var proc = "活动列表 " + params;
+				var rst = $$.JSONDB.Query(proc).Table;
+				if(rst.length > 0) {
+					for(var i = 0; i < rst.length; i++) {
+						var arr = rst[i].T0001_IMAGE.split(",");
+						rst[i].T0001_IMAGE = decodeURI(atob(arr[0]));
+						if(rst[i].VALID_TYPE == "未开始") {
+							rst[i].stateImg = ""
+						} else if(rst[i].VALID_TYPE == "进行中") {
+							rst[i].stateImg = "../Common/image/jxz.png"
+						} else {
+							rst[i].stateImg = "../Common/image/yjs.png"
+						}
+					}
+					$$.Fill("#list", rst);
+					$("#list").show();
+					console.log(rst)
+				} else {
+					$(".null").show();
+				}
+
+				// 查询我的所有抽奖券   会员标识
+				var shID = "1"
+				var proc = "商户抽奖卷查看 " + shID;
+				var rst = $$.JSONDB.Query(proc).Table[0];
+				console.log(rst)
+				$("#total").text(rst.TICKET_COUNT);
+			}
+			
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

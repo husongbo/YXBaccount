@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>使用范围</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script src="../Common/js/jquery-3.1.1.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.mui-segmented-control.mui-segmented-control-inverted~.mui-slider-progress-bar{
+				background: red;
+			}
+			.mui-segmented-control.mui-segmented-control-inverted .mui-control-item.mui-active{
+				color: red;
+			}
+			.code{
+			}
+			#code-ma{
+				width: 200px;
+				height: 200px;
+			}
+			.Couponlist{
+				height: 50px;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				border-bottom: 1px solid rgb(240,240,240);
+			}
+			.Coupon1{
+				margin-left:5%;
+			}
+		</style>
+	</head>
+	<style type="text/css">
+		#app{height: calc(100vh - 44px);overflow-y: scroll;margin-top: 50px;}
+		.midle{margin: 0 15px;background: white;padding: 0 15px;border-radius: 5px;padding-top: 5px;margin-bottom: 20px;border: 1px dotted rgb(220,220,220);
+		border-radius: 5px;box-shadow: 0px 0px 2px  #f67b5a;}
+		.midle img{width: 50px;height: 50px;margin-top: -5px;}
+		.active{background: rgb(230,230,230);color: white!important;}
+		.item{width: 40%;margin-left: 30%;text-align: center;margin-bottom: 10px;color: rgb(220,220,220);}
+	</style>
+	<body style="background:white;">
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">适用范围</h1>
+		</header>
+		<!-- <div id="app">
+			<div v-for="(item,index) in list" :key="index" @click="Gotos(item)">
+				{{item.FO_COMMODITY_TYPE_NAME}}
+			</div>
+		</div> -->
+		<div id="app">
+			<div class="midle" id="Coupon" v-for="(item,index) in list" :key="index" @click="Gotos(item)">
+				<div style="display: flex;flex-direction: row;align-items: center;padding: 10px 0;">
+					<div style="font-size: .7rem;" id="start">{{item.FO_COMMODITY_TYPE_NAME}}</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			new Vue({
+				el:'#app',
+				data:{
+					list:[]
+				},
+				created(){
+					var _this=this
+					$.ajax({
+						type: "post",
+						url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={"method":"GetCommodityTypeList"}`,
+						data:{},
+						async: true,
+						success: function (res) {		
+							_this.list=JSON.parse(JSON.parse(res).data)
+							console.log(JSON.parse(JSON.parse(res).data))
+							
+						},
+						error:function(err){
+							console.log(err)
+						}
+					});
+				},
+				methods:{
+					Gotos(item){
+						console.log(item)
+						window.location.href=`./syfwxq.html?id=${item.FO_COMMODITY_TYPE_NO}`
+					}
+				}
+			})
+				
+		</script>
+		 <style>
+		    .title {
+		        background-color: #ffffff;
+		        color: #000;
+		    }
+		
+		    .bar-nav ~ .content {
+		        top: 2.3rem;
+		    }
+		
+		    .buttons-tab .button.active {
+		        color: #C8141E;
+		        border-bottom: none;
+		    }
+		
+			.buttons-tab .button.active .i-title {
+				border-bottom: 2px solid #C8141E;
+				padding-bottom: 1px;
+			}
+		
+		    .r-border {
+		        width: 3px;
+		        background-color: #eee;
+		        height: 0.9rem;
+		        margin-top: 0.55rem;
+		    }
+		
+		    .card {
+		        margin: 0;
+		        box-shadow: none;
+		        background: url("../Common/image/lplq/img_lijilingqu_quan.png") no-repeat center top;
+		        background-size: 100% 100%;
+		    }
+			.cards{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_yishiyong_bg.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+			.cardss{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_yishiyong_bgs.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+			.cardsss{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_bg.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+		    .content-padded {
+		        margin: 0.25rem 0;
+		        padding-top: 0.2rem;
+		    }
+		
+		    .row {
+		        margin-left: 0;
+				position: relative;
+		    }
+		
+		    .row-left {
+		        width: 30.7%;
+		        float: left;
+		        text-align: center;
+		        height: 4rem;
+		        line-height: 4rem;
+		        color: #fff;
+		    }
+		
+		    .row-right {
+		        width: 69.3%;
+		        margin-left: 30%;
+		        padding-left: 1rem;
+		    }
+		
+		    .row-price {
+		        font-size: 1.5rem;
+		        font-weight: 600;
+		    }
+		    .fh {
+		        font-weight: 600;
+		    }
+		    .card {
+		        font-size: 0.6rem;
+		    }
+		
+		    .lp-title {
+				padding-top: 0.2rem;
+		        /* padding: 0.3rem 0; */
+		        font-size: 0.6rem;
+		        font-weight: 600;
+		        color:#333;
+		    }
+		    .title-yxq {
+		        width: 100%;
+		        float: left;
+		        color:#666;
+		    }
+		    .lp-bz {
+		        bottom: 0.15rem;
+		        position: absolute;
+		        color: #999;
+				display: flex;
+				justify-content: space-between;
+		    }
+		
+		    
+		
+		    .ljlq {
+		        width: 30%;
+		        float: left;
+		        padding-top: 1.6rem;
+		    }
+		
+		        .ljlq img {
+		            width: 80%;
+		        }
+		
+		    @font-face {
+		        font-family: 'iconfont'; /* project id 705790 */
+		        src: url('//at.alicdn.com/t/font_705790_6ijubsornlw.eot');
+		        src: url('//at.alicdn.com/t/font_705790_6ijubsornlw.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.woff') format('woff'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.ttf') format('truetype'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.svg#iconfont') format('svg');
+		    }
+		  .iconfont {
+		            font-family: "iconfont" !important;
+		            font-size: 16px;
+		            font-style: normal;
+		            -webkit-font-smoothing: antialiased;
+		            -moz-osx-font-smoothing: grayscale;
+		        }
+		    .icon-wenhao:before {
+		        content: "\e725";
+		        color: #000;
+		        font-size: 0.8rem;
+		    }
+		    .shuoming-close {
+		        width:2.2rem;
+		        float:right;
+		        padding-top:0.6rem;
+		    }
+		    .shuoming-close img {
+		        width:0.9rem;
+		    }
+		 
+		</style>
+	</body>
+
+</html>

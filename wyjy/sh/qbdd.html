@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>全部订单</title>
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+    <link rel="stylesheet" href="Common/css/common.css" />
+    <script type="text/javascript" src="Common/js/layer_mobile/layer.js"></script>
+    <style>
+        .layui-m-layercont {
+            padding: 30px;
+        }
+
+        .buttons-tab .button.active {
+            color: #E4393C;
+            border-color: #E4393C;
+        }
+
+        .content-block {
+            margin: 0.5rem 0;
+            padding: 0 0.5rem;
+        }
+
+        .fw {
+            font-weight: bold;
+        }
+
+        .operate {
+            padding: 0.2rem 0.7rem;
+            background-color: #E4393C;
+            color: #FFFFFF;
+            border-radius: 1rem;
+            font-size: 0.65rem;
+        }
+
+        .no-operate {
+            color: #E4393C;
+        }
+    </style>
+
+    <!--全部-->
+    <script type="text/template" id="total_Template" class="template">
+        <div class="card">
+            <div class="card-header">订单号{{订单ID}}</div>
+            <div class="card-content">
+                <div class="card-content-inner">
+                    <div class="list-block media-list">
+                        <ul id="total">
+                            <li data-type="{{订单类别}}" data-id="{{订单ID}}">
+                                <a href="#" class="item-link item-content">
+                                    <div class="item-media">
+                                        <img src="{{商品图片}}" style='width: 3rem;'>
+                                    </div>
+                                    <div class="item-inner">
+                                        <div class="item-title-row">
+                                            <div class="item-title">{{商品名称}}</div>
+                                        </div>
+                                        <div class="item-subtitle" style="color: #999999;font-size: 0.65rem;">{{商品描述}}</div>
+                                        <div class="item-title-row">
+                                            <div class="item-title">
+                                                <s style="font-size: 0.85rem;" class="fw">{{实付金额}}</s>
+                                            </div>
+                                            <div class="item-after fw" style="color: #E4393C;font-size: 0.85rem">{{实付金额}}</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div>共{{购买数量}}件商品</div>
+                <div data-id="{{订单ID}}" data-type="{{订单类别}}" class="{{showClass}}">{{订单状态}}</div>
+            </div>
+        </div>
+    </script>
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current">
+            <header class="bar bar-nav">
+                <a onclick="closeme()" class="icon icon-left pull-left"></a>
+                <h1 class="title">全部订单</h1>
+            </header>
+            <div class="content">
+                <div class="buttons-tab">
+                    <a href="#total" class="tab-link active button">全部</a>
+                    <a href="#dfh" class="tab-link button">待发货</a>
+                    <a href="#dsh" class="tab-link button">待收货</a>
+                </div>
+                <div class="content-block">
+                    <div class="tabs">
+                        <div id="total" class="tab active"></div>
+                        <div id="dfh" class="tab"></div>
+                        <div id="dsh" class="tab"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+    <script type="text/javascript" src="Common/js/sdk.js"></script>
+    <script type="text/javascript" src="Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="Common/js/common-plus.js"></script>
+    <script>
+        function plusReady() {
+            var shID = "{{CurrentMerchantID}}";
+
+            function queryOrderData(orderState, tabID) {
+                $("#" + tabID).text("");
+                var data = {
+                    "商户标识": shID,
+                    "订单状态": orderState
+                }
+                var tmpl = "{{商户标识}},{{订单状态}}";
+                var params = tmpl.t(data);
+                var proc = "商户订单列表 " + params;
+                var rst = $$.JSONDB.Query(proc).Table;
+                console.log(rst)
+
+                if (rst.length > 0) {
+                    for (var i = 0; i < rst.length; i++) {
+                        rst[i].实付金额 = rst[i].实付金额.toFixed(2);
+                        var arr = rst[i].商品图片.split(",");
+                        rst[i].商品图片 = decodeURI(atob(arr[0]));
+                        if (tabID == "dfh") {
+                            if (rst[i].订单类别 == 1) {
+                                rst[i].订单状态 = "去发货";
+                                rst[i].showClass = "operate";
+                            } else {
+                                rst[i].订单状态 = "待提货";
+                                rst[i].showClass = "no-operate";
+                            }
+                        } else if (tabID == "dsh") {
+                            if (rst[i].订单类别 == 1) {
+                                rst[i].订单状态 = "待收货";
+                                rst[i].showClass = "no-operate";
+                            } else {
+                                rst[i].订单状态 = "已使用";
+                                rst[i].showClass = "no-operate";
+                            }
+                        } else {
+                            // 线上线下都是未付款
+                            if (rst[i].订单状态 == 0) {
+                                rst[i].订单状态 = "未付款";
+                                rst[i].showClass = "no-operate";
+                            } else if (rst[i].订单状态 == 3) {
+                                rst[i].订单状态 = "已完成";
+                                rst[i].showClass = "no-operate";
+                            }
+
+                            // 线上
+                            if (rst[i].订单类别 == 1) {
+                                if (rst[i].订单状态 == 1) {
+                                    rst[i].订单状态 = "去发货";
+                                    rst[i].showClass = "operate";
+                                } else if (rst[i].订单状态 == 2) {
+                                    rst[i].订单状态 = "待收货";
+                                    rst[i].showClass = "no-operate";
+                                }
+                            } else {
+
+                                // 线下
+                                if (rst[i].订单状态 == 1) {
+                                    rst[i].订单状态 = "待提货";
+                                    rst[i].showClass = "no-operate";
+                                } else if (rst[i].订单状态 == 2) {
+                                    rst[i].订单状态 = "已使用";
+                                    rst[i].showClass = "no-operate";
+                                }
+                            }
+                        }
+                    }
+                    $$.Fill("#" + tabID, rst);
+                } else {
+                    $("#" + tabID).append(
+                        '<div class="null" style="margin-top: 3rem;display:block">' +
+                        '<img src="Common/image/null.png" alt="" />' +
+                        '<div>还没相应的订单数据哦</div></div>'
+                    )
+                }
+            }
+
+            // 首先显示全部
+            queryOrderData("-1", "total");
+
+            // 待发货
+            $("a[href='#dfh']").click(function () {
+                $(".template").attr("id", "dfh_Template");
+                queryOrderData("1", "dfh");
+            });
+
+            // 待收货
+            $("a[href='#dsh']").click(function () {
+                $(".template").attr("id", "dsh_Template");
+                queryOrderData("2", "dsh");
+            });
+
+            // 订单详情
+            $(".content").on("click", "li,.operate", function () {
+                var orderID = $(this).attr("data-id");
+                plus.webview.create('ddxq.html?orderID=' + orderID).show();
+            });
+
+            var callbackType = $$.getParameterValue().callbackType;
+            if (callbackType) {
+                $("a[href='#dfh']").trigger("click");
+            } else {
+                queryOrderData("-1", "total");
+            }
+        }
+
+        if (window.plus) {
+            plusReady();
+        } else {
+            document.addEventListener('plusready', plusReady, false);
+        }
+    </script>
+</body>
+
+</html>

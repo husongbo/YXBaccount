@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>选择推荐活动</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<!-- <meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black"> -->
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			*{
+				font-family: "宋体";
+			}
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.code{
+			}
+			#code-ma{
+				width: 200px;
+				height: 200px;
+			}
+			.Hidden{
+				display: none!important;
+			}
+		</style>
+	</head>
+	<body style="background: white;">
+		<div id="app">
+			<header class="bar bar-nav Color_B1">
+			    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+			    <h1 id="MainPage_Title" class="title">选择推荐活动</h1>
+			</header>
+			<div style="margin-top: 50px;">
+				<div class="items" v-for="(item,index) in Hdlist" :key="index" @click="Goto(item)">{{item.PM0006_NAME}}</div>
+			</div>
+		</div>
+		
+	</body>
+	<style type="text/css">
+		.items{padding: 10px;border-bottom: 1px solid rgb(240,240,240);}
+		.items:active{background: rgb(240,240,240);}
+	</style>
+	<script type="text/javascript">
+		var proc = "推广活动列表";
+		var rst = $$.JSONDB.Query(proc);
+		var list=rst.Table
+		new Vue({
+			el:'#app',
+			data:{
+				Hdlist:list
+			},
+			methods:{
+				Goto(val){
+					//alert(JSON.stringify(val))
+					localStorage.setItem('item',JSON.stringify(val))
+					localStorage.setItem('itemlist',JSON.stringify(this.Hdlist))
+					window.location.href='./grtjm.html'
+				}
+			}
+		})
+	</script>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>预约登记</title>
+	<link rel="stylesheet" href="../Common/css/mui.min.css" />
+	<link rel="stylesheet" href="../Common/css/city/mui.picker.css" />
+	<link rel="stylesheet" href="../Common/css/city/mui.poppicker.css" />
+	<link rel="stylesheet" href="../Common/css/city/element.min.css" />
+	<link rel="stylesheet" href="../Common/css/city/loadings.css" />
+	<script type="text/javascript" src="../Common/js/jquery-3.1.1.js"></script>
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+	<script type="text/javascript" src="../Common/js/mui.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+	<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+	<script type="text/javascript" src="../Common/js/city/element.min.js"></script>
+	<style>
+	    @font-face {
+	        font-family: 'iconfont'; /* project id 705767 */
+	        src: url('//at.alicdn.com/t/font_705767_wsdw7wzndb.eot');
+	        src: url('//at.alicdn.com/t/font_705767_wsdw7wzndb.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.woff') format('woff'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.ttf') format('truetype'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.svg#iconfont') format('svg');
+	    }
+	    .iconfont {
+	        font-family: "iconfont" !important;
+	        font-size: 16px;
+	        font-style: normal;
+	        -webkit-font-smoothing: antialiased;
+	        -moz-osx-font-smoothing: grayscale;
+	    }
+	    @font-face {
+	        font-family: 'iconfont'; /* project id 796516 */
+	        src: url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.eot');
+	        src: url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.woff') format('woff'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.ttf') format('truetype'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.svg#iconfont') format('svg');
+	    }
+	    .icon-duanxin:before {
+	        content: "\e618";
+	        color: #ff8200;
+	    }
+	    .icon-dizhi01:before {
+	        content: "\e62c";
+	        color: #ffc600;
+	    }
+	
+	    .icon-shouji:before {
+	        content: "\e607";
+	        color: #a535e9;
+	    }
+	
+	    .icon-yonghudianji:before {
+	        content: "\e638";
+	        color: #1375ff;
+	    }
+	
+	    .icon-nationaarea:before {
+	        content: "\e624";
+	        color: #ff9800;
+	    }
+	
+	    .icon-youjian:before {
+	        content: "\e62b";
+	        color: #ee2683;
+	    }
+	
+	    .icon-shenfenzheng:before {
+	        content: "\e696";
+	        color: #f94d1b;
+	        font-size:0.5rem;
+	    }
+	    .title {
+	        background-color: #ffffff;
+	        color: #000;
+	    }
+	    .list-block {
+	        margin: 0;
+	        font-size: 0.65rem;
+	        color: #333
+	    }
+	   .list-block input[type="text"] {
+	       font-size: 0.6rem;
+	       color:#999
+	   }
+	   .list-block .item-inner {
+	        padding-right:0;
+	   }
+	   .list-block .item-content {
+	       padding-right: 0.75rem;
+	   }
+	    .page, .page-group {
+	        background:#fff;
+	    }
+	  
+	    .iconfont {
+	        width: 2.5rem;
+	    }
+	    .tijiao {
+	        background-color: #ff8200;
+	        color: #fff;
+	        padding: 0 1.4rem;
+	        border:none;
+	    }
+	    .jbxx-content {
+	        background: url("../Common/image/jbxx/bg_img.png") no-repeat center top;
+	        margin-top:0.5rem;
+	        background-size:100% 100%;
+	        padding-bottom:0.5rem;
+	    }
+	    .fsyzm {
+	        position:absolute;  
+	        right:0.3rem;
+	    }
+	    .fsyzm-button {
+	        background: #ff8200;
+	        border:none;
+	        color:#fff;
+	        height:1.1rem;
+	        line-height:1rem;
+	        font-size:0.6rem;
+	    }
+	    a:active {
+	        color: #fff ;
+	        text-decoration:none; 
+	    }
+	
+	</style>
+	<style>
+        .page{
+			    
+				height: 200px;
+				height: calc(100vh - 44px);
+				margin-top: 44px;
+				background: white;
+				position: relative;
+				padding: 0 10px;
+				padding-top: 20px;
+				/* display: flex;
+				align-items: center; */
+		}
+		.pages{
+			    background: url(../Common/image/jbxx/bg_img.png) no-repeat center top;
+				margin-top: 0.5rem;
+				background-size: 100% 100%;
+				padding-bottom: 0.5rem;
+				/* height: 400px; */
+				width: 100%;
+				padding: 10px;
+		}
+		.pagesinput{
+			display: flex;
+			flex-direction: row;
+			height: 40px;
+			align-items: center;
+			margin-bottom: 10px;
+		}
+		.ins{
+			height: 40px;
+			line-height: 40px;
+			width: 100px;
+			font-size: .8rem;
+		}
+		.mui-btn{
+			height: 40px;
+			display: flex;
+			align-items: center;
+			padding: 0;
+			justify-content: center;
+		}
+		#myVue{
+			box-shadow: 0 0 0.6rem rgba(220, 220, 220, 0.6);
+			padding: 20px 10px;
+		}
+		.labels{
+			color: #8C8C8C;
+			font-size: .8rem;
+		}
+		input{
+			color: #8C8C8C;
+		}
+		.actives{
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<span class=" mui-icon  mui-pull-left" onclick='history.back(-1)'>
+			<img src="../Common/image/bzfk/back.png" style="width: 25px;height: 25px;">
+		</span>
+		<h1 class="mui-title">预约登记</h1>
+	</header>
+	<div id="myVues">
+	<div class="page" >
+		<div class="Bz actives">
+			<div id="myVue">
+			    <el-steps :active="stepVal1" finish-status="success">
+				  <el-step title="已登记"></el-step>
+				  <el-step title="已受理"></el-step>
+				  <el-step title="已成功"></el-step>
+				</el-steps>
+			</div>
+			<button onclick="edits()" type="button"class="mui-btn mui-btn-warning mui-btn-block" style="position:absolute;width: 80%;bottom: 10%;left: 10%;">重新编辑</button>
+		</div>
+		<div class="pages">
+			<div class="pagesinput">
+				<i class="iconfont icon-yonghudianji"></i>
+				<div style="width: 20%;" class="labels">姓名</div>
+				<div style="display: flex;justify-content: center;width: 80%;">
+					<input class="ins" id="name" style="width: 100%;border: 0;margin-bottom: 0;" type="text" placeholder="请输入您的姓名" />
+					<div style="display: flex;align-items: center;color: red;">*</div>
+				</div>
+			</div>
+			<div class="pagesinput">
+				<i class="iconfont icon-shenfenzheng"></i>
+				<div style="width: 20%;" class="labels">电话</div>
+				<div style="display: flex;justify-content: center;width: 80%;">
+					<input class="ins" id="phone" style="width: 100%;border: 0;margin-bottom: 0;" type="text" placeholder="请输入您的电话" />
+					<div style="display: flex;align-items: center;color: red;">*</div>
+				</div>
+			</div>
+			<div class="pagesinput">
+				<i class="iconfont icon-nationaarea"></i>
+				<div style="width: 20%;" class="labels">区域</div>
+				<div style="display: flex;justify-content: center;width: 80%;">
+					<div id="showCityPicker3" class="ins" style="width: 100%;border: 0;margin-bottom: 0;padding: 0 15px;color: #8C8C8C;">请选择地址</div>
+					<!-- <input id="showCityPicker3" class="ins" style="width: 100%;border: 0;margin-bottom: 0;" type="text" disabled placeholder="请选择地址" /> -->
+					<div style="display: flex;align-items: center;color: red;">*</div>
+				</div>
+			</div>
+			<div class="pagesinput">
+				<i class="iconfont icon-duanxin"></i>
+				<div style="width: 20%;" class="labels">推广码</div>
+				<div style="display: flex;justify-content: center;width: 80%;">
+					<input id="Num" class="ins"style="width: 100%;border: 0;margin-bottom: 0;" type="number" placeholder="请输入4位数字的推广码" />
+					<div style="display: flex;align-items: center;color: red;">*</div>
+				</div>
+			</div>
+			<div class="pagesinput">
+				<i class="iconfont icon-dizhi01"></i>
+				<div style="width: 20%;" class="labels">地址</div>
+				<div style="display: flex;justify-content: center;width: 80%;">
+					<input id="address" class="ins"style="width: 100%;border: 0;margin-bottom: 0;" type="text" placeholder="请输入您的详细地址" />
+				</div>
+			</div>
+			<div type="button" class="mui-btn mui-btn-warning mui-btn-block" style="display: flex;justify-content: center;" onclick="Tjs()">提交</div>
+		</div>
+	</div>
+	</div>
+</body>
+	<script src="../Common/js/city/loadings.js"></script>
+	<script src="../Common/js/city/mui.picker.js"></script>
+	<script src="../Common/js/city/mui.poppicker.js"></script>
+	<script src="../Common/js/city/city.data.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../Common/js/city/city.data-3.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../Common/js/city/crypto-js.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../Common/js/city/util.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		(function($, doc) {
+			$.init();
+			$.ready(function() {
+				var _getParam = function(obj, param) {
+					return obj[param] || '';
+				};
+				var cityPicker3 = new $.PopPicker({
+					layer: 3
+				});
+				cityPicker3.setData(cityData3);
+				var showCityPickerButton = doc.getElementById('showCityPicker3');
+				showCityPickerButton.addEventListener('tap', function(event) {
+					cityPicker3.show(function(items) {
+						showCityPickerButton.innerText=_getParam(items[0], 'text') + " " + _getParam(items[1], 'text') + " " + _getParam(items[2], 'text');
+						return true
+					});
+				}, false);
+			});
+		})(mui, document);
+	</script>
+	<script type="text/javascript">
+		var proc = "查询基本信息 " + Bill.userId;
+		var rst = $$.JSONDB.Query(proc);
+		var data = rst.Table[0];
+		var id=data.用户标识;
+		// var id="2071611150600000001"
+		new Vue({
+		    el: '#myVue',
+			data: {
+			    stepVal1: 0,
+			},
+			created(){
+				_this=this
+				$.ajax({
+					type: "post",
+					url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetOrderUserInfo",user_id:"${id}"}`,
+					data:{},
+					async: true,
+					success: function (res) {
+						console.log(JSON.parse(res))
+						if(JSON.parse(JSON.parse(res).result)==1&&JSON.parse(res).message=='获取用户信息成功'){
+							var info=JSON.parse(JSON.parse(res).user_info)[0]
+							$(".mui-btn").attr('rel','true')
+							$("#name").val(info.PM0003_REAL_NAME)
+							$("#phone").val(info.PM0003_PHONE)
+							$("#showCityPicker3").text(info.PM0003_PROVINCE+' '+info.PM0003_CITY+' '+info.PM0003_COUNTY)
+							$("#address").val(info.PM0003_ADDRESS)
+							console.log(JSON.parse(JSON.parse(res).user_info))
+							if(info.PM0003_DATA_STATE==0){
+								_this.stepVal1=1
+								$(".Bz").removeClass('actives')
+								$(".pages").addClass('actives')
+							}
+							else if(info.PM0003_DATA_STATE==1){
+								_this.stepVal1=2
+								mui.toast('不可更改预约信息',{
+									duration:1000
+								});
+							}
+							else{
+								_this.stepVal1=3
+								mui.toast('不可更改预约信息',{
+									duration:1000
+								});
+							}
+						}
+						else{
+							_this.stepVal1=0
+							$(".Bz").addClass('actives')
+							$(".pages").removeClass('actives')
+							$(".mui-btn").attr('rel','false')
+						}
+					},
+					error:function(err){
+						console.log(err)
+					}
+				});
+			}
+	    })
+	</script>
+	
+<script type="text/javascript">
+	var proc = "查询基本信息 " + Bill.userId;
+	var rst = $$.JSONDB.Query(proc);
+	var data = rst.Table[0];
+	var id=data.用户标识;
+	// var id="2071611150600000001"
+	var Zhtext=/[\u4e00-\u9fa5]+/g
+	var Phonetext=/^1[3456789]\d{9}$/
+	var showCityPickerButton = document.getElementById('showCityPicker3');
+	var names=document.getElementById('name')
+	var phones=document.getElementById('phone')
+	var addresss=document.getElementById('address')
+	var TNum=document.getElementById('Num')//推广码
+	var RegFlag=false
+	$.ajax({
+		type: "post",
+		url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetOrderUserInfo",user_id:"${id}"}`,
+		data:{},
+		async: true,
+		success: function (res) {
+			console.log(JSON.parse(res))
+			if(JSON.parse(JSON.parse(res).result)==1&&JSON.parse(res).message=='获取用户信息成功'){
+				RegFlag=true
+			}
+			else{
+				RegFlag=false
+			}
+		},
+		error:function(err){
+			console.log(err)
+		}
+	});
+	function Tjs(){
+		console.log($(showCityPickerButton)[0].innerText.split(' '))
+		var Flag=Yztext()
+		if(Flag){
+			var City=$(showCityPickerButton)[0].innerText.split(' ')
+			mui.showLoading("提交中...","div")
+			var datas={
+				user_id:id,
+				phone:$(phones)[0].value,
+				real_name:$(names)[0].value,
+				province:City[0],
+				city:City[1],
+				county:City[2],
+				address:$(addresss)[0].value,
+				promote_no:$(TNum)[0].value,
+			}
+			if(parseInt(datas.promote_no)>72){
+				datas.promote_no='0000'
+			}
+			console.log(datas)
+			var AesJson=encodeURIComponent(encrypt(JSON.stringify(datas),'afd60b4ad2ec1l2c586e2150770f8f9e'))
+			console.log(AesJson)
+			if(!RegFlag){
+				$.ajax({
+					type: "post",
+					url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"OrderUserInfo",post_params:"${AesJson}"}`,
+					data:{},
+					async: true,
+					success: function (res) {
+						setTimeout(function(){
+							mui.hideLoading()
+							if(JSON.parse(res).result==1||JSON.parse(res).result=='1'){
+								mui.toast('预约提交成功',{
+									duration:1000
+								});
+								setTimeout(function(){
+									location.reload()
+								},1000)
+							}
+							else{
+								mui.toast('预约提交失败',{
+									duration:1000
+								});
+							}
+						},1000)
+						console.log(res)
+					},
+					error:function(err){
+						console.log(err)
+					}
+				});
+			}
+			else{
+				$.ajax({
+					type: "post",
+					url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"UpdateOrderUserInfo",post_params:"${AesJson}"}`,
+					data:{},
+					async: true,
+					success: function (res) {
+						console.log(res)
+						setTimeout(function(){
+							mui.hideLoading()
+							if(JSON.parse(res).result==1||JSON.parse(res).result=='1'){
+								mui.toast('预约编辑成功',{
+									duration:1000
+								});
+								setTimeout(function(){
+									location.reload()
+								},1000)
+							}
+							else{
+								mui.toast('预约编辑失败',{
+									duration:1000
+								});
+							}
+						},1000)
+					},
+					error:function(err){
+						console.log(err)
+					}
+				});
+			}
+		}
+	}
+	function edits(){
+		$(".Bz").addClass('actives')
+		$(".pages").removeClass('actives')
+	}
+	function Yztext(){
+		var Len=$(TNum)[0].value.split('').length
+		if($(names)[0].value==''||$(phones)[0].value==''){
+			mui.toast('姓名或者手机号不能为空',{
+				duration:1000
+			});
+			return false
+		}
+		else if(!Phonetext.test($(phones)[0].value)){
+			mui.toast('请输入正确的手机号',{
+				duration:1000
+			});
+			return false
+		}
+		else if($("#showCityPicker3").text()=='请选择地址'){
+			mui.toast('请选择地址',{
+				duration:1000
+			});
+			return false
+		}
+		else if(Len!=4){
+			mui.toast('请正确输入4位数字的推广码',{
+				duration:1000
+			});
+			return false
+		}
+		else{
+			return true
+		}
+	}
+</script>
+</html>

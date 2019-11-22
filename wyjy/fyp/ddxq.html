@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<title>订单详情</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<script type="text/javascript" src="../../Common/js/layer_mobile/layer.js"></script>
+		<style type="text/css">
+			.layui-m-layercont {
+				padding: 30px;
+			}
+			
+			.orderPrompt {
+				height: 5rem;
+			}
+			
+			.orderPrompt img {
+				width: 100%;
+				height: 100%;
+			}
+			
+			.orderPrompt div {
+				position: absolute;
+				z-index: 100;
+				top: 40%;
+				left: 15%;
+				color: #fff;
+				font-size: 0.8rem;
+			}
+			
+			#btn {
+				margin-left: 5%;
+				width: 90%;
+				margin-top: 1%;
+			}
+		</style>
+
+		<!--数据展示-->
+		<script type="text/template" id="orderDetails_Template">
+			<nav class="bar bar-tab" style="height: 3rem;">
+				<a data-state="{{订单状态}}" id="btn" class="button button-fill button-danger">{{btnText}}</a>
+			</nav>
+			<div class="content">
+				<div class="card">
+					<div class="card-content orderPrompt">
+						<img src="{{promptImg}}" />
+						<div>{{promptText}}</div>
+					</div>
+				</div>
+
+				<!--收货地址-->
+				<div class="list-block media-list" style="margin-bottom: 0.4rem;">
+					<ul>
+						<li class="item-content" hidden="hidden" id="orderNum">
+							<div class="item-media">
+								<img src="Common/image/courier.png" width="25px">
+							</div>
+							<div class="item-inner">
+								<div class="item-title-row">
+									<div class="item-title">物流单号</div>
+									<div class="item-after">{{物流单号}}</div>
+								</div>
+							</div>
+						</li>
+						<li class="item-content">
+							<div class="item-media">
+								<img src="Common/image/position.png" width="25px">
+							</div>
+							<div class="item-inner">
+								<div class="item-title-row">
+									<div class="item-title">{{配送收货人}}</div>
+									<div class="item-after">{{配送电话}}</div>
+								</div>
+								<div class="item-text" style="height: 1.65rem;line-height: 1.65rem;">
+									{{配送省}}{{配送市}}{{配送区}}{{配送地址}}
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+
+				<!--商品信息-->
+				<div class="card">
+					<div class="card-header">{{店铺名称}}</div>
+					<div class="card-content">
+						<div class="list-block media-list">
+							<ul>
+								<li class="item-content">
+									<div class="item-media">
+										<img src="{{商品图片}}" style="width: 3rem;">
+									</div>
+									<div class="item-inner">
+										<div class="item-title-row">
+											<div class="item-title">{{商品名称}}</div>
+											<div class="itme-after">￥{{实付金额}}</div>
+										</div>
+										<div class="item-subtitle color-gray">{{商品描述}}</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<!--结算信息-->
+				<div class="list-block">
+					<ul>
+						<li class="item-content">
+							<div class="item-inner">
+								<div class="item-title">商品价格</div>
+								<div class="item-after">￥{{实付金额}}</div>
+							</div>
+						</li>
+						<li class="item-content">
+							<div class="item-inner">
+								<div class="item-title">总金额</div>
+								<div class="item-after">￥{{实付金额}}</div>
+							</div>
+						</li>
+						<li class="item-content">
+							<div class="item-inner">
+								<div class="item-title">订单编号</div>
+								<div class="item-after">{{订单ID}}</div>
+							</div>
+						</li>
+						<li class="item-content">
+							<div class="item-inner">
+								<div class="item-title">下单时间</div>
+								<div class="item-after">{{DATA_CREATE_TIME}}</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<div class="content" id="orderDetails"></div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript">
+			var hyID = "{{CurrentUserID}}";
+			var orderID = $$.getParameterValue().orderID;
+			var state ="";
+			var proc = "订单详情 " + orderID;
+			var rst = $$.JSONDB.Query(proc).Table;
+			console.log(rst)
+			for(var i = 0; i < rst.length; i++) {
+				rst[i].实付金额 = rst[i].实付金额.toFixed(2);
+				var arr = rst[i].商品图片.split(",");
+				rst[i].商品图片 = decodeURI(atob(arr[0]));
+				state = rst[i].订单状态;
+				switch(rst[i].订单状态) {
+					case 0:
+						rst[i].promptImg = "Common/image/payment.png";
+						rst[i].promptText = "待付款";
+						rst[i].btnText = "确认付款";
+						break;
+					case 1:
+						rst[i].promptImg = "Common/image/deliver.png";
+						rst[i].promptText = "待发货";
+						rst[i].btnText = "返回";
+						break;
+					case 2:
+						rst[i].promptImg = "Common/image/wating.png";
+						rst[i].promptText = "待收货";
+						rst[i].btnText = "确认收货";
+						break;
+					case 3:
+						rst[i].promptImg = "Common/image/finish.png";
+						rst[i].promptText = "交易成功";
+						rst[i].btnText = "返回";
+						break;
+					default:
+						break;
+				}
+			}
+
+			$$.Fill("#orderDetails", rst);
+			if(state == 2){
+				$("#orderNum").css("display","flex");
+			}
+
+			// 操作按钮
+			$("#btn").click(function() {
+				if(state == 2) {
+					layer.open({
+						content: '您确定要进行收货吗？',
+						btn: ['确定', '取消'],
+						yes: function(index) {
+							var data = {
+								"订单ID": orderID,
+								"操作用户": hyID
+							}
+							var tmpl = "{{订单ID}},{{操作用户}}";
+							var params = tmpl.t(data);
+							var proc = "订单已收货 " + params;
+							var rst = $$.JSONDB.Query(proc).Table;
+							layer.close(index);
+
+							layer.open({
+								content: '收货完成',
+								skin: 'msg',
+								time: 2
+							});
+							location.href = "wddd.html?callbackType=dsh";
+						}
+					});
+				} else {
+					location.href = "wddd.html";
+				}
+			})
+		</script>
+	</body>
+
+</html>

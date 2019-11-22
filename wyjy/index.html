@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>油信宝</title>
+    <link rel="stylesheet" href="../Common/css/sm.css?v=20181010" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/zepto.cookie.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js?v=2"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js?v=1"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/javascript" src="../Common/js/fx.js"></script>
+    <!--<script type="text/javascript" src="../Common/js/jquery-3.1.1.js"></script>-->
+    <!-- <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script> -->
+	<script src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script type="text/javascript" src="http://map.qq.com/api/js?v=2.exp"></script>
+	<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+	<script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+    <script type="text/javascript">
+        var My = {
+            SearchClikcProcess: function () {
+                if (!My.IsBindingCard()) {
+                    My.BindPrompt();
+                    return;
+                }
+
+                $.actions([
+                    [{
+                        text: '请选择您要进行的操作！',
+                        label: true
+                    },
+                    {
+                        text: '已出账单查询',
+                        onClick: function () {
+                            $$.Goto("yczdcx");
+                        }
+                    },
+                    {
+                        text: '未出账单查询',
+                        bold: true,
+                        color: 'danger',
+                        onClick: function () {
+                            $$.Goto("wczdcxmx");
+                        }
+                    }
+                    ],
+                    [{
+                        text: '取消',
+                        bg: 'danger'
+                    }]
+                ]);
+            },
+            Recharge: function () {
+                $$.Goto('wycz');
+            },
+            citylocation: new qq.maps.CityService({
+                complete: function (results) {
+                    var location = results.detail.detail.split(",");
+                    if (location.length > 3) {
+                        My.location.province = location[2];
+                    }
+                    My.location.city = location[1];
+
+                    My.GetCityInfo();
+                }
+            })
+        };
+
+        $$.Page_Load = function () {
+            $.init();
+			//window.location.href = $$.Context.CreateTokenURI
+			// My.Getwxinfo();
+            $(".card-sales").hide();
+			My.getLinecredit();//获取信用额度
+			My.getjifen();//获取信用额度
+            // My.ShowAd();
+            My.GetOilPoints();
+            My.Event();
+        }
+		My.getLinecredit=function(){
+			var proc = "查询基本信息 " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+			var data = rst.Table[0];
+			var id=data.用户标识;
+			// var id="3052109275300000002";
+			var datas=`params={method:"GetUserMoneyInfo",user_id:"${id}"}`
+			console.log(datas)
+			$.ajax({
+			    type: "post",
+			    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+			    data: datas,
+			    async: true,
+			    success: function (data) {
+					var jsondata=$.parseJSON(data)
+					console.log(jsondata)
+					if(jsondata.result==1){
+						var moneylist=$.parseJSON(jsondata.data_score)
+						$(".clearmoeny").text(moneylist[0].MONEY)
+						// console.log(moneylist.MONEY)
+					}
+					console.log(jsondata)
+			    }
+			});
+		}
+		My.Getwxinfo=function(){
+			var aa=window.location.href
+			var datas=`params={method:"GetWeInfo"}`
+			$.ajax({
+			    type: "post",
+			    url:`http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetWeInfo",url:"${aa}"}`,
+			    async: true,
+			    success: function (res) {
+					//alert(encodeURIComponent(location.href.split('#')[0]));
+					var res=JSON.parse(res)
+					console.log(res)
+					wx.config({
+						 debug: false, // 开启调试模式   
+						 appId:res.appId,
+						 timestamp:res.timpstamp,
+						 nonceStr:res.noncestr,
+						 signature:res.signature,
+						 jsApiList: [
+									   'scanQRCode'// 微信扫一扫接口
+									] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2 
+					 });
+					wx.ready(function() {
+						wx.scanQRCode({
+							 needResult : 1, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
+							 scanType : ["qrCode"], // 可以指定扫二维码还是一维码，默认二者都有
+							 success : function(res) {
+								 var result = res.resultStr;
+								  console.log(res)// 当needResult 为 1 时，扫码返回的结果
+							 }							
+						});
+					});
+				},
+				error:function(jqXHR){
+		          	//alert(JSON.stringfy(jqXHR))
+		       		 }
+		
+			});
+		}
+		My.getjifen=function(){
+			//alert(JSON.stringify(Bill))
+			//alert(Bill.userId)
+			var proc = "查询基本信息 " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+			var data = rst.Table[0];
+			var id=data.用户标识;
+			//alert(id)
+			// var id="3052109275300000002";
+			var datas=`params={method:"GetUserScoreInfo",user_id:"${id}"}`
+			console.log(datas)
+			$.ajax({
+			    type: "post",
+			    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+			    data: datas,
+			    async: true,
+			    success: function (data) {
+					var jsondata=$.parseJSON(data).data_score
+					var jifentext=$.parseJSON(jsondata)[0].SCORE
+					$("#oil_points").text(jifentext)
+					console.log(jifentext)
+					// if(jsondata.result==1){
+					// 	var moneylist=$.parseJSON(jsondata.data_score)
+					// 	$(".clearmoeny").text(moneylist[0].MONEY)
+					// 	// console.log(moneylist.MONEY)
+					// }
+			    }
+			});
+		}
+        My.IsBindingCard = function () {
+            var rst = Bill.GetUserCardInfo();
+            if (rst.Table.length == 0) {
+                return false;
+            }
+            return true;
+        }
+
+        My.Recharge = function () {
+            if (My.IsBindingCard()) {
+                $$.Goto('wycz');
+            } else {
+                My.BindPrompt();
+            }
+        };
+
+        My.GotoMyCardPage = function () {
+            if ($$.Context.Parameter.CardCD) {
+                var param = {};
+                param.CardCD = $$.Context.Parameter.CardCD
+            }
+
+            $$.Goto('wdyk', param);
+        };
+
+        My.QueryBalance = function () {
+            var balance = Bill.GetAccountBalance();
+            $$.Fill("#balance", balance);
+        };
+
+        My.NoOpenPrompt = function () {
+            layer.open({
+                content: "尚未开通，敬请期待",
+                btn: "好的"
+            });
+        };
+
+        My.GotoJYFJ = function () {
+           layer.open({
+                content: '加油用户请在支持核销的加油站扫描二维码购买加油券，此处购买加油券，不能为油卡充值，请谨慎操作。',
+                btn: ['去加油', '取消'],
+                yes: function (index) {
+                    $$.Goto('gmjyq');
+                    layer.close(index);
+                }
+            });
+        };
+
+        My.GotoShop = function () {
+            var rst = $$.JSONDB.Query("判断特权用户 '{{CurrentUserID}}'");
+            if (!rst || !rst.Table[0]) {
+                My.NoOpenPrompt();
+                return;
+            }
+
+            //window.location.href = 'http://shop.youxinbao.com.cn/App/amec/index.html'
+        }
+
+        My.BindPrompt = function () {
+            layer.open({
+                content: '绑定油卡后才可以进行此操作，现在要去绑定油卡吗？',
+                btn: ['绑定油卡', '取消'],
+                yes: function (index) {
+                    $$.Goto('wdyk');
+                    layer.close(index);
+                }
+            });
+        };
+
+        My.GetOilPoints = function () {
+            var proc = "GetOilPoints " + Bill.userId;
+            var rst = $$.JSONDB.Query(proc);
+            $("#oil_points").text(rst.Table[0].油点);
+        };
+
+        My.ShowMap = function () {
+            if (!My.city) {
+                My.SetCity("成都市");
+            }
+            // My.city = "绵阳市";
+            var proc = "查询城市油站信息 " + "'" + My.city + "'";
+            var rst = $$.JSONDB.Query(proc).Table;
+           // if (rst.length > 0) {
+                $$.Goto("dtapi");
+           // } else {
+              //  var mapUrl = "http://apis.map.qq.com/uri/v1/search?keyword=加油站&center=" + My.location.latitude +
+                //    "," + My.location.longitude + "&radius=1000&referer=myapp";
+              //  window.location.href = mapUrl;
+           // }
+        };
+
+        My.LoadWxApi = function () {
+            var signPackage = $$.GetJSSDKParameter();
+
+            wx.config({
+                debug: false,
+                appId: signPackage["AppId"],
+                timestamp: signPackage["Timestamp"],
+                nonceStr: signPackage["Noncestr"],
+                signature: signPackage["Signature"],
+                jsApiList: [
+                    // 所有要调用的 API 都要加到这个列表中
+                    'checkJsApi',
+                    'openLocation',
+                    'getLocation',
+					'scanQRCode'
+                ]
+            });
+        };
+		My.OpenWx=function(){
+			wx.scanQRCode({
+				 needResult : 1, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
+				 scanType : ["qrCode"], // 可以指定扫二维码还是一维码，默认二者都有
+				 success : function(res) {
+					 var result = res.resultStr;
+					  alert(JSON.stringify(result))// 当needResult 为 1 时，扫码返回的结果
+				 }							
+			});
+		}
+        My.GetLocation = function () {
+            wx.getLocation({
+                success: function (res) {
+                    My.location = {};
+                    My.location.latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    My.location.longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    My.location.speed = res.speed; // 速度，以米/每秒计
+                    My.location.accuracy = res.accuracy; // 位置精度
+                    //设置经纬度信息
+                    var latLng = new qq.maps.LatLng(My.location.latitude, My.location.longitude);
+                    //调用城市经纬度查询接口实现经纬查询
+                    My.citylocation.searchCityByLatLng(latLng);
+                },
+                cancel: function (res) {
+                    alert('用户拒绝授权获取地理位置');
+                }
+            });
+        };
+
+        My.GetCityInfo = function () {
+            //				My.city = $.fn.cookie("city");
+            //				if(!My.city) {
+            My.province = My.location.province;
+            My.city = My.location.city;
+            //					$.fn.cookie("province", My.prototype);
+            //					$.fn.cookie("city", My.city);
+            //				}
+            My.SetCity(My.city);
+        };
+
+        My.SetCity = function (city) {
+            //				$.fn.cookie("city", city);
+            My.city = city;
+            $("#city").text(city);
+        };
+
+        My.ShowAd = function () {
+            layer.open({
+                content: '<div class="card"> \
+							<div valign="bottom" class="card-header color-white no-border no-padding"> \
+								<img class="card-cover" style="width: 100%;" src="../Common/image/ad1.png" alt=""> \
+				  				<div style="position: absolute; top : 0; right: 0; font-size: 120%; padding: 0.3rem" onclick="My.CloseAd();">×</div> \
+							</div> \
+						</div>',
+                style: 'background-color: transparent; color:#fff; border:none; width: auto; height:auto;' //自定风格
+                ,
+                time: 0
+            });
+        };
+
+        My.CloseAd = function () {
+            layer.closeAll();
+        };
+
+        My.Event = function () {
+            var cities = ["成都市", "自贡市", "攀枝花市", "泸州市", "德阳市", "绵阳市", "广元市", "遂宁市", "内江市", "乐山市", "南充市", "宜宾市",
+                "广安市", "达州市", "眉山市", "雅安市", "巴中市", "资阳市", "阿坝州", "甘孜州", "凉山州  "
+            ];
+            $("#city-picker").picker({
+                toolbarTemplate: '<header class="bar bar-nav">\
+					<button class="button button-link pull-right close-picker">确定</button>\
+					<h1 class="title">请选择城市</h1>\
+					</header>',
+                cols: [{
+                    textAlign: 'left',
+                    values: cities
+                }],
+                onClose: function (obj) {
+                    My.SetCity(obj.value[0]);
+                }
+            });
+
+            // return;
+            My.LoadWxApi();
+            wx.ready(function () {
+                My.GetLocation();
+            });
+        }
+    </script>
+	
+    <style>
+		.iconfont {
+			font-family: "iconfont" !important;
+			font-size: 1rem;
+			font-style: normal;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			color:#fff
+		}
+		@font-face {
+			font-family: "iconfont";
+			src: url('iconfont.eot?t=1528857607289'); /* IE9*/
+			src: url('iconfont.eot?t=1528857607289#iefix') format('embedded-opentype'), /* IE6-IE8 */
+			url('data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAAAAAVoAAsAAAAAB9AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABHU1VCAAABCAAAADMAAABCsP6z7U9TLzIAAAE8AAAARAAAAFZW7kg9Y21hcAAAAYAAAABeAAABhpqEBr5nbHlmAAAB4AAAAZwAAAG8Dhv/GWhlYWQAAAN8AAAALwAAADYRrI4JaGhlYQAAA6wAAAAcAAAAJAfeA4RobXR4AAADyAAAAAwAAAAMC+kAAGxvY2EAAAPUAAAACAAAAAgAdgDebWF4cAAAA9wAAAAfAAAAIAESAF1uYW1lAAAD/AAAAUUAAAJtPlT+fXBvc3QAAAVEAAAAIgAAADPWeOxweJxjYGRgYOBikGPQYWB0cfMJYeBgYGGAAJAMY05meiJQDMoDyrGAaQ4gZoOIAgCKIwNPAHicY2Bk/sE4gYGVgYOpk+kMAwNDP4RmfM1gxMjBwMDEwMrMgBUEpLmmMDgwVDwLZm7438AQw9zA0AAUZgTJAQAphQy/eJzFkMENgDAMAy9t6QMxCA+26YcXc3TirlFMKA8mqCXHimMpUYAFiOIhJrAL48Ep19yPrO4nz2SpEait9K7+U0U0y65BJTMNNm/1H5vXfXT6CnVQJ7byknADJBYM2wAAeJwdkMFO20AQhnd2sZPQxCbrtR072E6y4DWiWIqzCUGVnUMiV62qqAIuCHLouYIrigQSByr10EPFoQ+AKvUluPIgVfscaTeM5jD/aObXfIM0hP79Jk+khSyUoD6aoY8Igb4PPQMH0BUyxftgdzXbZQYRXHQrvJeSHNyezpxsJGNXr+gmGBDCoJuNRIoFDGWB30DmBABe2z+hu9uUfIfNlgi/rN7jR7Ajvm0WB6t3rycs61jV6zqlHqXfqrqmVTHeMA24dJ2aVtvUVz8107efoj0cQd0T/oezRqdNP32VV8GuWwO4uwOr3TF+TZp+U+WN71jUq2w1qi2/wXcYXP991bLqQfwHqSCK9Zn8IEcoQyV6qzizEDN1f8VxQ7CZ3ovXvIIb5EUMCzgcHcYiBQU06Lvp+iksXLMVWMaij9FwUSYJb9rH+XjCQgvkxbKEcnkhWcigGOfHjPIkKReje386nw2CYDAVIKaq8MiR6n9ecGpE+fjh1GTMLJfnEkCeL8u1On0Y55FBuRoqk1tf7c7m0xeL+cxTOP8BRJ5GEXicY2BkYGAA4tbpaobx/DZfGbhZGEDguttSdgT9/ygLA7MlkMvBwAQSBQD8vQjEAHicY2BkYGBu+N/AEMPCAAJAkpEBFTADAEcJAmwEAAAAA+kAAAQAAAAAAAAAAHYA3nicY2BkYGBgZghkYGUAASYg5gJCBob/YD4DABD3AXAAeJxlj01OwzAQhV/6B6QSqqhgh+QFYgEo/RGrblhUavdddN+mTpsqiSPHrdQDcB6OwAk4AtyAO/BIJ5s2lsffvHljTwDc4Acejt8t95E9XDI7cg0XuBeuU38QbpBfhJto41W4Rf1N2MczpsJtdGF5g9e4YvaEd2EPHXwI13CNT+E69S/hBvlbuIk7/Aq30PHqwj7mXle4jUcv9sdWL5xeqeVBxaHJIpM5v4KZXu+Sha3S6pxrW8QmU4OgX0lTnWlb3VPs10PnIhVZk6oJqzpJjMqt2erQBRvn8lGvF4kehCblWGP+tsYCjnEFhSUOjDFCGGSIyujoO1Vm9K+xQ8Jee1Y9zed0WxTU/3OFAQL0z1xTurLSeTpPgT1fG1J1dCtuy56UNJFezUkSskJe1rZUQuoBNmVXjhF6XNGJPyhnSP8ACVpuyAAAAHicY2BigAAuBuyAmZGJkZmRhYGxgjU9tSg1j4EBABHJAqsAAA==') format('woff'), url('iconfont.ttf?t=1528857607289') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+			url('iconfont.svg?t=1528857607289#iconfont') format('svg'); /* iOS 4.1- */
+		}
+
+		@font-face {
+			font-family: "iconfont";
+			src: url('iconfont.eot?t=1528858032540'); /* IE9*/
+			src: url('iconfont.eot?t=1528858032540#iefix') format('embedded-opentype'), /* IE6-IE8 */
+			url('data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAAAAAWEAAsAAAAAB/QAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABHU1VCAAABCAAAADMAAABCsP6z7U9TLzIAAAE8AAAARAAAAFZW7kf5Y21hcAAAAYAAAABeAAABhpl0Br5nbHlmAAAB4AAAAbkAAAHgcHiINWhlYWQAAAOcAAAALwAAADYRrJFjaGhlYQAAA8wAAAAcAAAAJAfeA4RobXR4AAAD6AAAAAwAAAAMC+kAAGxvY2EAAAP0AAAACAAAAAgAdgDwbWF4cAAAA/wAAAAfAAAAIAESAF1uYW1lAAAEHAAAAUUAAAJtPlT+fXBvc3QAAAVkAAAAIAAAADFudOoJeJxjYGRgYOBikGPQYWB0cfMJYeBgYGGAAJAMY05meiJQDMoDyrGAaQ4gZoOIAgCKIwNPAHicY2Bk/sE4gYGVgYOpk+kMAwNDP4RmfM1gxMjBwMDEwMrMgBUEpLmmMDgwVDzjZ27438AQw9zA0AAUZgTJAQAkeQx7eJzFkMENgDAMAy9t6QMhdQ0eDMSLOTpx1ygmlAcT1JJjxbGUKMACRPEQE9iF8eCUa+5HVveTZ7LUCNRWelf/qSKaZdegkpkGm7f6j83rPjp9hTqoE1t5SbgBc6cLywAAeJw1j01rE1EYhe+5c2cmiclNOp+ZSfM5bW5K44hjmiBpJhuJjWQhZBDctV11Y/zYdOMim1QXLgSloNCNCBb6F7pTKP4JReLviN5NXs7iPc+BA4eohPz7o1wrRWKSFrlLHpDHhEDbRYPTMuqiE9Jd2HXVdi2uiEDU9aARKgO4Dc1yom6n6Wq6lgdHBffqUVeEVGCvE9M+IqcMeCV/amxvGsp7ZIqislg9ol9gV4PNfHx7NW4Prahmpk6zhuEZxruUpqopSlme45nrpNV0Rlt9VfO+fV3doVVkPeFPnuZqJePobWdW3nbTwHwOs1Tj34Yb/obUa98xDU8v5FJFPxdsWTj9e6toZsvNJZHH5NYzZaHMiSuXDsiYENWJhuj2YvS6vRCCQ3fcCqroNe9A+hB7MqrAlQFHnnKYkq6RIql8pA2Bn/Z9hxv2/qvWBOz35eUvhsnOy30RsUyz/0I0ttj3Dx9/MASBeN5vcr2gT2eKMpsmM0pnSZxQmsTDBEiOXbdgeQcX48Xh1ZKx5dXh2fjioF1g2fbDT6P4pHV+w9jNeetkMPo8ahd04I0sWJfhybpnGCeE/AcoEVRpAAAAeJxjYGRgYADiyWyCkfH8Nl8ZuFkYQOC627INCPp/GwsDcwOQy8HABBIFAAbZCbAAeJxjYGRgYG7438AQw8IAAkCSkQEVMAMARwkCbAQAAAAD6QAABAAAAAAAAAAAdgDweJxjYGRgYGBmCGRgZQABJiDmAkIGhv9gPgMAEPcBcAB4nGWPTU7DMBCFX/oHpBKqqGCH5AViASj9EatuWFRq911036ZOmyqJI8et1ANwHo7ACTgC3IA78EgnmzaWx9+8eWNPANzgBx6O3y33kT1cMjtyDRe4F65TfxBukF+Em2jjVbhF/U3YxzOmwm10YXmD17hi9oR3YQ8dfAjXcI1P4Tr1L+EG+Vu4iTv8CrfQ8erCPuZeV7iNRy/2x1YvnF6p5UHFockikzm/gple75KFrdLqnGtbxCZTg6BfSVOdaVvdU+zXQ+ciFVmTqgmrOkmMyq3Z6tAFG+fyUa8XiR6EJuVYY/62xgKOcQWFJQ6MMUIYZIjK6Og7VWb0r7FDwl57Vj3N53RbFNT/c4UBAvTPXFO6stJ5Ok+BPV8bUnV0K27LnpQ0kV7NSRKyQl7WtlRC6gE2ZVeOEXpc0Yk/KGdI/wAJWm7IAAAAeJxjYGKAAC4G7ICZkYmRmZGFgbGCOTexgIEBAAs3AdY=') format('woff'), url('iconfont.ttf?t=1528858032540') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+			url('iconfont.svg?t=1528858032540#iconfont') format('svg'); /* iOS 4.1- */
+		}
+		@font-face {
+		  font-family: 'iconfont';  /* project id 705790 */
+		  src: url('//at.alicdn.com/t/font_705790_tof4l3b7mj.eot');
+		  src: url('//at.alicdn.com/t/font_705790_tof4l3b7mj.eot?#iefix') format('embedded-opentype'),
+		  url('//at.alicdn.com/t/font_705790_tof4l3b7mj.woff') format('woff'),
+		  url('//at.alicdn.com/t/font_705790_tof4l3b7mj.ttf') format('truetype'),
+		  url('//at.alicdn.com/t/font_705790_tof4l3b7mj.svg#iconfont') format('svg');
+		}
+		@font-face {
+			font-family: 'iconfont'; /* project id 705790 */
+			src: url('//at.alicdn.com/t/font_705790_1pqa63lspn2.eot');
+			src: url('//at.alicdn.com/t/font_705790_1pqa63lspn2.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705790_1pqa63lspn2.woff') format('woff'), url('//at.alicdn.com/t/font_705790_1pqa63lspn2.ttf') format('truetype'), url('//at.alicdn.com/t/font_705790_1pqa63lspn2.svg#iconfont') format('svg');
+		}
+		@font-face {
+			font-family: 'iconfont'; /* project id 705790 */
+			src: url('//at.alicdn.com/t/font_705790_rcuud2pu3n.eot');
+			src: url('//at.alicdn.com/t/font_705790_rcuud2pu3n.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705790_rcuud2pu3n.woff') format('woff'), url('//at.alicdn.com/t/font_705790_rcuud2pu3n.ttf') format('truetype'), url('//at.alicdn.com/t/font_705790_rcuud2pu3n.svg#iconfont') format('svg');
+		}
+		@font-face {
+			font-family: 'iconfont'; /* project id 705790 */
+			src: url('//at.alicdn.com/t/font_705790_1qoesp8z8xq.eot');
+			src: url('//at.alicdn.com/t/font_705790_1qoesp8z8xq.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705790_1qoesp8z8xq.woff') format('woff'), url('//at.alicdn.com/t/font_705790_1qoesp8z8xq.ttf') format('truetype'), url('//at.alicdn.com/t/font_705790_1qoesp8z8xq.svg#iconfont') format('svg');
+		}
+		.icon-geren:before {
+			content: "\e653";
+		}
+		.icon-map:before {
+			content: "\e60f";
+		}
+		.icon-shouji:before {
+			content: "\e616";
+			color:#000;
+		}
+		.icon-qiapian:before {
+			content: "\e621";
+		}
+		.icon-xinxi:before {
+			content: "\e632";
+			color: #000;
+		}
+		.icon-wenti:before {
+			content: "\e757";
+			color:red;
+		}
+		.icon-geren:before {
+			content: "\e653";
+		}
+        .bar-nav {
+            top: 0;
+            border: 0;
+            margin: 0;
+            height: 2.2rem;
+        }
+
+        .bar:after {
+            content: "";
+            height: 0;
+        }
+
+        .card {
+            border-radius: 0;
+            margin: 0rem;
+        }
+
+        .card1 {
+            margin: 0;
+            background: url("../Common/image/bg.png") no-repeat center;
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 0.1rem;
+        }
+
+        .card2 img {
+            width: 30%;
+            vertical-align: middle;
+        }
+
+        .card2 .col-50 {
+            text-align: center;
+            padding: 0.15rem;
+        }
+
+        .card2 .col-50 span {
+            /*font-weight: bold;*/
+           color: #000;
+           font-size: 0.65rem;
+           margin-left: 5%;
+           display: inline-block;
+           width: 100%;
+        }
+        .num {
+            font-size: 1.2rem !important;
+            font-weight: bold;
+            line-height:1.2rem;
+        }
+        .card3 img {
+            width: 60%;
+        }
+
+        .card3 .row .col-33 {
+            padding: 0.35rem 0.55rem;
+        }
+
+        .card3 .row:first-child .col-33:last-child,
+        .card3 .row:last-child .col-33:last-child {
+            border: none;
+        }
+        .swiper-container {
+            /*height: 8rem;*/
+            padding-bottom:0rem;
+        }
+
+        .swiper-slide img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .title {
+            background-color: #fff;
+        }
+
+        .row {
+            margin-left: 0;
+			display: flex;
+			flex-direction: row;
+        }
+
+            .row .col-33 {
+                width: 25%;
+                margin-left: 0;
+            }
+			.row .col-333{
+				width: 21%;
+			}
+        .picker-items {
+            font-size: 0.85rem;
+        }
+
+        .layui-m-layercont {
+            padding: 0.5rem;
+        }
+
+        /*底部广告图片*/
+
+        .footer-adv {
+            height: 2.8rem;
+            background: url(../Common/image/ad2.png) no-repeat;
+            background-size: 100%;
+        }
+
+        .index_header {
+            background-color: #E4393c;
+            color: #fff;
+        }
+
+        .button {
+            border: 1px solid #E4393c;
+            background-color: #E4393c;
+            color: #FFF;
+        }
+
+        .footer_button {
+            background: url(../Common/image/bottom_icon_youkachongzhi.png) no-repeat;
+            background-size: 1.3rem;
+            /*background-position: 4.3rem;*/
+            background-position: 29%
+        }
+
+        .header_left {
+            background: url(../Common/image/icon1.png) no-repeat;
+            background-size: 2rem;
+            width: 3rem;
+        }
+
+        .header_right {
+            background: url(../Common/image/icon1.png) no-repeat;
+            background-size: 2rem;
+            width: 3rem;
+        }
+
+        .yzdh {
+            color: #fff;
+            font-size: 0.6rem;
+            float: right;
+        }
+
+        .card-content-inner {
+            padding: 0.4rem;
+        }
+        .title {
+            height:2.2rem;
+        }
+        #PageContent {
+            padding-bottom: 2.5rem;
+        }
+
+        /*.border-gradient-color {
+            border-image: -webkit-linear-gradient(left, #e4dddd, #acb5ac 50%, #e4dddd 100%) 1 1;
+        }*/
+
+        .border-3 {
+            height: 3px;
+            background: url(../Common/image/img_fengexian.png) no-repeat;
+            /*background: -webkit-linear-gradient(left, #e4dddd, #acb5ac 50%, #e4dddd 100%);*/
+        }
+        .list-block {
+            margin: 0;
+        }
+        .col-50 img{
+            width:100%;
+        }
+        /*横向广告图高度*/
+        .transverse-ad {
+            background: url(../Common/image/link_img_zuixinzixun.png) no-repeat;
+            height: 2.7rem !important;
+            background-size: 100% 2.7rem;
+            overflow: hidden;
+        }
+        .col-50-width-50 {
+            width: 50% !important;
+            margin-left:0rem !important;
+        }
+        .news {
+            font-size: 0.6rem;
+            margin-top: 0.35rem;
+            margin-bottom: 0.3rem;
+			overflow: hidden;
+			height:0.9rem;
+        }
+        .swiper-pagination-bullet {
+            background: #fff;
+            opacity: 1;
+        }
+        .swiper-pagination-bullet-active {
+            background: #e4393c;
+        }
+        .ad-padding {
+            padding:0 17%;
+        }
+		.szcs{
+			position: absolute;
+			right: 0.5rem;
+			top: 0.5rem;
+			font-size:0.8rem;
+			z-index:999;
+		}
+        #city {
+            font-size:0.6rem;
+            color:#666;
+        }
+        .swiper-container-horizontal > .swiper-pagination {
+            bottom:4px;
+        }
+        .swiper-pagination-bullet {
+            width:6px;
+            height:6px;
+        }
+        .tab-item:active {
+            background: #e7e7e7;
+        }
+		.cols img,.colss img{
+			width: 40%;
+		}
+		.cols{
+			padding:0.8rem 0.8rem 0.5rem 1rem!important;
+		}
+		.module01{
+			/* padding:0.1rem 1rem; */
+			}
+		.swiper-container{
+			/* border-radius: 10px; */
+		}
+		.colss{
+			width: 20%!important;
+			padding:0.8rem 0rem 0.5rem 0rem!important;
+			/* padding:0.8rem 0.9rem!important; */
+			
+		}
+		.colss img{
+			width: 45%;
+		}
+		@media (max-width:320px) {
+			.colss,.cols{
+				padding:0.8rem 0.7rem 0.5rem 0.7rem!important;
+			}
+			.colss img,.cols img{
+				width: 40%;
+			}
+		}
+		.titles{
+			padding: 5px 0 0 20px;
+			height: 40px;
+			line-height: 40px;
+			font-size: 0.7rem;
+			background:white;
+		}
+		.wahts{
+			/* margin: 5px; */
+			border-radius: 10px;
+			border: 0.5px solid rgb(250,250,250);
+			/* border-bottom: 0; */
+			box-sizing: border-box;
+			box-shadow: 0 0 0.6rem rgba(220, 220, 220, 0.6);
+		}
+		.page-group{
+			width: 100%;
+			overflow-x: hidden;
+		}
+    </style>
+</head>
+
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current" style="background:#FFF">
+            <div id="PageContent" class="content">
+				<div class="module01">
+				    <div class="swiper-container" data-space-between='10' data-autoplay="3000" data-loop=true>
+				        <div class="swiper-wrapper">
+				            <a class="swiper-slide">
+				                <img src="../Common/image/banner.png?v=1" onclick="window.location.href='https://mp.weixin.qq.com/s/5oUnmf7cIIrAUK4AqqXZ_Q'" alt="">
+				            </a>
+				            <a class="swiper-slide">
+				                <img src="../Common/image/lthd.png" onclick="window.location.href='http://smstest.youxinbao.com.cn/App/wyjy/yydj.html'" alt="">
+				            </a>
+				            <a class="swiper-slide">
+				                <img src="../Common/image/banner2.png" onclick="window.location.href='https://mp.weixin.qq.com/s/5oUnmf7cIIrAUK4AqqXZ_Q'" alt="">
+				            </a>
+				        </div>
+				        <div class="swiper-pagination"></div>
+				    </div>
+				</div>
+				<div class="card card3 wahts" style="background:white;position: relative;">
+				<div class="card-content my-services">
+				<div class="row" style="background: rgb();">
+					<div class="col-33 cols xiaohui" style="text-align: center;" onclick='My.Getwxinfo();'>
+					    <img src="../Common/image/sao.png" alt="" />
+					    <div class="fontColor" style="color: black;font-size: 0.6rem;">扫一扫</div>
+					</div>
+					<!-- <div style="width: 80%;display: flex;
+			flex-direction: row;justify-content: flex-end;"> -->
+				    <div class="col-33 cols" style="text-align: center;" onclick="$$.Goto('dtapi')">
+				        <img src="../Common/image/shui.png" alt="" />
+				        <div class="fontColor" style="color: black;font-size: 0.6rem;">去加油</div>
+				    </div>
+				    <div class="col-33 cols" style="text-align: center;" onclick="$$.Goto('Coupon');">
+				        <img src="../Common/image/ka.png" alt="" />
+				        <div class="fontColor" style="color: black;font-size: 0.6rem;">卡/券</div>
+				    </div> 
+					<div class="col-33 cols" style="text-align: center;" onclick="$$.Goto('userprice');">
+					    <img src="../Common/image/money.png" alt="" />
+					    <div class="fontColor" style="color: black;font-size: 0.6rem;">积分</div>
+					</div>
+					</div>
+				</div>
+				</div>
+				<!-- <div class="border-3"></div> -->
+				<div class="titles" style="font-weight:bold;">
+					活动专区
+				</div>
+				<!-- <div class="card card3 wahts" style="position: relative;">
+				    <div class="card-content my-services">
+				        <div style="height: 85px;display: flex;flex-direction: row;">
+							<img src="./image/left.png" style="width: 50%;height: 100%;border-radius: 10px 0 0 10px;"  onclick="$$.Goto('https://pro.m.jd.com/mall/active/MkZ7bAxtJRKj95BRD4kkJwsAkdH/index.html');">
+							
+							<img src="./image/right.png" style="width: 50%;height: 100%;border-radius: 0 10px 10px 0;" onclick="$$.Goto('wdltk');">
+						</div>
+				    </div>
+				</div> -->
+                <div class="card card3 wahts" style="position: relative;">
+                    <div class="card-content my-services">
+                        <div style="padding: 0.4rem;">
+							<img src="./images/gh.png" style="width: 100%;height: 100%;border-radius: 10px;padding: 0.15rem 0.15rem;"  onclick="window.location.href='https://mp.weixin.qq.com/s/xbm5Q2lPgPzqU0crIuh6ZA';">
+							<img src="./images/jh.png" style="width: 100%;height: 100%;border-radius: 10px;padding: 0.15rem 0.15rem;"  onclick="window.location.href='https://etc.ccbjrfw.com/etc?jg=510650000&yg=81668798&fx=81668798zybd001';">
+							<img src="./images/jp.png" style="width: 100%;height: 100%;border-radius: 10px;padding: 0.15rem 0.15rem;"  onclick="window.location.href='https://pro.m.jd.com/mall/active/MkZ7bAxtJRKj95BRD4kkJwsAkdH/index.html';">
+							<img src="./images/lt.png" style="width: 100%;height: 100%;border-radius: 10px;padding: 0.15rem 0.15rem;"  onclick="$$.Goto('wdltk');">
+						</div>
+                    </div>
+                </div>
+                <!-- <div class="border-3"></div> -->
+                <!--横广告图-->
+				<div style="padding: 0.4rem 0.55rem;" class="wahts">
+					<div class="transverse-ad wahts">
+					    <ul style="margin: 0rem;padding-left:0rem">
+					        <li style="list-style:none">
+					            <div class="card">
+					                <div class="card-content">
+					                    <div class="card-content-inner ad-padding">
+					                        <div class="news">
+					                            发【优惠券】啦！快找找，有没有你啊~
+					                        </div>
+					                        <div class="card-content clos-30"><img src="../Common/image/btn_dianjilingqu.png" style="width: 2.5rem"></div>
+					                    </div>
+					                </div>
+					            </div>
+					        </li>
+					    </ul>
+					</div>
+				</div>
+                <!-- <div class="border-3"></div> -->
+                <!--左右分广告图-->
+                <div class="card card2 wahts">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <div class="row">
+                                <div class="col-50" style="margin-left: 2%">
+                                    <img src="../Common/image/content_banner_shouchong.png"  onclick="My.Recharge();"/>
+                                </div>
+                                <div class="col-50">
+                                    <div>
+                                        <img src="../Common/image/content_banner_shuaka.png"  onclick="$$.Goto('wdltk');"/>
+                                    </div>
+                                    <div style="padding-top: 0.3rem">
+                                        <img src="../Common/image/content_banner_butie.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-3"></div>
+            </div>
+            <nav class="bar bar-tab">
+                <a class="tab-item external active" href="#" onclick="$$.Goto('index')">
+                    <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_shouye.png" /></span>
+                    <span class="tab-label">首页</span>
+                </a>
+                <a class="tab-item external" href="#" onclick="$$.Goto('dtapi')">
+                    <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_daohang.png" /></span>
+                    <span class="tab-label">导航</span>
+                </a>
+                <a class="tab-item external" href="#" onclick="My.GotoMyCardPage();">
+                    <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_youka.png" /></span>
+                    <span class="tab-label">油卡</span>
+                </a>
+                <a class="tab-item external" href="#" onclick="$$.Goto('wdzh')">
+                    <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_wode.png" /></span>
+                    <span class="tab-label">我的</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            var news = $(".transverse-ad");
+            var scrollTimer;
+			var liCount = news.find("li").length;
+			if(liCount>1){
+				scrollTimer = setInterval(function () {
+					scrollNews(news);
+				}, 3000);
+			}
+            function scrollNews(obj) {
+                var self = $(".transverse-ad").find("ul");
+                var lineHeight = $(".transverse-ad").find("ul li:first-child").height();
+                self.animate({
+                    "marginTop": -lineHeight + "px"
+                }, 500, function () {
+                    self.css({
+                        marginTop: 0
+                    }).find("ul li:first-child").appendTo(self);
+                })
+            }
+				
+        })
+    </script>
+</body>
+</html>

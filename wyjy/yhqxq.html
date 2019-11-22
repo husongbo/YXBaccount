@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>我的优惠券</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script src="../Common/js/jquery-3.1.1.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.mui-segmented-control.mui-segmented-control-inverted~.mui-slider-progress-bar{
+				background: red;
+			}
+			.mui-segmented-control.mui-segmented-control-inverted .mui-control-item.mui-active{
+				color: red;
+			}
+			.code{
+			}
+			#code-ma{
+				width: 200px;
+				height: 200px;
+			}
+			.Couponlist{
+				height: 50px;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				border-bottom: 1px solid rgb(240,240,240);
+			}
+			.Coupon1{
+				margin-left:5%;
+			}
+		</style>
+		<script type="text/javascript">
+			var My = {
+				
+			};
+			// $$.Page_Load = function () {
+			//     $.init();
+			// }
+		</script>
+	</head>
+	<style type="text/css">
+		.midle{margin: 0 15px;background: white;margin-top: 90px;position: relative;padding: 0 15px;padding-bottom: 25px;border-radius: 5px;}
+		.midle img{width: 50px;height: 50px;margin-top: -5px;}
+		.active{background:#f67b5a;color: white!important;}
+		.item{width: 40%;margin-left: 30%;text-align: center;margin-bottom: 10px;color: rgb(220,220,220);}
+		.hidden{display: none;}
+	</style>
+	<body style="background: #f67b5a;">
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color:white;font-size: .8rem;" onclick="history.back(-1)"><span style="margin-left: 5px;">详情</span></a>
+			<span class=" pull-right" style="color:white;font-size: .8rem;display: flex;align-items: center;height: 44px;" onclick="window.location.href='./syfw.html'">使用范围</span>
+		    <h1 id="MainPage_Title" class="title"></h1>
+		</header>
+		<div class="midle" id="Coupon">
+			<div style="display: flex;justify-content: center;">
+				<img src="../Common/image/quan.png" >
+			</div>
+			<div style="text-align: center;margin-top: 8px;font-size: .7rem;" id="text"></div>
+			<div style="border: 1px dashed rgb(240,240,240);margin: 0 15px;margin-top: 15px;"></div>
+			<div style="font-size: .7rem;margin-top: 10px;">开始时间</div>
+			<div style="font-size: .7rem;" id="start"></div>
+			<div style="font-size: .7rem;margin-top: 10px;">结束时间</div>
+			<div style="font-size: .7rem;" id="end"></div>
+			<div style="margin-top: 10px;">
+				<div rel='已过期' class="item">已过期</div>
+				<div rel='已使用' class="item">已使用</div>
+				<div rel='未使用' class="item">未使用</div>
+			</div>
+			
+		</div>
+		<script>
+			$(function(){
+				var info=JSON.parse(localStorage.quaninfo)
+				console.log(info)
+				$('#text').text(info.Explain)
+				$('#start').text(info.发放日期)
+				$('#end').text(info.有效期)
+				$('.item').each(function(){
+					if($(this).attr('rel')==info.礼品状态){
+						$(this).addClass('active')
+					}
+					else{
+						$(this).addClass('hidden')
+					}
+				})	
+			})
+				
+		</script>
+		 <style>
+		    .title {
+		        background-color: #ffffff;
+		        color: #000;
+		    }
+		
+		    .bar-nav ~ .content {
+		        top: 2.3rem;
+		    }
+		
+		    .buttons-tab .button.active {
+		        color: #C8141E;
+		        border-bottom: none;
+		    }
+		
+			.buttons-tab .button.active .i-title {
+				border-bottom: 2px solid #C8141E;
+				padding-bottom: 1px;
+			}
+		
+		    .r-border {
+		        width: 3px;
+		        background-color: #eee;
+		        height: 0.9rem;
+		        margin-top: 0.55rem;
+		    }
+		
+		    .card {
+		        margin: 0;
+		        box-shadow: none;
+		        background: url("../Common/image/lplq/img_lijilingqu_quan.png") no-repeat center top;
+		        background-size: 100% 100%;
+		    }
+			.cards{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_yishiyong_bg.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+			.cardss{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_yishiyong_bgs.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+			.cardsss{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_bg.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+		    .content-padded {
+		        margin: 0.25rem 0;
+		        padding-top: 0.2rem;
+		    }
+		
+		    .row {
+		        margin-left: 0;
+				position: relative;
+		    }
+		
+		    .row-left {
+		        width: 30.7%;
+		        float: left;
+		        text-align: center;
+		        height: 4rem;
+		        line-height: 4rem;
+		        color: #fff;
+		    }
+		
+		    .row-right {
+		        width: 69.3%;
+		        margin-left: 30%;
+		        padding-left: 1rem;
+		    }
+		
+		    .row-price {
+		        font-size: 1.5rem;
+		        font-weight: 600;
+		    }
+		    .fh {
+		        font-weight: 600;
+		    }
+		    .card {
+		        font-size: 0.6rem;
+		    }
+		
+		    .lp-title {
+				padding-top: 0.2rem;
+		        /* padding: 0.3rem 0; */
+		        font-size: 0.6rem;
+		        font-weight: 600;
+		        color:#333;
+		    }
+		    .title-yxq {
+		        width: 100%;
+		        float: left;
+		        color:#666;
+		    }
+		    .lp-bz {
+		        bottom: 0.15rem;
+		        position: absolute;
+		        color: #999;
+				display: flex;
+				justify-content: space-between;
+		    }
+		
+		    
+		
+		    .ljlq {
+		        width: 30%;
+		        float: left;
+		        padding-top: 1.6rem;
+		    }
+		
+		        .ljlq img {
+		            width: 80%;
+		        }
+		
+		    @font-face {
+		        font-family: 'iconfont'; /* project id 705790 */
+		        src: url('//at.alicdn.com/t/font_705790_6ijubsornlw.eot');
+		        src: url('//at.alicdn.com/t/font_705790_6ijubsornlw.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.woff') format('woff'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.ttf') format('truetype'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.svg#iconfont') format('svg');
+		    }
+		  .iconfont {
+		            font-family: "iconfont" !important;
+		            font-size: 16px;
+		            font-style: normal;
+		            -webkit-font-smoothing: antialiased;
+		            -moz-osx-font-smoothing: grayscale;
+		        }
+		    .icon-wenhao:before {
+		        content: "\e725";
+		        color: #000;
+		        font-size: 0.8rem;
+		    }
+		    .shuoming-close {
+		        width:2.2rem;
+		        float:right;
+		        padding-top:0.6rem;
+		    }
+		    .shuoming-close img {
+		        width:0.9rem;
+		    }
+		 
+		</style>
+	</body>
+
+</html>

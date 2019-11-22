@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>帮助反馈</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript">
+		$$.Page_Load = function(){
+			$.init();
+		}
+	</script>
+	<style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+      
+		.Color_B1 {
+			background-color:#f57c59;
+		}
+		.list-block.media-list .item-title{
+			position: relative;
+			padding-left: 1.45rem;
+			font-weight: bold;
+			font-size: 0.8rem;
+		}
+		.list-block.media-list .item-title img{
+			width: 1.2rem;
+			height: 1.2rem;
+			position: absolute;
+			left: 0px;
+			top:0.2rem;
+		}
+		.sui-bottom-text {
+			color: #666666;
+			margin: 0;
+			padding: 0.4rem 0.6rem;
+			margin-bottom: 1rem;
+		}
+        .list-block ul:before {
+            background-color: rgba(0,0,0,0);
+        }
+        .list-block .item-content {
+            line-height:1.8rem;
+        }
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">帮助反馈</h1>
+            </header>
+
+            <div id="PageContent" class="content">
+            	<div class="list-block media-list" style="margin-top: 0rem;margin-bottom: 0.5rem;">
+            		<ul>
+            			<li>
+            				<a class="item-link item-content" onclick="$$.Goto('help/quancun')">
+            					<div class="item-inner">
+            						<div class="item-title-row">
+            							<div class="item-title">
+        									<img src="../Common/image/bzfk/nav_icon_quancun.png"/>
+            								<span>什么是圈存</span>
+            							</div>
+            							<div class="item-after"></div>
+            						</div>
+            					</div>
+            				</a>
+            			</li>
+            			<li class="card-sales">
+            				<a class="item-link item-content" onclick="$$.Goto('help/youhuiquan')">
+            					<div class="item-inner">
+            						<div class="item-title-row">
+            							<div class="item-title">
+        									<img src="../Common/image/bzfk/nav_icon_guize.png"/>
+            								<span>优惠券使用规则</span>
+            							</div>
+            							<div class="item-after"></div>
+            						</div>
+            					</div>
+            				</a>
+            			</li>
+            			<li class="card-sales">
+            				<a class="item-link item-content" onclick="$$.Goto('help/fapiao')">
+            					<div class="item-inner">
+            						<div class="item-title-row">
+            							<div class="item-title">
+        									<img src="../Common/image/bzfk/nav_icon_shuoming.png"/>
+            								<span>发票说明</span>
+            							</div>
+            							<div class="item-after"></div>
+            						</div>
+            					</div>
+            				</a>
+            			</li>
+            		</ul>
+            	</div>
+            </div>
+        </div>        
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>商品管理</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/iconfont.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<script src="../Common/js/layer_mobile/layer.js"></script>
+		<style type="text/css">
+			.layui-m-layercont {
+				padding: 30px;
+			}
+			/*商品操作*/
+			
+			.operate {
+				width: 40%;
+				text-align: right;
+			}
+			
+			.operate .iconfont {
+				font-size: 20px;
+				margin: 0 6%;
+			}
+			
+			.card-header {
+				padding: 0 0.5rem;
+			}
+			
+			.card-content-inner {
+				padding: 0.5rem;
+			}
+			
+			p {
+				margin: 0.5rem 0;
+			}
+			
+			.img {
+				height: 8.5rem;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<div class="card" id="{{商品标识}}">
+				<div class="card-header">
+					<span>商品操作</span>
+					<div class="operate">
+						<span data-id="{{商品标识}}" class="edit iconfont icon-icon"></span>
+						<span data-id="{{商品标识}}" class="delete iconfont icon-laji"></span>
+					</div>
+				</div>
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div class="img" data-id="{{商品标识}}">
+							<img src="{{商品图片}}" alt="">
+						</div>
+						<div>
+							<span>{{商品名称}}</span>
+							<span class="pull-right" style="color: #e4393c">￥{{销售价格}}</span>
+						</div>
+						<div class="color-gray">{{商品描述}}</div>
+					</div>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<a class="icon iconfont icon-fabu3 pull-right" id="cjsp"></a>
+					<h1 class="title">商品管理</h1>
+				</header>
+				<div class="content">
+					<!--搜索框-->
+					<div class="searchbar row" style="background-color: #FFFFFF;height: 2.4rem">
+						<div class="search-input col-75" style="margin-left: 6.5%">
+							<label class="icon icon-search" for="search" style="color: #e4393c"></label>
+							<input type="search" id='search' placeholder='输入关键字...' style="border-color: #e4393c;height: 1.6rem" />
+						</div>
+						<a class="button button-fill button-primary col-20" style="margin-top: 0.7%;height: 1.35rem;line-height: 1.35rem;">搜索</a>
+					</div>
+					<div id="list" hidden="hidden"></div>
+					<div class="null" style="margin-top: 3rem;">
+						<img src="../Common/image/null.png" alt="" />
+						<div>还没有创建商品呢，愁啥呀...</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			function plusReady() {
+				
+				// 商品列表
+				var shID = "{{CurrentMerchantID}}";
+				function queryList() {
+					var proc = "商户商品列表 " + shID;
+					var rst = $$.JSONDB.Query(proc).Table;
+					if(rst.length > 0) {
+						for(var i = 0; i < rst.length; i++) {
+							rst[i].销售价格 = rst[i].销售价格.toFixed(2);
+							var arr = rst[i].商品图片.split(",");
+							rst[i].商品图片 = decodeURI(atob(arr[0]));
+						}
+						$("#list").text("");
+						$$.Fill("#list", rst);
+						$("#list").show();
+					} else {
+						$(".null").show();
+					}
+				}
+
+				queryList();
+
+				// 创建商品
+				$("#cjsp").click(function() {
+					plus.webview.create('cjsp.html').show();
+				});
+
+				// 商品编辑
+				$("#list").on("click", ".edit", function() {
+					var spID = $(this).attr("data-id");
+					plus.webview.create("cjsp.html?spID=" + spID).show();
+				});
+
+				// 商品删除
+				$("#list").on("click", ".delete", function() {
+					var spID = $(this).attr("data-id");
+					layer.open({
+						content: '您确定要删除该商品吗？',
+						btn: ['确定', '取消'],
+						yes: function(index) {
+							var data = {
+								"商品标识": spID,
+								"操作用户": "1"
+							}
+							var tmpl = "{{商品标识}},'{{操作用户}}'";
+							var params = tmpl.t(data);
+							var proc = "商品删除 " + params;
+							var rst = $$.JSONDB.Query(proc).Table;
+							layer.close(index);
+
+							$("#" + spID).remove();
+							layer.open({
+								content: "删除成功",
+								skin: 'msg',
+								time: 2
+							});
+							queryList();
+						}
+					});
+				});
+
+				//商品详情
+				$(".img").click(function() {
+					var spID = $(this).attr("data-id");
+					plus.webview.create("details.html?spID=" + spID).show();
+				})
+			}
+			
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

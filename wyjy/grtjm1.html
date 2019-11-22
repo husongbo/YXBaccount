@@ -1,0 +1,578 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>个人推荐码</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			*{
+				font-family: "宋体";
+			}
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.code{
+			}
+			#code-ma{
+				width: 200px;
+				height: 200px;
+			}
+			.Hidden{
+				display: none!important;
+			}
+		</style>
+	</head>
+	<body>
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">个人推荐码</h1>
+			<span class="icon pull-right" style="color: #000;font-size: .85rem;" onclick="MyOrder()">推荐订单</span>
+		</header>
+		<!--生成二维码-->
+		<div class="page" id="code" style="margin-top: 40px;" >
+		    <div class="content Codes Hidden">
+		        <div style="background-color: #FFFFFF;text-align:center;" class="code-title">
+		            <div id="" style="display: flex;justify-content: center;margin-top: 30%;">
+		            	<div id="qrcodeCanvas"></div>
+		            </div>
+		        </div>
+		        <div style="padding: 0.3rem 0.75rem;font-size: 0.7rem;text-align: center;margin-top: 20px;">
+		            <span style="color: #ff8200;">请扫描此二维码</span>
+		        </div>
+		    </div>
+			<!-- 获取推荐码 -->
+			<div class="Hidden CodeBtn" style="display: flex;align-items: center;justify-content: center;height: calc(100vh - 44px);">
+				<div onclick="Refresh()" style="width: 80%;background: #ff8200;height: 40px;line-height: 40px;text-align: center;color: white;border-radius: 5px;">点击获取个人推荐码</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		var proc = "查询基本信息 " + Bill.userId;
+		var rst = $$.JSONDB.Query(proc);
+		var data = rst.Table[0];
+		var id=data.用户标识;
+		var items=JSON.parse(localStorage.getItem('item'))
+		var itenlist=JSON.parse(localStorage.getItem('itemlist'))
+		var HDid=items.PM0006_ID
+		alert(JSON.stringify(itenlist))
+		$.ajax({
+			type: "post",
+			url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"ExistsInvationCode",user_id:"${id}"}`,
+	data:{},
+	async:false,
+	success: function (res) {
+	if(JSON.parse(res).result==0&&JSON.parse(res).message=='邀请码不存在'){
+					$.ajax({
+						type: "post",
+						url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetInvationCode",user_id:"${id}",promote_id:"${HDid}"}`,
+						data:{},
+						async:false,
+						success: function (res) {
+							mui.toast('正在获取邀请码，请稍后...');
+							setTimeout(()=>{
+								location.reload()
+							},1000)
+						},
+						error:function(err){
+							console.log(err)
+						}
+					});
+					return
+				}
+				if(JSON.parse(JSON.parse(res).data)==undefined){
+					mui.toast('没有获取到个人推荐码数据');
+					return
+				}
+	
+			var Flag=false
+				JSON.parse(JSON.parse(res).data).forEach((item)=>{
+	//alert(item)				if(item.PM0004_PROMOTE_ID==HDid){
+						Flag=true
+						if(HDid==itenlist[0].PM0006_ID){    alert('aa')
+							var location="http://smstest.youxinbao.com.cn/App/wyjy/gmjyqs.html?promid="+item.PM0004_INVATION_CODE
+						}
+						else{   alert('bb')
+							var location="http://smstest.youxinbao.com.cn/App/wyjy/hdgmjyq.html?promid="+item.PM0004_INVATION_CODE
+						}
+						console.log(location)
+						var qrcode = new QRCode("qrcodeCanvas", {
+						    text:location,
+							render: "div",
+						    width: 200,
+						    height: 200,
+						    colorDark: '#000000',
+						    colorLight: '#ffffff',
+						    correctLevel: QRCode.CorrectLevel.H
+						});
+						$(".Codes").removeClass('Hidden')
+						$(".CodeBtn").addClass('Hidden')
+					}
+				})
+				if(!Flag){
+					$(".Codes").addClass('Hidden')
+					$(".CodeBtn").removeClass('Hidden')
+				}
+			},
+			error:function(err){
+				console.log(err)
+			}
+		});
+		function Refresh(){
+			location.reload()
+		}
+		function MyOrder(){
+			window.location.href='./tjdd.html'
+		}
+		function getDate(type) {
+			const date = new Date();
+			let year = date.getFullYear();
+			let month = date.getMonth() + 1;
+			let day = date.getDate();
+			let hours=date.getHours();
+			let minutes=date.getMinutes()
+			let secounds=date.getSeconds()
+			if (type === 'start') {
+				year = year - 60;
+			} else if (type === 'end') {
+				year = year + 2;
+			}
+			month = month > 9 ? month : '0' + month;;
+			day = day > 9 ? day : '0' + day;
+			hours = hours > 9 ? hours : '0' + hours;;
+			minutes = minutes > 9 ? minutes : '0' + minutes;
+			secounds = secounds > 9 ? secounds : '0' + secounds;;
+			return `${year}-${month}-${day} ${hours}:${minutes}:${secounds}`;
+		}
+	</script>
+	<style>
+	    .page, .page-group {
+	        background: #fff;
+	    }
+	
+	    .title {
+	        background: #fff;
+	    }
+	
+	    input[type='number'] {
+	        border: none;
+	        width: 90%;
+	        box-sizing: border-box;
+	        padding-left: 5%;
+	        font-size: 0.6rem;
+	        padding-bottom: 0.3rem;
+	    }
+	
+	    .content-block-title {
+	        margin-top: 0.5rem;
+	        font-weight: bold;
+	    }
+	
+	    .checkbox-money {
+	        height: 4rem;
+	        line-height: 4rem;
+	    }
+	
+	    label.label-checkbox input[type="checkbox"]:checked + .item-media i.icon-form-checkbox {
+	        background-color: #ff8200;
+	    }
+	
+	    .yh-yhjts img {
+	        height: 0.7rem;
+	    }
+	
+	    .yh-yhjts {
+	        font-size: 0.6rem;
+	        height: 0;
+	        min-height: 0rem;
+	        padding-left: 0.3rem;
+	    }
+	
+	    .row {
+	        margin: 0;
+	    }
+	
+	    .row-left {
+	        width: 30.7%;
+	        float: left;
+	        text-align: center;
+	        height: 4rem;
+	        line-height: 4rem;
+	        color: #fff;
+	    }
+	
+	    .row-right {
+	        width: 69.3%;
+	        margin-left: 30%;
+	        padding-left: 1rem;
+	    }
+	
+	    .row-price {
+	        font-size: 1rem;
+	        font-family: DIN-Bold;
+	    }
+	
+	    .ljlq {
+	        width: 25%;
+	        float: left;
+	        padding-top: 1.6rem;
+	    }
+	
+	        .ljlq img {
+	            width: 80%;
+	        }
+	
+	    .lp-yxq {
+	        font-size: 0.6rem;
+	    }
+	
+	    .content-padded {
+	        margin: 0 auto;
+	    }
+	
+	    .lp-title {
+	        padding: 0.3rem 0;
+	        font-size: 0.65rem;
+	        font-weight: 600;
+	        color: #333;
+	    }
+	
+	    .title-yxq {
+	        width: 100%;
+	        float: left;
+	        color: #666;
+	    }
+	
+	    .lp-bz {
+	        bottom: 0.15rem;
+	        position: absolute;
+	        color: #999;
+	        font-size: 0.6rem;
+	    }
+	
+	    .content-padded {
+	        padding-top: 0.2rem;
+	        width: 100%;
+	    }
+	
+	    #couponList .card {
+	        margin: 0;
+	        box-shadow: none;
+	        background: url("../Common/image/wycz/img_diyongquan.png") no-repeat left top;
+	        background-size: 100% 100%;
+	        width: 85%;
+	        float: left;
+	        height: 4.3rem;
+	    }
+	
+	    .color-gray {
+	        color: #e4393c;
+	    }
+	
+	    yhq-list {
+	        padding-bottom: 0.5rem;
+	    }
+	
+	    .card-footer {
+	        margin-top: 1rem;
+	        padding: 0;
+	    }
+	
+	    #cz,#ok{
+	        background-color: #ff8200;
+	        color: #FFFFFF;
+	        font-weight: bold;
+	        -- border-radius:0.3rem;
+	    }
+	
+	    .js-button {
+	        background-color: rgba(0,0,0,0);
+	    }
+	
+	    .bar-tab:before {
+	        background-color: rgba(0,0,0,0);
+	    }
+	
+	    .content-block-title {
+	        margin-top: 0.5rem;
+	        font-weight: bold;
+	    }
+	
+	    .card-header:after {
+	        background-color: rgba(0, 0, 0, 0);
+	    }
+	
+	    label.label-checkbox i.icon-form-checkbox {
+	        border: 1px solid #ff8200;
+	    }
+	
+	    .checkbox-div {
+	        height: 4.3rem;
+	        line-height: 4.3rem;
+	    }
+	
+	    .icon-form-checkbox {
+	        left: 5%;
+	    }
+	
+	    .price {
+	        font-size: 1rem;
+	        color: #e4393c;
+	        margin-bottom: 1%;
+	        margin-top: -3%;
+	        font-weight: bold;
+	    }
+	
+	    .list-block {
+	        margin: 0.75rem 0;
+	    }
+	
+	    .shuoming-box {
+	        background: url("../Common/image/gmjyq/xflf.png") no-repeat center top;
+	        background-size: 100% auto;
+	        text-align: center;
+	        display: none;
+	        position: absolute;
+	        top: 14%;
+	        z-index: 999;
+	        border-radius: 0.3rem;
+	        width: 100%;
+	    }
+	
+	    .shuoming-content {
+	        padding: 15% 6% 0 6%;
+	        color: #FFFFFF;
+	        font-size: 0.8rem;
+	    }
+	
+	        .shuoming-content div {
+	            color: #ffffff;
+	            font-size: 1.2rem;
+	            padding: 1rem 0;
+	        }
+	
+	    .quxiao {
+	        background-color: rgba(0, 0, 0, 0);
+	        height: 12%;
+	        width: 36%;
+	        position: absolute;
+	        bottom: 14%;
+	        left: 14%;
+	    }
+	
+	    .quding {
+	        background-color: rgba(0, 0, 0, 0);
+	        height: 12%;
+	        width: 36%;
+	        position: absolute;
+	        bottom: 14%;
+	        right: 14%;
+	    }
+	
+	
+	    .huojiang-box {
+	        background: url("../Common/image/gmjyq/huojiang.png") no-repeat center top;
+	        background-size: 100% auto;
+	        text-align: center;
+	        display: none;
+	        width: 100%;
+	        position: absolute;
+	        top: 14%;
+	        z-index: 999;
+	        border-radius: 0.3rem;
+	    }
+	
+	    .huojiang-content {
+	        padding: 5% 6% 0 6%;
+	        color: #FFFFFF;
+	        font-size: 2rem;
+	        padding-top: 46%;
+	        padding-right: 18%;
+	    }
+	
+	        .huojiang-content span {
+	            color: #ffffff;
+	            font-size: 1rem;
+	            padding: 1rem 0;
+	        }
+	
+	    .huojiang-guanbi {
+	        background-color: rgba(0, 0, 0, 0);
+	        height: 2rem;
+	        width: 2rem;
+	        position: absolute;
+	        bottom: 0.1rem;
+	        right: 44%;
+	    }
+	
+	
+	    .weihuojiang-box {
+	        background: url("../Common/image/gmjyq/weihuojiang.png") no-repeat center top;
+	        background-size: 100% auto;
+	        text-align: center;
+	        display: none;
+	        width: 100%;
+	        position: absolute;
+	        top: 14%;
+	        z-index: 999;
+	        border-radius: 0.3rem;
+	    }
+	
+	    .weihuojiang-guanbi {
+	        background-color: rgba(0, 0, 0, 0);
+	        height: 2rem;
+	        width: 2rem;
+	        position: absolute;
+	        bottom: 6%;
+	        right: 44%;
+	    }
+		.cengs{
+			width: 100%;
+			height: 100vh;
+			background: rgb(0,0,0,0.5);
+			position: fixed;
+			top: 0;
+			left: 0;
+			z-index: 90;
+			display: none;
+		}
+		.price-bom{
+			width: 100%;
+			/* height: 100px; */
+			background: white;
+			position: absolute;
+			bottom:-50%;
+			left: 0;
+			z-index: 999;
+			/* display: none; */
+	
+		}
+		.price-boms{
+			width: 100%;
+			/* height: 100px; */
+			background: white;
+			position: absolute;
+			bottom:0;
+			left:0;
+			z-index: 999;
+			display: none;
+		}
+		.get{
+			animation: .2s get linear;
+			animation-fill-mode:forwards;
+		}
+		.put{
+			animation: .2s put linear;
+			animation-fill-mode:forwards;
+		}
+		.left{
+			animation: .5s leftss linear;
+			animation-fill-mode:forwards;
+		}
+		.lefts{
+			animation: .5s lefts linear;
+			animation-fill-mode:forwards;
+		}
+		.right{
+			animation: .5s right linear;
+			animation-fill-mode:forwards;
+		}
+		.rights{
+			animation: .5s rights linear;
+			animation-fill-mode:forwards;
+		}
+		.price-bom-top{
+			width: 100%;
+			height: 30px;
+			position: relative;
+		}
+		.price-bom-mid,.price-bom-mids{
+			margin-top: 5%;
+			width: 100%;
+			height: 40px;
+			line-height: 40px;
+		}
+		.fangshi{
+			float: left;
+			font-size: 0.7rem;
+			color: #C7C7CC;
+			padding-left: 10px;
+		}
+		.imges{
+			float: right;
+		}
+		.dianjis1:active{
+			background:red;
+		}
+		.price-bom-mid:active{
+			background:#ccc;
+		}
+		@keyframes get{
+			from{
+				bottom: -50%;
+			}
+			to{
+				bottom: 0px;
+			}
+		}
+		@keyframes put{
+			from{
+				bottom: 0px;
+			}
+			to{
+				bottom: -50%;
+			}
+		}
+		@keyframes leftss{
+			from{
+				left: 0;
+			}
+			to{
+				left: -100%;
+			}
+		}
+		@keyframes lefts{
+			from{
+				left: -100%;
+			}
+			to{
+				left: 0;
+			}
+		}
+		@keyframes right{
+			from{
+				left: 100%;
+			}
+			to{
+				left: 0%;
+			}
+		}
+		@keyframes rights{
+			from{
+				left: 0%;
+			}
+			to{
+				left: 100%;
+			}
+		}
+		.imgb{
+			display: none;
+		}
+	</style>
+</html>

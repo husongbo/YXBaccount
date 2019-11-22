@@ -1,0 +1,1 @@
+﻿<%@ WebHandler Language="C#" CodeBehind="InvoiceApplyNotify.ashx.cs" Class="EWC.App.Common.CSharp.WeChat.InvoiceApplyNotify" %>

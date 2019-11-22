@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>我的开票记录</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+        .card-content-inner {
+            padding: 0.4rem 0.75rem;
+        }
+        .col-70 {
+            width: 66%;
+            margin-left:4%;
+        }
+        .card {
+            background-color: #fff;
+            /*margin: 0;*/
+            margin-bottom: 0.3rem;
+            border-radius:0.3rem;
+        }
+
+        .card-header {
+            font-weight: normal;
+            font-size: 0.7rem;
+        }
+        .grid-demo {
+            width:100%;
+        }
+        .money-box {
+            color: #b1b1b1;
+            font-size: 0.55rem;
+        }
+        .trade-name {
+            font-size:0.8rem;
+        }
+    </style>
+    <script id="jyjl_Template" type="text/template">
+        <div class="card">
+            <div class="card-header">
+                <div class="grid-demo">
+                    <div class="row">
+                        <div class="col-70">{{购方名称}}</div>
+                        <div class="col-30">{{申请开票时间}}</div>
+                    </div>
+                </div>
+            </div>
+                <div class="card-content">
+                    <div class="card-content-inner">
+                        <span class="trade-name">{{商品名称}}</span>
+                        <div class="money-box">金额：  <span class="money">{{金额}}</span></div>
+                    </div>
+                </div>
+                <div class="card-footer">邮箱：  {{电子邮箱}}</div>
+            </div>
+    </script>
+</head>
+
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current" style="background:#eee;">
+            <div class="diy-model"></div>
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">我的开票记录</h1>
+            </header>
+
+            <div id="PageContent" class="content">
+                <div id="jyjl">
+                  
+                </div>
+              
+            </div>
+        </div>
+
+    </div>
+</body>
+<script>
+    $$.Page_Load = function () {
+        $.init();
+        var querySql = '查询开票记录 ' + Bill.userId;
+        var rst = $$.JSONDB.Query(querySql).Table;
+        $$.Fill("#jyjl", rst);
+    }
+</script>
+
+</html>

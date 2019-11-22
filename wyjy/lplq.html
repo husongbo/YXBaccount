@@ -1,0 +1,476 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>礼品领取</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+
+
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+
+    <script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+    <style>
+        .shuoming-box {
+            background: url("../Common/image/lplq/img_tankuang_fuli.png") no-repeat center top;
+            background-size: 100%;
+            min-height: 5rem;
+            text-align: center;
+            display: none;
+            width: 90%;
+            position: absolute;
+            top: 30%;
+            left: 5%;
+            z-index: 999;
+            border-radius:0.3rem;
+        }
+
+        .shuoming-content {
+            padding-top: 55%;
+            font-size: 0.6rem;
+        }
+
+        .shuoming-button img {
+            padding-top: 1rem;
+            width: 75%;
+        }
+    </style>
+    
+    <script type="text/javascript">
+        var My = {
+
+        };
+        $$.Page_Load = function () {
+            $.init();
+           
+            My.GetGiftList();
+            $(".calendar").click(function () {
+                $(".shuoming-box").show();
+                $('#cover').css('display', 'block'); //显示遮罩层
+                $('#cover').css('height', document.body.clientHeight + 'px'); 
+                
+            });
+
+            $(".close-shuoming").click(function () {
+                $('.shuoming-box').hide();  //隐藏弹窗
+                $('#cover').css('display', 'none');   //显示遮罩层
+            })
+        }
+
+        My.GetGiftList = function () {
+            $$.Refill("#Unclaimed", My.GetUnclaimedGift());
+            $$.Refill("#Unused", My.GetUnusedGift());
+            $$.Refill("#Used", My.GetUsedGift());
+        }
+
+		My.GetUnclaimedGift = function() {
+			var sql = "SELECT * FROM LPGL_礼品展示 WHERE M0001_ID = " +  Bill.userId + " AND 礼品状态 = N'未领取' ORDER BY 有效期 DESC, 发放日期 DESC";
+			var rst = $$.JSONDB.Query(sql);
+			return rst.Table;
+		}
+		
+		My.GetUnusedGift = function() {
+			var sql = "SELECT * FROM LPGL_礼品展示 WHERE M0001_ID = " +  Bill.userId + " AND 礼品状态 = N'未使用' ORDER BY 有效期 DESC, 领取日期";
+			var rst = $$.JSONDB.Query(sql);
+			return rst.Table;
+		}
+		
+		My.GetUsedGift = function() {
+			var sql = "SELECT * FROM LPGL_礼品展示 WHERE M0001_ID = " +  Bill.userId + " AND 礼品状态 = N'已使用' ORDER BY 使用日期 DESC";
+			var rst = $$.JSONDB.Query(sql);
+            return rst.Table;
+        }
+
+        My.ReceiveGift = function (giftID) {
+            if (!giftID) {
+                giftID = My.giftID;
+            }
+
+            var sql = "领取礼品 " + giftID;
+            var rst = $$.JSONDB.Query(sql);
+            var msg = "优惠券无效";
+            if (rst.Table[0].RESULT == 0) {
+                msg = rst.Table[0].MESSAGE;
+            }
+
+            My.GetGiftList();
+            layer.open({
+                content: msg
+                , skin: 'msg'
+                , time: 2 //2秒后自动关闭
+            });
+        }
+
+        My.ReceiveQRGift = function (giftID) {
+            if (!giftID) {
+                giftID = My.giftID;
+            }
+
+            var url = "/App/Common/CSharp/GiftQRCode.ashx";
+            var data = {};
+            data.giftId = giftID;
+            data.URL = window.location.href;
+            var rst = null;
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: function (result) {
+                    if (result == 'success') {
+                        layer.open({
+                            content: '领取成功'
+                            , skin: 'msg'
+                            , time: 2 //2秒后自动关闭
+                            , end: function () {
+                                My.GetGiftList();
+                                My.ShowTab("Unused");
+                            }
+                        });
+                    } else {
+                        layer.open({
+                            content: '领取失败'
+                            , skin: 'msg'
+                            , time: 2 //2秒后自动关闭
+                        });
+                    }
+                },
+                async: false
+            });
+        }
+
+        My.UseQRGift = function (giftID) {
+            if (!giftID) {
+                giftID = My.giftID;
+            }
+            var sql = "SELECT 二维码, 礼品价格 FROM LPGL_礼品展示 WHERE 礼品标识 = " + giftID;
+            var rst = $$.JSONDB.Query(sql);
+            var qrCode = rst.Table[0].二维码;
+            var price = rst.Table[0].礼品价格;
+            My.ShowQRCode(qrCode, price);
+        }
+
+        My.ShowTab = function (tabId) {
+            $(".buttons-tab .tab-link").removeClass("active");
+            $(".tabs .tab").removeClass("active");
+            $("[href='#" + tabId + "']").addClass("active");
+            $("#" + tabId).addClass("active");
+        }
+
+        My.AsyncReceiveGift = function (giftID, giftNote) {
+            My.giftID = giftID;
+
+            var rst = Bill.GetUserCardInfo();
+            rst = 0;
+            if (giftNote != '二维码加油补贴' || (rst && rst.Table.length != 0)) {
+                $$.AsyncCall(My.ReceiveGift);
+            } else {
+                // 兑换加油二维码
+                // $$.AsyncCall(My.ReceiveQRGift);
+                // 领取优惠券
+                layer.open({
+                    content: '优惠券将在下次消费时抵扣'
+                    , skin: 'msg'
+                    , time: 2 //2秒后自动关闭
+                });
+            }
+        }
+
+        My.AsyncUseGift = function (giftID, giftNote) {
+            My.giftID = giftID;
+
+            var rst = Bill.GetUserCardInfo();
+            rst = 0;
+            if (giftNote == '二维码加油补贴') {
+                // 兑换加油二维码
+                // $$.AsyncCall(My.UseQRGift);
+            }
+        }
+
+        My.ShowQRCode = function (qrCode, price) {
+            var code = $("#QRCode_Template").html().t({ 'AMOUNT': price });
+            layer.open({
+                type: 1
+                , content: code
+                , anim: 'up'
+                , style: 'position:fixed; bottom:0; left:0; width: 80%; height: 60%; padding:0 10%; padding-bottom: 30px;'
+                , end: function () {
+                    My.GetGiftList();
+                }
+            });
+
+            // 生成二维码
+            new QRCode('qrcodeCanvas', {
+                text: qrCode,
+                width: "200", //二维码的宽度
+                height: "200", //二维码的高度
+                foreground: "#000000", //二维码的前景色
+            });
+        }
+    </script>
+    <style>
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .bar-nav ~ .content {
+            top: 2.3rem;
+        }
+
+        .buttons-tab .button.active {
+            color: #C8141E;
+            border-bottom: none;
+        }
+
+            .buttons-tab .button.active .i-title {
+                border-bottom: 2px solid #C8141E;
+                padding-bottom: 1px;
+            }
+
+        .r-border {
+            width: 3px;
+            background-color: #eee;
+            height: 0.9rem;
+            margin-top: 0.55rem;
+        }
+
+        #Unclaimed .card {
+            margin: 0;
+            box-shadow: none;
+            background: url("../Common/image/lplq/img_lijilingqu_quan.png") no-repeat center top;
+            background-size: 100% 100%;
+        }
+
+        #Unused .card {
+            margin: 0;
+            box-shadow: none;
+            background: url("../Common/image/lplq/img_lijilingqu_quan.png") no-repeat center top;
+            background-size: 100% 100%;
+        }
+
+        #Used .card {
+            margin: 0;
+            box-shadow: none;
+            background: url("../Common/image/lplq/img_yishiyong_bg.png") no-repeat center top;
+            background-size: 100% 100%;
+        }
+
+        .content-padded {
+            margin: 0.25rem 0;
+            padding-top: 0.2rem;
+        }
+
+        .row {
+            margin-left: 0;
+        }
+
+        .row-left {
+            width: 30.7%;
+            float: left;
+            text-align: center;
+            height: 4rem;
+            line-height: 4rem;
+            color: #fff;
+        }
+
+        .row-right {
+            width: 69.3%;
+            margin-left: 30%;
+            padding-left: 1rem;
+        }
+
+        .row-price {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .fh {
+            font-weight: 600;
+        }
+        .card {
+            font-size: 0.6rem;
+        }
+
+        .lp-title {
+            padding: 0.3rem 0;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color:#333;
+        }
+        .title-yxq {
+            width: 70%;
+            float: left;
+            color:#666;
+        }
+        .lp-bz {
+            bottom: 0.15rem;
+            position: absolute;
+            color: #999;
+        }
+
+        
+
+        .ljlq {
+            width: 30%;
+            float: left;
+            padding-top: 1.6rem;
+        }
+
+            .ljlq img {
+                width: 80%;
+            }
+
+        @font-face {
+            font-family: 'iconfont'; /* project id 705790 */
+            src: url('//at.alicdn.com/t/font_705790_6ijubsornlw.eot');
+            src: url('//at.alicdn.com/t/font_705790_6ijubsornlw.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.woff') format('woff'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.ttf') format('truetype'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.svg#iconfont') format('svg');
+        }
+      .iconfont {
+                font-family: "iconfont" !important;
+                font-size: 16px;
+                font-style: normal;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        .icon-wenhao:before {
+            content: "\e725";
+            color: #000;
+            font-size: 0.8rem;
+        }
+        .shuoming-close {
+            width:2.2rem;
+            float:right;
+            padding-top:0.6rem;
+        }
+        .shuoming-close img {
+            width:0.9rem;
+        }
+     
+    </style>
+    <script id="Unclaimed_Template" type="text/template">
+        <div class="card">
+            <div class="content-padded grid-demo">
+                <div class="row">
+                    <div class="row-left">
+                        <span class="fh">￥</span><span class="row-price">{{礼品价格}}</span>
+                    </div>
+                    <div class="row-right">
+                        <div class="title-yxq">
+                            <div class="lp-title">油信宝加油券</div>
+                            <div class="lp-yxq">有效期：{{有效期}}</div>
+                        </div>
+                        <div class="ljlq">
+                            <img src="../Common/image/lplq/img_lingqu.png" alt="立即领取" onclick="My.AsyncReceiveGift('{{礼品标识}}', '{{礼品说明}}')" />
+                        </div>
+                        <div class="lp-bz">支付时抵扣</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script id="Unused_Template" type="text/template">
+        <div class="card">
+            <div class="content-padded grid-demo">
+                <div class="row">
+                    <div class="row-left">
+                        <span class="fh">￥</span><span class="row-price">{{礼品价格}}</span>
+                    </div>
+                    <div class="row-right">
+                        <div class="title-yxq">
+                            <div class="lp-title">油信宝加油券</div>
+                            <div class="lp-yxq">有效期：{{有效期}}</div>
+                        </div>
+                        <div class="ljlq">
+                            <img src="../Common/image/lplq/img_shiyong.png" alt="立即使用" onclick="My.AsyncUseGift('{{礼品标识}}', '{{礼品说明}}')" />
+                        </div>
+                        <div class="lp-bz">支付时抵扣</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script id="Used_Template" type="text/template">
+        <div class="card">
+            <div class="content-padded grid-demo">
+                <div class="row">
+                    <div class="row-left">
+                        <span class="fh">￥</span><span class="row-price">{{礼品价格}}</span>
+                    </div>
+                    <div class="row-right">
+                        <div class="title-yxq">
+                            <div class="lp-title">油信宝加油券</div>
+                            <div class="lp-yxq">有效期：{{有效期}}</div>
+                        </div>
+                        <div class="lp-bz">支付时抵扣</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+</head>
+<body>
+
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+
+            <!-- 遮罩层 -->
+            <div id="cover" style="background: #000; position: absolute; left: 0px; top: 0px; width: 100%; filter: alpha(opacity=30); opacity: 0.7; display: none; z-index: 102 ">
+            </div>
+            <!-- 弹窗 -->
+            <div class="shuoming-box">
+                <div class="shuoming-close close-shuoming"> <img src="../Common/image/lplq/btn_guanbi.png"/> </div>
+               <div class="shuoming-content">
+                   中石油加油站持卡加油后，5-10日内领取优惠券。
+               </div>
+               <div class="shuoming-button close-shuoming">
+                   <img src="../Common/image/lplq/not_queding.png" />
+               </div>  
+            </div>
+            
+
+            <header id="MainPageHeader" class="bar bar-nav Color_B1">
+                <a class="icon icon-left  pull-left" style="color: #000;" onclick="$.router.back();"></a>
+                <a class="calendar pull-right icon" id="MainPage_Title"> <i class="iconfont icon-wenhao"></i></a>
+                <h1 id="MainPage_Title" class="title">优惠券</h1>
+
+            </header>
+
+            <div id="PageContent" class="content">
+                <div class="buttons-tab">
+                    <a href="#Unclaimed" class="tab-link active button"><span class="i-title">未领取</span><i></i></a>
+                    <div class="r-border"></div>
+                    <a href="#Unused" class="tab-link button"><span class="i-title">未使用</span><i></i></a>
+                    <div class="r-border"></div>
+                    <a href="#Used" class="tab-link button"><span class="i-title">已使用</span><i></i></a>
+                </div>
+                <div class="content-block" style="margin-top: 0rem;">
+                    <div class="tabs">
+                        <div id="Unclaimed" class="tab active">
+                        </div>
+                        <div id="Unused" class="tab">
+                        </div>
+                        <div id="Used" class="tab">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

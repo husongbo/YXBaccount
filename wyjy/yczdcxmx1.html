@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>油卡充值明细</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/QuickStore.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+    </style>
+	<script id="Bill_Template" type="text/template">
+    	<div class="card" style="margin-top:0.5rem; margin-left: 0;margin-right: 0;">
+    		<div class="card-content">
+    			<div class="row row-list" style="height: auto;">
+    				<div class="col-50" style="padding: 0.5rem 1rem;">
+    					<div style="font-weight: bold; font-size: 140%;">油卡充值明细</div>
+    					<div style="font-size: 40%; line-height: 1rem;">CARD STATEMENT</div>
+    				</div>
+    				<div class="col-50" style="padding: 1rem 1rem;">
+    					（{{YEAR_MONTH}}）
+    				</div>
+    			</div>
+    		</div>
+    	</div>
+    	<div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+    		<ul id="TradingRecord" style="background: transparent">
+			</ul>
+		</div>
+    </script>
+
+	<script id="TradingRecord_Template" type="text/template">
+		<li style="margin: 0.2rem 0;">
+			<div class="item-content" style="border: 0.1rem; background: #FFFFFF;">
+				<div style="width: 2.5rem;">
+					<img src="{{ICON}}" style="height: auto; width: auto; max-height: 100%; max-width: 100%; padding: 0.5rem;"/>
+				</div>
+				<div class="item-inner">
+					<div class="item-title-row">
+						<div class="item-title">
+							<div style="font-size: 60%; line-height: 1rem;">{{TYPE}}</div>
+							<div style="font-size: 30%" class="item-after">{{YMD}}</div>
+						</div>
+						<div class="item-media">
+							<div class="item-after money" style="color: {{COLOR}};">{{AMOUNT}}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</script>
+
+    <script type="text/javascript">
+		var My = {
+			tableId: 1
+		};
+		$$.Page_Load = function(){
+			$.init();
+			
+			My.BillDate = $$.Context.Parameter.BillDate;
+			if (!My.BillDate) {
+				// My.BillDate = '2017/08'; 
+				return;
+			}
+
+			var lastClosingBalance = {
+				TYPE: '上期结余',
+				YMD: My.BillDate.substring(5) + '/01',
+				ICON: "../Common/image/sqjy.png",
+				COLOR: "#FFCC00"
+			};
+
+			var billInfo = Bill.QueryBill(My.tableId);
+			var currentBill = [];
+			$.each(billInfo, function(index, item) {
+				if (item.BILL_YM == My.BillDate) {
+					item.YEAR_MONTH = item.BILL_YM.replace('/', '年') + '月';
+					item.BILL_YM = item.BILL_YM.substring(5);
+					item.START_DAY = item.START_DAY.substring(5);
+					item.END_DAY = item.END_DAY.substring(5);
+					currentBill.push(item);
+					lastClosingBalance.AMOUNT = item.OPENING_BALANCE;
+				}
+			});
+			$$.Fill("#Bill", currentBill);
+			
+			var detail = Bill.EnquiryHistoricalTransaction(My.BillDate, My.tableId);
+			$.each(detail, function(index, item) {
+				item.YMD = item.YMD.substring(5);
+				item.ICON = "../Common/image/mx1.png";
+				item.COLOR = "#C8141E";
+			});
+
+			detail.push(lastClosingBalance);
+
+			$$.Fill("#TradingRecord", detail);
+		}
+    </script>
+	<style>
+		body {
+			line-height: 0.7rem;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">油卡充值明细</h1>
+            </header>
+	    	<div id="PageContent" class="content">
+	    		<div id="Bill">    			
+	    		</div>
+	        </div>
+        </div>        
+    </div>
+</body>
+</html>

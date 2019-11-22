@@ -1,0 +1,448 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>电子发票明细</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/QuickStore.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/UploadPic.js"></script>
+	<script id="ToMakeOut_Template" type="text/template">
+		<li id="{{T0103_ID}}">
+			<div class="item-content">
+				<div class="item-media"><span class="checked-box"><input type="hidden" value="{{T0103_ID}}"/></span>{{TYPE}}：</div>
+				<div class="item-inner">
+					<div class="item-title-row">
+						<div class="item-title"></div>
+						<div class="item-after money" style="color: #379adf;">{{AMOUNT}}</div>
+					</div>
+					<div class="item-title-row">
+						<div class="item-title"></div>
+						<div class="item-after timers">{{YMD}}</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</script>
+	
+	<script id="HasMakeOut_Template" type="text/template">
+		<li>
+			<div class="item-content">
+				<div class="item-media"><span class="icons icon6"></span>{{TYPE}}：</div>
+				<div class="item-inner">
+					<div class="item-title-row">
+						<div class="item-title"></div>
+						<div class="item-after money" style="color: #379adf;">{{AMOUNT}}</div>
+					</div>
+					<div class="item-title-row">
+						<div class="item-title"></div>
+						<div class="item-after timers">{{YMD}}</div>
+					</div>
+				</div>
+
+			</div>
+		</li>
+	</script>
+    <script type="text/javascript">
+		var My = {
+            UserId: "{{CurrentUserID}}",
+			taxpayerInfo: {},
+			ToMake: [],
+			HasMake: []
+		};
+		$$.Page_Load = function() {
+			$.init();
+			$$.FileSystem.Config.ProcessURL = "../Common/CSharp/FileSystemAccess.ashx";
+			My.month = $$.Context.Parameter.month;
+			$('.calendar').html(My.month);
+			
+			My.showTaxpayerInfo();
+			My.QueryInvoiceDetail();
+			
+			My.Event();
+		}
+		/**
+		 * 展示已经保存的开票信息
+		 */
+		My.showTaxpayerInfo = function () {
+			var proc = "queryTaxpayerInfo " + this.UserId;
+			var rst = $$.JSONDB.Query(proc);
+			$$.Log(rst);
+			if (rst.Table[0].length == 0) {
+				return;
+			}
+			
+			My.taxpayerInfo = rst.Table[0]
+			$("#identityNumber").val(My.taxpayerInfo.IDENTITY_NUMBER);
+			$("#address").val(My.taxpayerInfo.ADDRESS);
+			$("#account").val(My.taxpayerInfo.ACCOUNT);
+			$("#phone").val(My.taxpayerInfo.PHONE);			
+		}
+		
+		/**
+		 * 保存开票信息
+		 */
+		My.saveTaxpayerInfo = function () {
+			My.taxpayerInfo = {};
+			My.taxpayerInfo.userID = this.UserId;
+			My.taxpayerInfo.IDENTITY_NUMBER = $("#identityNumber").val();
+			My.taxpayerInfo.ADDRESS = $("#address").val();
+			My.taxpayerInfo.ACCOUNT = $("#account").val();
+			My.taxpayerInfo.PHONE = $("#phone").val();
+
+			var tmpl = "{{userID}}, '{{IDENTITY_NUMBER}}', N'{{ADDRESS}}', N'{{ACCOUNT}}', '{{PHONE}}'";
+			var params = tmpl.t(My.taxpayerInfo);
+			var proc = "SaveTaxpayerInfo " + params;
+			$$.Log(proc);
+			var rst = $$.JSONDB.Exec(proc);
+			$$.Log(rst);
+		}
+		
+		My.QueryInvoiceDetail = function () {
+			var proc = "QueryInvoiceDetail " + this.UserId + ", '" + this.month + "'";
+			var rst = $$.JSONDB.Query(proc);
+			$$.Log(rst);
+			$.each(rst.Table, function(index, item) {
+				item.YMD = item.YMD.substr(0, 4) + "/" + item.YMD.substr(4, 2) + "/" + item.YMD.substr(6);
+				if (item.INVOICE == 0) {
+					My.ToMake.push(item);
+				} else {
+					My.HasMake.push(item);
+				}
+			});
+			
+			$$.Fill("#ToMakeOut", this.ToMake);
+			
+			if (this.HasMake.length > 0) {
+				$(".has_make").show();
+				$$.Fill("#HasMakeOut", this.HasMake);
+			} else {
+				$(".has_make").hide();
+			}
+		}
+		
+		My.MakeOutInvoice = function () {
+			$(".inner-fapiao li .item-content span.checked-box.active input").each(function() {
+				var tradingRecordId = $(this).val();
+				var proc = "UpdateInvoiceInfo " + tradingRecordId;
+				var rst = $$.JSONDB.Query(proc);
+			});
+			$$.Back();
+		}
+		
+		My.Event = function () {
+			$('.year_month').each(function() {
+				var ym = $(this).html();
+				ym = ym.substr(0, 4) + '年<i>' + ym.substr(4) + '月<i>';
+				$(this).html(ym);
+			});
+			
+			$(".inner-fapiao li .item-content").click(function () {
+				if($(this).find('.checked-box').hasClass('active')){
+					$(this).find('.checked-box').removeClass("active");
+					$(this).find('.checked-box input').attr("checked",false);
+
+					$(".bar-tab .tab-left .checked-box").removeClass("active");
+					$(".bar-tab .tab-left .checked-box input").removeClass("active");
+				}else{
+					$(this).find('.checked-box').addClass("active");
+					$(this).find('.checked-box input').attr("checked",true);
+				}
+			});
+		
+			$(".bar-tab .tab-left").click(function () {
+				if(!$(this).find(".checked-box").hasClass("active")){
+					$(".checked-box").addClass("active");
+					$(".checked-box input").attr("checked",true);
+				}else{
+					$(".checked-box").removeClass("active");
+					$(".checked-box input").attr("checked",false);
+				}
+			});
+		}
+    </script>
+	<style>
+		body{
+			font-family:-apple-system-font, Helvetica Neue, Helvetica, sans-serif,sans-serif;
+		}
+		.list-block input[type="text"]{
+			display: block;
+			padding: 0 0 0 0.25rem;
+			color: #f57d59;
+			font-size: 0.7rem;
+		}
+		.Color_B1{
+			background-color: #f57d59;
+		}
+		.calendar{
+			position: absolute;
+			right: 0px;
+			top: 0px;
+			color: #facdc6;
+			display: inline-block;
+			height: 2.2rem;
+			line-height: 2.2rem;
+			padding-right: 0.6rem;
+			font-size: 0.8rem;
+		}
+		.calendar i{
+			color: #fff;
+			font-style: normal;
+			font-size: 0.9rem;
+		}
+		.default-content {
+			margin: 0;
+			font-size: 0.8rem;
+			color: #666;
+			padding:0 0.6rem;
+		}
+		.list-block{
+			padding: 0rem 0.4rem 0.4rem 0.4rem;
+			margin-top: 0.5rem;
+			margin-bottom: 0.5rem;
+		}
+
+		.list-block ul {
+			background: #fff;
+			list-style: none;
+			padding: 0;
+			margin: 0;
+			position: relative;
+			overflow: hidden;
+			border-radius: 0.3rem;
+			box-shadow: 0 0 5px rgba(245, 127, 89, 0.35);
+		}
+		.list-block li{
+			padding:0 0.75rem;
+		}
+		.list-block .item-inner{
+			padding-right: 0;
+		}
+		.list-block .item-inner:after{
+			height: 0;
+		}
+		.list-block .item-content{
+			padding-left: 0;
+			border-bottom: 1px solid #f57d59;
+		}
+		.list-block li:last-child .item-content{
+			border-bottom: 0;
+		}
+		.list-block .item-title.label {
+			font-weight: normal;
+			font-size: 0.72rem;
+			width: 40%;
+			color: #f57d59;
+		}
+
+		.list-block .icons{
+			padding:0.8rem;
+		}
+		.checked-box{
+			display: inline-block;
+			text-align: center;
+			line-height:1rem;
+			width:1rem;
+			height: 1rem;
+			border: 1px solid #f57d59;
+			border-radius: 50%;
+			margin-right: 0.3rem;
+			vertical-align:middle;
+		}
+		.checked-box.active{
+			background:#f57d59 url("../Common/image/icon5.png") no-repeat center;
+			background-size: 1rem 1rem;
+		}
+		.list-block .item-title.label span.icon1{
+			background: url("../Common/image/icon1.png") no-repeat center;
+			background-size:1rem;
+		}
+		.list-block .item-title.label span.icon2{
+			background: url("../Common/image/icon2.png") no-repeat center;
+			background-size:1rem;
+		}
+		.list-block .item-title.label span.icon3{
+			background: url("../Common/image/icon3.png") no-repeat center;
+			background-size:1rem;
+		}
+		.list-block .item-title.label span.icon4{
+			background: url("../Common/image/icon4.png") no-repeat center;
+			background-size:1rem;
+		}
+		.list-block .icons.icon6{
+			background: url("../Common/image/icon6.png") no-repeat center;
+			background-size:1.2rem;
+		}
+		.list-block .icons.icon7{
+			background: url("../Common/image/icon7.png") no-repeat center;
+			background-size:1.2rem;
+		}
+		.list-block .icons.icon8{
+			background: url("../Common/image/icon8.png") no-repeat center;
+			background-size:1.2rem;
+		}
+		.buttonBtn {
+			border: 0px;
+			background: -moz-linear-gradient(left, #f58158 0%, #f76e5c 100%);
+			background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#f58158), color-stop(100%,#f76e5c));
+			color: #fff;
+			text-align: center;
+			display: block;
+			border-radius: 0.25rem;
+			line-height: 1.8rem;
+			font-size: 0.7rem;
+			box-shadow: 0 0 0.8rem rgba(245,125,89,0.4);
+		}
+		.list-block .item-after i{
+			color: #dadbdb;
+			font-size: 0.8rem;
+			font-style: normal;
+			line-height: 1.3rem;
+			padding-right: 0.4rem;
+		}
+		.list-block.media-list .item-media {
+			color: #f57d59;
+		}
+		.timers{
+			font-size: 0.8rem;
+			color: #dadbdb !important;
+		}
+		.sui-bottom-text {
+			color: #666666;
+			margin: 0;
+			padding: 0.4rem 0.6rem;
+			margin-bottom: 1rem;
+		}
+		.bar-tab .tab-item.tab-left{
+			text-align: left;
+			vertical-align: middle;
+			padding-left: 1rem;
+			color: #606060;
+			width: 5rem;
+		}
+		.bar-tab .tab-item.tab-sure{
+			position: absolute;
+			right: 1rem;
+			top: 0.35rem;
+			display: block;
+			width: 5rem;
+			height: 1.8rem;
+			line-height: 1.8rem;
+			background: -moz-linear-gradient(left, #f58158 0%, #f76e5c 100%);
+			background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#f58158), color-stop(100%,#f76e5c));
+			box-shadow: 0 0 0.8rem rgba(245,125,89,0.4);
+			color: #fff;
+			text-align: center;
+			border: 0px;
+			border-radius: 0.25rem;
+			font-size: 0.7rem;
+		}
+		.bar-tab{
+			background-color: #fff;
+			border-top: 1px solid #e8e8e8;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: white;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: white;">电子发票明细</h1>
+				<span class="calendar year_month">2017年<i>8月</i></span>
+            </header>
+			<nav class="bar bar-tab">
+                <a class="tab-item tab-left" style="top: 0; border-radius: 0;" ><span class="checked-box"><input type="hidden"/></span>全选</a>
+                <a class="tab-item button tab-sure" onclick="My.MakeOutInvoice()">开票</a>
+            </nav>
+            <div id="PageContent" class="content">
+            	<div class="default-content" style="padding-top: 0.6rem;">默认开票信息</div>
+            	<div class="list-block">
+            		<ul>
+            			<li>
+            				<div class="item-content">
+            					<div class="item-inner">
+            						<div class="item-title label"><span class="icons icon1"></span>纳税识别号</div>
+            						<div class="item-input">
+            							<input type="text" id="identityNumber" placeholder="请输入纳税识别号"/>
+            						</div>
+            					</div>
+            				</div>
+            			</li>
+            			<li>
+            				<div class="item-content">
+            					<div class="item-inner">
+            						<div class="item-title label"><span class="icons icon2"></span>经营地址</div>
+            						<div class="item-input">
+            							<input type="text" id="address" placeholder="请输入经营地址"/>
+            						</div>
+            					</div>
+            				</div>
+            			</li>
+            			<li>
+            				<div class="item-content">
+            					<div class="item-inner">
+            						<div class="item-title label"><span class="icons icon3"></span>账户及账号</div>
+            						<div class="item-input">
+            							<input type="text" id="account" placeholder="请输入账号"/>
+            						</div>
+            					</div>
+            				</div>
+            			</li>
+            			<li>
+            				<div class="item-content">
+            					<div class="item-inner">
+            						<div class="item-title label"><span class="icons icon4"></span>联系电话</div>
+            						<div class="item-input">
+            							<input type="text" id="phone" placeholder="请输入电话"/>
+            						</div>
+            					</div>
+            				</div>
+            			</li>
+            			<li>
+            				<div class="item-content row">
+            					<div class="col-33">&nbsp;</div>
+            					<div class="col-33" style="padding: 1rem 0;">
+            						<a class="buttonBtn" id='saveTaxpayerInfo' onclick="My.saveTaxpayerInfo()">保存</a>
+            					</div>
+            					<div class="col-33">&nbsp;</div>
+            				</div>
+            			</li>
+            		</ul>
+            	</div>
+            	
+            	<div class="default-content" style="margin: 0;">未开票</div>
+            	<div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+					<ul class="inner-fapiao" id="ToMakeOut">
+					</ul>
+            	</div>
+            	<div class="default-content has_make" style="margin: 0;">已开票</div>
+            	<div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+					<ul id="HasMakeOut">
+					</ul>
+            	</div>
+				<p class="sui-bottom-text">说明:每月10日是出账单日</p>
+            </div>
+        </div>        
+    </div>
+</body>
+</html>
+
+<script>
+</script>

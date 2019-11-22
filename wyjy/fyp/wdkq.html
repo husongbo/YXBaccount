@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>我的卡券</title>
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+    <link rel="stylesheet" href="Common/css/common.css" />
+    <style>
+        .coupon {
+            position: relative;
+            background: hsl(38, 100%, 48%);
+            color: #fff;
+            width: 96%;
+            height: 4rem;
+            line-height: 25px;
+            overflow: hidden;
+            left: 2%;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-diabled {
+            background: #c3c3c3;
+            color: #666;
+        }
+
+        .coupon:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        /*价格*/
+
+        .coupon-money .sum {
+            font-size: 1.1rem;
+        }
+
+        .coupon-left {
+            float: left;
+            text-align: left;
+            width: 60%;
+            font-size: 12px;
+        }
+
+        .coupon-right {
+            float: right;
+            text-align: center;
+            width: 40%;
+            font-size: 0.7rem;
+        }
+
+        .coupon-inner {
+            padding: 0.5rem 0.75rem;
+            height: 5rem;
+            position: relative;
+        }
+
+        .coupon-right .coupon-inner {
+            border-left: 2px dashed rgba(255, 255, 255, .5);
+        }
+
+        .coupon-circle {
+            display: inline-block;
+            width: 0.8rem;
+            height: 0.8rem;
+            background: hsl(240, 19%, 95%);
+            position: absolute;
+            left: -9px;
+            border-radius: 50%
+        }
+
+        .coupon-circle.top {
+            top: -0.5rem;
+        }
+
+        .coupon-circle.bottom {
+            bottom: -0.55rem;
+        }
+
+        .coupon-light {
+            position: absolute;
+            top: 1rem;
+            left: 20%;
+            width: 100%;
+            background: rgba(255, 255, 255, .2);
+            transform: rotate(-30deg);
+            -webkit-transform: rotate(-30deg);
+            -moz-transform: rotate(-30deg);
+        }
+
+        button {
+            color: #1c1d1f;
+            background-color: #FFFFFF;
+            border: none;
+            width: 4rem;
+            font-size: 0.65rem;
+            border-radius: 0.15rem;
+            margin-top: 0.5rem;
+        }
+
+        p {
+            margin: 0.5rem;
+        }
+
+        .list-block {
+            margin: 0.5rem 0;
+            width: 96%;
+            margin-left: 2%;
+        }
+
+        .list-block .item-media+.item-inner {
+            margin-left: 0.3rem;
+        }
+    </style>
+    <script type="text/template" id="list_Template">
+        <div class="coupon">
+            <div class="coupon-left">
+                <div class="coupon-inner">
+                    <div class="coupon-money">
+                        <span>¥</span>
+                        <span class="sum">{{实付金额}}</span>
+                    </div>
+                    <div class="coupon-condition" style="font-size: 0.75rem;margin-top: 0.3rem;">{{商品名称}}</div>
+                </div>
+            </div>
+            <div class="coupon-right">
+                <div class="coupon-inner">
+                    <div class="coupon-time">
+                        {{店铺名称}}
+                        <br>
+                        <button class="use" data-code="{{订单二维码}}">立即使用</button>
+                    </div>
+                    <i class="coupon-circle top"></i>
+                    <i class="coupon-circle bottom"></i>
+                </div>
+            </div>
+            <div class="coupon-light"></div>
+        </div>
+    </script>
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current">
+            <header class="bar bar-nav">
+                <a class="icon icon-left pull-left back"></a>
+                <h1 class="title">我的卡券</h1>
+            </header>
+            <div class="content">
+                <div class="list-block">
+                    <ul>
+                        <li class="item-content item-link" id="history">
+                            <div class="item-media">
+                                <span class="icon icon-gift"></span>
+                            </div>
+                            <div class="item-inner" style="font-size: 0.65rem">
+                                <div class="item-title">卡券</div>
+                                <div class="item-after">查看历史</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div id="list"></div>
+                <div class="null" style="margin-top: 3rem;">
+                    <img src="Common/image/null.png" alt="" />
+                    <div>暂时还没有相关的订单</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+    <script type="text/javascript" src="/APP/Common/js/sdk.js"></script>
+    <script type="text/javascript" src="/APP/Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="/APP/Common/js/sdk_db.js?1=1"></script>
+    <script>
+        var hyID = "{{CurrentUserID}}";
+        var data = {
+            "用户标识": hyID,
+            "订单状态": "-1"
+        }
+        var tmpl = "{{用户标识}},{{订单状态}}";
+        var params = tmpl.t(data);
+        var proc = "我的订单 " + params;
+        var rst = $$.JSONDB.Query(proc).Table;
+        console.log(rst)
+        if (rst.length > 0) {
+            for (var i = 0; i < rst.length; i++) {
+                rst[i].实付金额 = rst[i].实付金额.toFixed(2);
+            }
+            $$.Fill("#list", rst);
+        }
+
+        // 立即使用
+        $(".use").click(function () {
+            var code = $(this).attr("data-code");
+            location.href = "kqxq.html?code=" + code;
+        })
+    </script>
+</body>
+
+</html>

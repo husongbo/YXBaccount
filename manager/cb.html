@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="misapplication-tap-highlight" content="no"/>
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="MobileOptimized" content="320"/>
+    <meta http-equiv="Expires" content="0"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Cache-control" content="no-cache"/>
+    <meta http-equiv="Cache" content="no-cache"/>
+    <title>卡包</title>
+    <link rel="stylesheet" href="../Common/css/sm.css"/>
+    <style>
+        .card {
+            background-color: #FFFFFF;
+        }
+
+        .card img {
+            width: 1.5rem;
+            float: right;
+            margin-top: -1.8rem;
+        }
+
+        .icon {
+            font-weight: normal;
+            font-size: 0.65rem;
+        }
+
+        .card-footer div {
+            width: 80%;
+        }
+
+        .list-block .item-content {
+            padding-left: 0;
+        }
+    </style>
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/template" id="cardPackageList_Template">
+        <div class="card">
+            <div class="card-header">
+                <span>卡包{{卡包标识}}</span>
+                <span class="icon icon-down"></span>
+            </div>
+            <div style="display: none">
+                <div class="card-content">
+                    <div class="card-content-inner">
+                        <div class="list-block">
+                            <ul id="cardList_{{卡包标识}}"></ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer" style="display: block">
+                    <div>油卡起始编号：{{油卡起始编号}}</div>
+                    <div>油卡结束编号：{{油卡结束编号}}</div>
+                    <img src="/images/manager/CardPackageQRCode/{{卡包标识}}.png" alt="" class="code" data-id="{{卡包标识}}">
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/template" id="cardList_Template">
+        <li class="item-content">
+            <div class="item-media"><i class="icon icon-f7"></i></div>
+            <div class="item-inner">
+                <div class="item-title">卡号</div>
+                <div class="item-after">{{油卡卡号}}</div>
+            </div>
+        </li>
+    </script>
+</head>
+<body>
+<div class="page-group">
+    <div class="page page-current">
+        <div class="content" id="cardPackageList"></div>
+    </div>
+</div>
+<script>
+    var My = {};
+
+    // 生成二维码 （卡包ID）
+    My.CreateQRCode = function (CardPackageId) {
+        var rst;
+        var param = {
+            'CardPackageId': CardPackageId
+        };
+
+        $.ajax({
+            type: "POST",
+            url: '/App/Common/CSharp/Manager/CardPackage.ashx',
+            data: param,
+            success: function (data) {
+                rst = data;
+            },
+            dataType: 'JSONP',
+            async: false
+        });
+
+        return rst;
+        console.log(rst);
+    };
+
+    // 查询卡包未销售油卡
+    My.noSaleCard = function (cardPackage) {
+        var proc = "查询卡包未销售油卡 " + cardPackage;
+        var rst = $$.JSONDB.Query(proc).Table;
+        console.log(rst);
+        return rst;
+    };
+
+    // 首先查询卡包
+    var proc = "查询客户经理卡包 " + Bill.userId;
+    var rst = $$.JSONDB.Query(proc).Table;
+    console.log(rst);
+    $$.Fill("#cardPackageList", rst);
+    for (var i = 0; i < rst.length; i++) {
+        My.CreateQRCode(rst[i].卡包标识);
+        var noSaleCard = My.noSaleCard(rst[i].卡包标识);
+        var tmp = $("#cardList_Template").html();
+        for (var k = 0; k < noSaleCard.length; k++) {
+            var show = tmp.t(noSaleCard[k]);
+            $("#cardList_" + rst[i].卡包标识).append(show);
+        }
+    }
+
+    // 二维码点击事件
+    $(".code").click(function () {
+        var imgId = "/images/manager/CardPackageQRCode/" + $(this).attr("data-id") + ".png";
+        layer.open({
+            content: '<img src="' + imgId + '"><br>' +
+            '<span>扫描二维码进行油卡分配</span>'
+        });
+    });
+
+    // 折叠面板
+    $(".card-header").click(function () {
+        $(this).next().toggle();
+        if ($(this).next().css("display") == "none") {
+            $(this).children("span.icon").addClass("icon-down").removeClass("icon-up");
+        } else {
+            $(this).children("span.icon").addClass("icon-up").removeClass("icon-down");
+        }
+    });
+
+    // 第一个默认显示
+    var list = $(".card-header");
+    for (var item = 0; item < list.length; item++) {
+        var first = list[0];
+        $(first).next().show();
+        $(first).children("span.icon").addClass("icon-up").removeClass("icon-down");
+    }
+
+</script>
+</body>
+</html>

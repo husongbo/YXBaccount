@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>店铺</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<style>
+			.card-content-inner {
+				padding: 0.5rem;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<div class="card demo-card-header-pic" id="{{店铺标识}}">
+				<div valign="bottom" class="card-header color-white no-border no-padding">
+					<img class='card-cover' src="{{店铺图片}}" alt="" style="height: 10rem">
+				</div>
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div>{{店铺名}}</div>
+						<div class="color-gray">{{店铺描述}}</div>
+					</div>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<h1 class="title">店铺</h1>
+				</header>
+				<div class="content" id="list"></div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="/APP/Common/js/sdk.js"></script>
+		<script type="text/javascript" src="/APP/Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="/APP/Common/js/sdk_db.js"></script>
+		<script>
+			// 查询所有的店铺
+			var dpID = "''";
+			var proc = "店铺列表 " + "''";
+			var rst = $$.JSONDB.Query(proc).Table;
+			if(rst.length > 0) {
+				for(var i = 0; i < rst.length; i++) {
+					var arr = rst[i].店铺图片.split(",");
+					rst[i].店铺图片 = decodeURI(atob(arr[0]));
+				}
+				$$.Fill("#list", rst);
+			}
+			console.log(rst)
+
+			// 点击店铺跳转
+			$("#list").on("click", ".card", function() {
+				var dpID = $(this).attr("id");
+				location.href = "splb.html?dpID=" + dpID;
+			})
+		</script>
+	</body>
+
+</html>

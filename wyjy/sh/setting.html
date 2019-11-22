@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>信息维护</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/iconfont.css" />
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<style type="text/css">			
+			.iconfont {
+				font-size: 1rem;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left back"></a>
+					<h1 class="title">信息维护</h1>
+				</header>
+				<div class="content">
+					<div class="list-block">
+						<ul>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-mingcheng"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">商户名称</div>
+										<div class="item-input">
+											<input type="text" placeholder="请输入名称" value="油信宝">
+										</div>
+									</div>
+								</div>
+							</li>
+							<!--<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-mingcheng"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">登录名称</div>
+										<div class="item-input">
+											<input type="text" placeholder="请输入名称" value="油信宝">
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-mingcheng"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">登录密码</div>
+										<div class="item-input">
+											<input type="password" placeholder="请输入名称">
+										</div>
+									</div>
+								</div>
+							</li>-->
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-shengshiqu"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">省市区</div>
+										<div class="item-input">
+											<input type="text" placeholder="请选择" value="陕西 西安 未央区" id="city-picker">
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-xiangxidizhi"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">详细地址</div>
+										<div class="item-input">
+											<input type="text" placeholder="请输入详细地址" value="草滩121号">
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-lianxiren"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">联系人</div>
+										<div class="item-input">
+											<input type="text" value="王曦" />
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-lianxidianhua"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">联系电话</div>
+										<div class="item-input">
+											<input type="tel" value="15129047277" />
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-lianxiyouxiang"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">联系邮箱</div>
+										<div class="item-input">
+											<input type="email" value="831462897@qq.com" />
+										</div>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="content-block">
+						<p>
+							<a href="#" class="button button-fill button-success">确定</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="//g.alicdn.com/msui/sm/0.6.2/js/sm-city-picker.min.js" charset="utf-8"></script>
+		<script type="text/javascript" src="Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			// 地址选择
+			$("#city-picker").cityPicker({
+				toolbarTemplate: '<header class="bar bar-nav">' +
+					'<button class="button button-link pull-right close-picker" style="color:#fff">确定</button>' +
+					'<h1 class="title">选择收货地址</h1>' +
+					'</header>'
+			});
+		</script>
+	</body>
+
+</html>

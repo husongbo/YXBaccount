@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>转赠油卡</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    
+    <script type="text/javascript">
+		var My = {
+			ApplyRecordId: 0,
+			TransferRecordId: 0
+		};
+		$$.Page_Load = function() {
+			$.init();
+
+			if ($$.Context.Parameter.TransferRecordId) {
+				My.TransferRecordId = $$.Context.Parameter.TransferRecordId;
+			}
+			
+			My.QueryTransferState();
+		}
+		
+		/**
+		 * 查询转赠状态
+		 */
+		My.QueryTransferState = function() {
+			// 查询是否转赠中
+			var sql = "SELECT PT0014_ID FROM [PT0014_TRANSFER_OIL_CARD_RECORD] WHERE PT0014_DATA_STATE=1 AND [PT0014_TO_USER]='' AND [PT0014_FROM_USER] = " + Bill.userId;
+			var rst = $$.JSONDB.Query(sql);
+			if (rst && rst.Table.length > 0 && rst.Table[0].PT0014_ID) {
+				My.ApplyRecordId = rst.Table[0].PT0014_ID;
+			}
+
+			// 自己进入自己的赠送油卡页面
+			if (My.ApplyRecordId >0 && My.ApplyRecordId == My.TransferRecordId) {
+				$(".accept-transfer").hide();
+				$(".transfer-explain").show();
+			} else {
+				$(".transfer-explain").hide();
+				$(".accept-transfer").show();
+			}
+		}
+		
+		My.AcceptOilCard = function() {
+			var proc = "获取转赠油卡 " + My.TransferRecordId + ", " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+			if (rst && rst.Table.length > 0) {
+				var code  = rst.Table[0].RESULT;
+				var msg = rst.Table[0].MESSAGE;
+				layer.open({
+					content: msg
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				
+				if (code === 0) {
+					$$.Goto("wdyk", {
+						back: "index"
+					});
+				}
+			}
+		}
+    </script>
+    <style>
+        #MainPage{
+            background-color: #f5f5f5;
+        }
+        .bar:after {
+            content: '';
+            height: 0px;
+        }
+		.button:active  {
+			background: burlywood;
+		}
+        .card{
+            background: #fff;
+            box-shadow: none;
+            margin: 0.5rem;
+            position: relative;
+            border-radius: 0.2rem;
+            font-size: 0.7rem;
+            padding: 0.8rem 0;
+        }
+		.button{
+			display: block;
+			margin: 0.3rem auto 0;
+			line-height: 2rem;
+			height: 2rem;
+			width: 7rem;
+			font-size: 16;
+			border-radius: 0.3rem;
+			border-color: #ff8200;
+		}
+            .button.accept {
+                background: #ff8200;
+                color: #FFFFFF;
+            }
+
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">转赠油卡</h1>
+            </header>
+
+			<div class="content">
+				<div class="card explain">
+					<div class="card-content">
+						<div class="card-content-inner transfer-explain" style="display: none;">
+							油卡转赠步骤：<br />
+							1、将该页面分享给你要转赠的微信好友。<br />
+							2、微信好友在其微信中打开次。<br />
+							3、好友点击接受转赠后完成转赠。
+						</div>
+						<div class="card-content-inner accept-transfer" style="display: none;">
+							您的好友赠送您了一张油卡，接受后这张油卡就是您的了。
+							<a class="button accept" onclick="My.AcceptOilCard()">接收转赠</a>
+						</div>
+					</div>
+				</div>
+			</div>
+        </div>
+    </div>
+</body>
+</html>

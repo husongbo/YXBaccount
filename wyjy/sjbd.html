@@ -1,0 +1,232 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>手机绑定</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/javascript">
+		$$.Page_Load = function(){
+			$.init();
+
+			My.GetRegisterInfo();
+			
+			My.Event();
+		}
+		
+		var My = {
+		};
+		
+		My.GetRegisterInfo = function () {
+			var proc = "GetRegisterInfo " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+
+			if (!rst) {
+				return 0;
+			}
+			var data = rst.Table[0];
+			if (!data || data.M0001_PHONE == "") {
+				return 0;
+			}
+			
+			$('#phone').val(data.M0001_PHONE);
+			
+			return 1;
+		}
+		
+		My.HasCard = function () {
+			$(".has-card").show();
+		}
+
+		My.Commit = function () {
+			var data = {};
+			data.USER_ID = Bill.userId;
+			data.M0001_PHONE = $('#phone').val();
+			if (!DV_MOBILE_PHONE.test(data.M0001_PHONE)) {
+				layer.open({
+					content: '请输入正确的手机号码格式'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;
+			}
+			
+			data.M0001_EMAIL = $('#mail').val();
+			if (!DV_EMAIL.test(data.M0001_EMAIL)) {
+				layer.open({
+					content: '请输入正确的电子邮箱地址'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;							
+			}
+
+			$$.Log(JSON.stringify(data));
+			
+//			var procTmpl = "AddRegisterInfo {{USER_ID}}, '{{M0001_PHONE}}', '{{M0001_EMAIL}}', '{{M0001_PASSWORD}}', '{{M0001_CARD_PHOTO_A}}', '{{M0001_CARD_PHOTO_B}}', '{{M0001_DRIVER_PHOTO}}', " +
+//						"'{{M0001_SUPPLIER_COUNTRY}}', '{{M0001_SUPPLIER_PROVINCE}}', '{{M0001_SUPPLIER_CITY}}', '{{M0001_SUPPLIER_CONUNTY}}', '{{M0001_SUPPLIER_ADDRESS}}'";
+//					
+//			var proc = procTmpl.t(data);
+//			layer.open({type:2});
+//			$$.JSONDB.Query(proc);
+//			layer.closeAll();
+			
+			My.GetUserInfo();
+		}
+		
+		My.Event = function () {
+		}
+	</script>
+	<style>
+		.Color_B1 {
+			background-color:#f57c59;
+		}
+		.card{
+			background: #fff;
+			box-shadow: 0 0 0.6rem rgba(245, 127, 89, 0.3);
+			margin: 0.5rem;
+			position: relative;
+			border-radius: 0.4rem;
+			font-size: 0.7rem;
+		}
+		.button:active  {
+			background: burlywood;
+		}
+		.button{
+			line-height: 1.7rem;
+			padding: 0 0.8rem;
+			height: 1.8rem;
+			border: 1px solid #f57c59;
+			color: #F57C59;
+		}
+		.card .namefont {
+			font-weight: lighter;
+			color: #666666;
+			font-size: 0.85rem;
+		}
+		.card-number{
+			width: 100%;
+			text-align: left;
+			font-size: 1.1rem;
+			border: 0;
+			border-bottom: 1px solid #f57e59;
+			color: #666;
+			font-weight: lighter;
+			padding: 0 0.5rem;
+		}
+		.item-content .query{
+			background-color: #f57e59;
+			color: #fff;
+			padding: 0 1rem;
+		}
+		.inner-box h3{
+			margin: 0;
+			font-weight: normal;
+		}
+		.inner-box p{
+			margin-top: 0;
+			color: #a5a5a5;
+			padding-left: 1rem;
+		}
+		.item-inner{
+			position: relative;
+		}
+		.inbtn{
+			position: absolute;
+			top: 50%;
+			right:0.6rem;
+			transform: translateY(-50%);
+		}
+		.tijiao{
+			background-color: #f57e59;
+			color: #fff;
+			padding: 0 1.4rem;
+			box-shadow: 0 0 0.8rem rgba(245,125,89,0.4);
+		}
+		.sui-bottom-text {
+			color: #666666;
+			margin: 0;
+			padding: 0.4rem 0.6rem;
+			margin-bottom: 1rem;
+		}
+		.list-block .item-input input{
+			font-size: 0.75rem;
+		}
+		.list-block .item-title.label {
+			width: 33%;
+		}
+	</style>
+</head>
+<body>
+	<div class="page-group">
+		<div id="MainPage" class="page page-current">
+			<header class="bar bar-nav Color_B1">
+				<a class="icon icon-left  pull-left" style="color: white;" onclick="$.router.back();"></a>
+				<h1 id="MainPage_Title" class="title" style="color: white;">手机绑定</h1>
+			</header>
+
+			<div id="PageContent" class="content">
+				<div class="card" style="margin-top: 0.5rem;">
+					<div class="card-header">
+						<div class="namefont">个人信息</div>
+					</div>
+					<div class="card-content">
+						<div class="list-block">
+							<ul>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title label namefont">手机号</div>
+											<div class="item-input">
+												<input type="text" placeholder="请输入手机号" id="phone"/>
+											</div>
+										</div>
+									</div>
+								</li>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title label namefont">手机验证码</div>
+											<div class="item-input">
+												<input type="text" placeholder="请输入验证码" id="verification_code"/>
+											</div>
+											<div class="item-after">
+												<a class="button">发送验证码</a>
+											</div>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="card-footer">
+						<span></span>
+						<a class="button tijiao" onclick="My.Commit()">提交</a>
+						<span></span>
+					</div>
+				</div>
+			</div>
+		</div>		
+	</div>
+</body>
+
+<script>
+</script>
+</html>

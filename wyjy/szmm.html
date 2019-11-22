@@ -1,0 +1,553 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>个人信息</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+	<link rel="stylesheet" href="../Common/css/szpassword.css" />
+	<link rel="stylesheet" href="../Common/css/mui.min.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+	<script type="text/javascript" src="../Common/js/public.js"></script>
+	<script type="text/javascript" src="../Common/js/mui.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+	<script type="text/javascript" src="../Common/js/Bill.js"></script>
+	<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+	<script type="text/javascript" src="../Common/js/utf.js"></script>
+	<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+	<script type="text/javascript">
+			//扩展mui.showLoading
+	(function($, window) {
+	    //显示加载框
+	    $.showLoading = function(message,type) {
+	        if ($.os.plus && type !== 'div') {
+	            $.plusReady(function() {
+	                plus.nativeUI.showWaiting(message);
+	            });
+	        } else {
+	            var html = '';
+	            html += '<i class="mui-spinner mui-spinner-white"></i>';
+	            html += '<p class="text">' + (message || "数据加载中") + '</p>';
+	
+	            //遮罩层
+	            var mask=document.getElementsByClassName("mui-show-loading-mask");
+	            if(mask.length==0){
+	                mask = document.createElement('div');
+	                mask.classList.add("mui-show-loading-mask");
+	                document.body.appendChild(mask);
+	                mask.addEventListener("touchmove", function(e){e.stopPropagation();e.preventDefault();});
+	            }else{
+	                mask[0].classList.remove("mui-show-loading-mask-hidden");
+	            }
+	            //加载框
+	            var toast=document.getElementsByClassName("mui-show-loading");
+	            if(toast.length==0){
+	                toast = document.createElement('div');
+	                toast.classList.add("mui-show-loading");
+	                toast.classList.add('loading-visible');
+	                document.body.appendChild(toast);
+	                toast.innerHTML = html;
+	                toast.addEventListener("touchmove", function(e){e.stopPropagation();e.preventDefault();});
+	            }else{
+	                toast[0].innerHTML = html;
+	                toast[0].classList.add("loading-visible");
+	            }
+	        }   
+	    };
+	
+			//隐藏加载框
+			  $.hideLoading = function(callback) {
+				if ($.os.plus) {
+					$.plusReady(function() {
+						plus.nativeUI.closeWaiting();
+					});
+				} 
+				var mask=document.getElementsByClassName("mui-show-loading-mask");
+				var toast=document.getElementsByClassName("mui-show-loading");
+				if(mask.length>0){
+					mask[0].classList.add("mui-show-loading-mask-hidden");
+				}
+				if(toast.length>0){
+					toast[0].classList.remove("loading-visible");
+					callback && callback();
+				}
+			  }
+		})(mui, window);
+		</script>
+    <script type="text/javascript">
+		$$.Page_Load = function(){
+			$.init();
+		}
+	</script>
+	<script type="text/javascript">
+	            $(document).ready(function() {
+	                var pdIndex = 0;
+	                var zcpdIndx = 0;
+					var oldsIndex=0
+	                var numArr = new Array();
+	                var zcNumArr = new Array();
+					var oldNumArr= new Array();
+					var strNum;
+					var strzcNum;
+					var stroldsNum;
+					var falges=false;
+	                window.pdNum = 2;
+					var hideshow=false;
+					var proc = "查询基本信息 " + Bill.userId;
+					var rst = $$.JSONDB.Query(proc);
+					var data = rst.Table[0];
+					var Paypassword=data.支付密码;
+						var  mycars = [1,2,3,4,5,6,7,8,9];
+						mycars.sort(function(a, b){    //function(a, b） 是一个排序指针方法
+						return 0.5 - Math.random()   //  a -b 从小到大， b - a 从大到小 ，Math.random()  产生一个随机数，大于0.5 数组从小到大，小于0.5，数组从大到小排。
+						});
+						for(var i=0;i<mycars.length;i++){
+							console.log(mycars[i])
+							var text=`<li class="subnum" name="${mycars[i]}">${mycars[i]}</li>`;
+							$(".passub_num ul").append(text)
+						}
+						var text1=`<li class="botcre"></li>
+			            <li class="subnum" name="0">0</li>
+			            <li class="botcre" id="delcre">
+			                <img src="image/cha.png" />
+			            </li>`
+						$(".passub_num ul").append(text1)
+						<!-- Paypassword="111111"; -->
+							alert(Paypassword)
+							if(Paypassword!=''){
+								$("#usedpassword").show();
+								$("#Scpassword").hide();
+								$(".password_tit").html("<p>请输入旧密码</p>");
+								hideshow=true;
+							}
+							$("#Truepassword ul li").click(function(){
+								if(falges){
+									$("#Truepassword ul li").each(function (){
+									    $(this).children('img').remove();
+									})
+									$("#Scpassword ul li").each(function (){
+									    $(this).children('img').remove();
+									})
+									$(".password_tit").html('<p>输入6位密码</p>')
+									$("#Scpassword").show();
+									$("#Truepassword").hide();
+									window.pdNum =0;
+									zcpdIndx =0;
+									pdIndex=0
+									
+									numArr=[]
+									zcNumArr=[]
+									
+									falges=false
+									$(".passub").removeClass('amintes')
+									$(".passub").addClass('amins')
+								}
+							})
+							$(".buttons").click(function(){
+								setTimeout(function (){
+										    $("#Truepassword ul li").each(function (){
+										        $(this).children('img').remove();
+										    })
+										    zcpdIndx =0;
+											$("#Scpassword ul li").each(function (){
+											    $(this).children('img').remove();
+											})
+											pdIndex =0;
+											$("#Scpassword").show();
+											$("#Truepassword").hide();
+										},400)
+										zcNumArr.splice(0,zcNumArr.length);
+	                                    // 向后台发送密码数据
+										mui.showLoading("请稍后..","div");
+										var proc = "查询基本信息 " + Bill.userId;
+										var rst = $$.JSONDB.Query(proc);
+										var data = rst.Table[0];
+										var userid=data.用户标识;
+										var datas=`params={method:"SetUserPayPwd",user_id:"${userid}",pay_pwd:"${strzcNum}"}`
+											// console.log(datas)
+											$.ajax({
+											    type: "get",
+											    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+											    data: datas,
+											    async: true,
+											    success: function (data) {
+													setTimeout(function(){
+														mui.hideLoading();
+														layer.open({
+														    content: "设置成功",
+														    skin: 'msg',
+														    time: 2
+														},1500);
+														setTimeout(function(){
+															window.history.back(-1); 
+														},1500)
+													},1500)
+											    }
+											});
+	                                    console.log('设置密码成功');
+					})
+	                $(".passub_num ul li.subnum").click(function (){
+						if(hideshow){
+							var index = $(this).attr("name");
+							if(oldsIndex<=6){
+							    oldNumArr.push(index);
+							    $("#usedpassword ul li").eq(oldsIndex).append('<img src="image/dd_03.jpg" />');
+							    if(oldsIndex==5){
+									setTimeout(function(){
+									stroldsNum=oldNumArr.join("")
+									if(parseInt(Paypassword)==parseInt(stroldsNum)){
+										hideshow=false;
+										$(".password_tit").html("<p>请输入新密码</p>");
+										$("#usedpassword").hide();
+										$("#Scpassword").show();
+									}
+									else{
+										console.log(oldNumArr)
+										layer.open({
+										    content: "密码错误，请重新输入旧密码",
+										    skin: 'msg',
+										    time: 2
+										},1500);
+										$("#usedpassword ul li").each(function (){
+										    $(this).children('img').remove();
+										})
+										oldNumArr=[]
+										oldsIndex=0
+										return;
+									}
+									},200)
+							    }
+							    oldsIndex++;
+							}else{
+							    return;
+							}
+						}
+						else{
+	                    var index = $(this).attr("name");
+	                    if(window.pdNum==1){
+	                        
+	                        if(zcpdIndx<=6){
+	                            zcNumArr.push(index);
+	                            $("#Truepassword ul li").eq(zcpdIndx).append('<img src="image/dian.png" />');
+	                            if(zcpdIndx==5){
+	                                strNum = numArr.join("");
+	                                strzcNum = zcNumArr.join("");
+									console.log(strNum)
+									console.log(strzcNum)
+	                                if(strNum==strzcNum){
+										$(".password_tit p").html('密码输入一致');
+										$(".passub").addClass('amintes')
+										$(".passub").removeClass('amins')
+										falges=true
+										
+	                                }else{
+	                                    $(".password_hint").html('<p style="color:#ff0000;">两次密码不一致，请重新输入确认密码</p>');
+	                                    setTimeout(function (){
+	                                        $("#Truepassword ul li").each(function (){
+	                                            $(this).children('img').remove();
+	                                        })
+											$("#Scpassword ul li").each(function (){
+											    $(this).children('img').remove();
+											})
+											$(".password_tit").html('<p>输入6位密码</p>')
+											$("#Scpassword").show();
+											$("#Truepassword").hide();
+											window.pdNum =0;
+	                                        zcpdIndx =0;
+											pdIndex=0
+											numArr=[]
+											zcNumArr=[]
+	                                    },400)
+	                                    zcNumArr.splice(0,zcNumArr.length);
+	                                }
+	                            }
+	                            zcpdIndx++;
+	                        }else{
+	                            return;
+	                        }
+	                    }else{
+	                        if(pdIndex<=6){
+	                            numArr.push(index);
+	                            $("#Scpassword ul li").eq(pdIndex).append('<img src="image/dd_03.jpg" />');
+	                            if(pdIndex==5){
+	                                window.pdNum = 1;
+	                                // 调用方法
+	                                setTimeout(function(){
+	                                    $(".password_tit p").html('再次确认密码');
+										$(".password_hint").html('<p>6位密码用于支付</p>')
+	                                    $("#Scpassword").hide();
+	                                    $("#Truepassword").show();
+	                                },400)
+	                            }
+	                            pdIndex++;
+	                        }else{
+	                            return;
+	                        }
+	                    }
+	                    }
+	                    // i++;  
+	                })
+	                $("#delcre").click(function (){
+	                    if(window.pdNum==1){
+	                        if(zcpdIndx==0){
+	                            return;
+	                        }
+	                        $("#Truepassword ul li").eq(zcpdIndx-1).children('img').remove();
+	                        zcNumArr.remove(zcpdIndx-1);
+	                        zcpdIndx--
+	                    }
+						else if(window.pdNum==2){
+							if(oldsIndex==0){
+							    return;
+							}
+							$("#usedpassword ul li").eq(oldsIndex-1).children('img').remove();
+							oldNumArr.remove(oldsIndex-1);
+							oldsIndex--
+						}
+						else{
+	                        if(pdIndex==0){
+	                            return;
+	                        }
+	                        $("#Scpassword ul li").eq(pdIndex-1).children('img').remove();
+	                        numArr.remove(pdIndex-1);
+	                        pdIndex--
+	                    }
+	                })
+					
+	            })
+	Array.prototype.remove=function(obj){
+	    for(var i =0;i <this.length;i++){
+	        var temp = this[i];
+	        if(!isNaN(obj)){
+	            temp=i;
+	        }
+	        if(temp == obj){
+	            for(var j = i;j <this.length;j++){
+	                this[j]=this[j+1];
+	            }
+	            this.length = this.length-1;
+	        }
+	    }
+	}
+	        </script>
+	<style>
+		/*----------------mui.showLoading---------------*/
+		.mui-show-loading {
+			position: fixed;
+			padding: 5px;
+			width: 120px;
+			min-height: 120px;
+			top: 45%;
+			left: 50%;
+			margin-left: -60px;
+			background: rgba(0, 0, 0, 0.6);
+			text-align: center;
+			border-radius: 5px;
+			color: #FFFFFF;
+			visibility: hidden;
+			margin: 0;
+			z-index: 2000;
+		
+			-webkit-transition-duration: .2s;
+			transition-duration: .2s;
+			opacity: 0;
+			-webkit-transform: scale(0.9) translate(-50%, -50%);
+			transform: scale(0.9) translate(-50%, -50%);
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+		}
+		.mui-show-loading.loading-visible {
+			opacity: 1;
+			visibility: visible;
+			-webkit-transform: scale(1) translate(-50%, -50%);
+			transform: scale(1) translate(-50%, -50%);
+		}
+		.mui-show-loading .mui-spinner{
+			margin-top: 24px;
+			width: 36px;
+			height: 36px;
+		}
+		.mui-show-loading .text {
+			line-height: 1.6;
+			font-family: -apple-system-font,"Helvetica Neue",sans-serif;
+			font-size: 14px;
+			margin: 10px 0 0;
+			color: #fff;
+		}
+		
+		.mui-show-loading-mask {
+		  position: fixed;
+		  z-index: 1000;
+		  top: 0;
+		  right: 0;
+		  left: 0;
+		  bottom: 0;
+		}
+		.mui-show-loading-mask-hidden{
+			display: none !important;
+		}
+		a{
+			color: black;
+		}
+		
+		
+		#MainPage{
+			background-color: #f5f5f5;
+			background: white;
+		}
+		.Color_B1 {
+			background-color:#f57c59;
+		}
+		.list-block.media-list .item-title{
+			position: relative;
+			padding-left: 1.45rem;
+			font-weight: bold;
+			font-size: 0.8rem;
+		}
+		.list-block.media-list .item-title img{
+			width: 1.2rem;
+			height: 1.2rem;
+			position: absolute;
+			left: 0px;
+			top:0;
+		}
+		.sui-bottom-text {
+			color: #666666;
+			margin: 0;
+			padding: 0.4rem 0.6rem;
+			margin-bottom: 1rem;
+		}
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+		.password_num{
+			width: auto!important;
+			touch-action: none;
+		}
+		.password_num ul li img{
+			width:12px;
+			height: 12px;
+			margin: 0.7rem;
+		}
+		.password_num ul{
+			float: left;clear: both;
+			width: 96%;
+			margin:0 2%;
+			display: flex;
+			justify-content: center;
+		}
+		@keyframes amin{
+			from{
+				bottom: 0;
+			}
+			to{
+				bottom: -225px;
+			}
+		}
+		@keyframes amins{
+			from{
+				bottom: -225px;
+			}
+			to{
+				bottom: 0;
+			}
+		}
+		.amintes{
+			animation: .2s amin linear;
+			animation-fill-mode:forwards;
+		}
+		.amins{
+			animation: .2s amins linear;
+			animation-fill-mode:forwards;
+		}
+		.passub{
+			/* display: none; */
+		}
+		.buttons{
+			width: 80%;
+			margin: 0 10%;
+			position: absolute;
+			bottom:10%;
+		}
+		.subnum:active{
+			background: #CCCCCC;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">支付密码设置</h1>
+            </header>
+			<div class="password">
+			    <div class="password_tit">
+			        <p>输入6位密码</p>
+			    </div>
+				<div class="password_num" id="usedpassword" style="display: none;">
+				    <ul>
+				        <li></li>
+				        <li></li>
+				        <li></li>
+				        <li></li>
+						<li></li>
+						<li></li>
+				    </ul>
+				</div>
+			    <div class="password_num" id="Scpassword">
+			        <ul>
+			            <li></li>
+			            <li></li>
+			            <li></li>
+			            <li></li>
+						<li></li>
+						<li></li>
+			        </ul>
+			    </div>
+			    <div class="password_num" id="Truepassword" style="display: none;">
+			        <ul>
+			            <li></li>
+			            <li></li>
+			            <li></li>
+			            <li></li>
+						<li></li>
+						<li></li>
+			        </ul>
+			    </div>
+			    <div class="password_hint">
+			        <p>6位密码用于支付</p>
+			    </div>
+			</div>
+			<button type="button" class="mui-btn mui-btn-primary mui-btn-block buttons">确定</button>
+			<!-- 键盘按钮 -->
+			<div class="passub">
+			    <div class="passub_num">
+			        <ul> 
+			            
+			        </ul>
+			    </div>
+			</div>
+        </div>        
+    </div>
+</body>
+
+</html>

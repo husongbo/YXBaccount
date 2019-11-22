@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>推荐订单</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/city/loadings.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/city/loadings.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			*{
+				font-family: "宋体";
+			}
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.bodys{
+				padding: 0 10%;
+				padding-top: 50px;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+			}
+			.inp{display: flex;justify-content: space-between;margin-top: 5px;}
+			.btn{display: flex;justify-content: space-between;padding: 0 10%;margin-top: 20px;}
+			.btn-left{height: 45px;font-size: .8rem;line-height: 45px;text-align: center;border:1px solid #ff8200;
+			border-radius:5px;color: #ff8200;width: 45%;}
+			.btn-right{height: 45px;font-size: .8rem;line-height: 45px;text-align: center;background: #ff8200 !important;
+			border-radius:5px;color: white;width: 45%;}
+			.right{
+				margin-top: 30%;
+				text-align: center;
+				font-size: .8rem;
+				color: #CCCCCC;
+			}
+			#price{font-size:2.5rem;padding: 0 10%;}
+			.hiddens{visibility: hidden;}
+			.txs{font-size: .7rem;color: red;margin-left:20px;}
+			.pricetext{font-size: .8rem!important;margin-left: 5px;}
+			.pricess{}
+		</style>
+	</head>
+	<body style="background: white;">
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">推荐订单</h1>
+		</header>
+		<div id="Acts">
+			<div class="top hiddens">
+				<div v-if="Flag" class="left">
+					<div  class="bodys" style="margin-top: 30%;">
+						 <div>余额</div>
+						 <div class="txs" @click="withdrawal">提现 ></div>
+						<!-- <div>可提现:</div>
+						<div class="inp">
+							<input id="price" type="text" v-model="price" disabled />
+							<span @click="withdrawal" style="width: 50px;line-height: 50px;color: red;margin-left: 10px;font-size: .7rem;">提现</span>
+						</div> -->
+					</div>
+					<div id="price"><span id="pricess">{{price}}</span><span class="pricetext">元</span></div>
+					<div class="btn">
+						<div class="btn-left" @click="Detailed(-1)">提现明细</div>
+						<div class="btn-right" @click="Detailed(1)">已收入明细</div>
+					</div>
+				</div>
+				<div v-else class="right">
+					暂无推荐订单信息
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		var proc = "查询基本信息 " + Bill.userId;
+		var rst = $$.JSONDB.Query(proc);
+		var data = rst.Table[0];
+		var id=data.用户标识;
+		// var id='2071611150600000001'
+		var prices=document.getElementById('pricess')
+		new Vue({
+			el: '#Acts',
+			data: {
+				list:[],
+				Orderflag:false,
+				price:0,
+				Flag:false,
+				numlist:[],
+				numindex:0,
+				numpice:0,
+				numbers:''
+			},
+			created(){
+				
+				mui.showLoading("正在加载..","div");
+				this.GetList()
+				setTimeout(()=>{
+					$(".top").removeClass('hiddens')
+					mui.hideLoading()
+				},500)
+			},
+			methods:{
+				GetList(){
+					var _this=this
+					$.ajax({
+						type: "post",
+						url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetUserPromoteList",user_id:"${id}"}`,
+						data:{},
+						async:false,
+						success: function (res) {
+							if(JSON.parse(res).data==undefined){
+								mui.toact('当前没有订单数据')
+								_this.Flag=false
+							}
+							else{
+								_this.Flag=true
+								console.log(JSON.parse(JSON.parse(res).data))
+								var Numbers=0
+								_this.Orderflag=true
+								_this.list=JSON.parse(JSON.parse(res).data)
+								_this.list.forEach((item)=>{
+									if(item.PM0005_STATE==0){
+										_this.numlist.push(item)
+										console.log(((parseFloat(item.COUPON_AMOUNT)/100)/100)*parseFloat(item.PM0006_AMOUNT))
+										Numbers+=((parseFloat(item.COUPON_AMOUNT)/100)/100)*parseFloat(item.PM0006_AMOUNT)
+									}
+								})
+								_this.numpice=Numbers
+								_this.price=Numbers
+								if(_this.numlist.length==0){
+									mui.toast('提现余额为0')
+									return
+								}
+								_this.numlist.forEach((item,index)=>{
+									_this.numindex++
+									if(_this.numlist.length==index+1){
+										_this.numbers+=item.PM0005_OUT_TRADE_NO
+									}
+									else{
+										_this.numbers+=item.PM0005_OUT_TRADE_NO+","
+									}
+								})
+							}
+							console.log(Numbers)
+						},
+						error:function(err){
+							console.log(err)
+						}
+					});
+				},
+				withdrawal(){
+					if(this.numlist.length==0){
+						mui.toast('没有可提现的订单')
+						return
+					}
+					var json={
+						numindex:this.numindex,
+						numpice:this.numpice,
+						numbers:this.numbers
+					}
+					localStorage.setItem('Txdd',JSON.stringify(json))
+					console.log(json)
+					window.location.href='./txfl.html'
+				},
+				Detailed(val){
+					if(val==-1){
+						if(this.numlist.length==0){
+							mui.toast('没有可提现的订单')
+							return
+						}
+						else{
+							window.location.href=`./wdtjdd.html?state=${val}`
+						}
+					}
+					else{
+						window.location.href=`./wdtjdd.html?state=${val}`
+					}
+					
+				}
+				// withdrawal(){
+				// 	$(.bodys).each(()=>{
+				// 		console.log($(this))
+				// 	})
+				// }
+			}
+		})
+	</script>
+</html>

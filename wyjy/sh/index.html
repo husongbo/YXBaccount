@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>首页</title>
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/iconfont.css">
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<style type="text/css">
+			.col-50,
+			.col-33 {
+				padding: 0.5rem;
+				text-align: center;
+			}
+			
+			.row .col-50:first-child {
+				border-right: 1px solid #DDDDDD;
+			}
+			
+			.col-50 .iconfont {
+				color: #E4393C;
+				font-size: 30px;
+			}
+			
+			.col-33 .iconfont {
+				color: #FFFFFF;
+				font-size: 30px;
+			}
+			
+			.content {
+				padding-bottom: 0.3rem;
+			}
+			
+			.card {
+				margin: 0;
+				margin-bottom: 0.3rem;
+			}
+			
+			.operate {
+				padding: 0.2rem 0.7rem;
+				background-color: #E4393C;
+				color: #FFFFFF;
+				border-radius: 1rem;
+				font-size: 0.65rem;
+			}
+			
+			.no-operate {
+				color: #E4393C;
+			}
+		</style>
+		<script type="text/template" id="orderList_Template">
+			<div class="card">
+				<div class="card-header">
+					<div>
+						订单号： <span class="color-gray">{{订单ID}}</span>
+					</div>
+				</div>
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div class="list-block media-list">
+							<ul>
+								<li data-id="{{订单ID}}">
+									<div class="item-content">
+										<div class="item-media">
+											<img src="{{商品图片}}" style='width: 2.2rem;'>
+										</div>
+										<div class="item-inner">
+											<div class="item-title-row">
+												<div class="item-title">{{商品名称}}</div>
+												<div class="item-after" style="color: #e4393c">￥{{实付金额}}</div>
+											</div>
+											<div class="item-subtitle">{{商品描述}}</div>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="card-footer">
+					<span style="color: #1c1d1f">订单状态</span>
+					<span class="{{showClass}}">{{订单状态}}</span>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<span class="icon iconfont icon-shezhi pull-right" id="setting"></span>
+					<h1 class="title">首页</h1>
+				</header>
+				<div class="content">
+					<div class="row" style="background-color: #E4393C;color: #FFFFFF;margin-bottom: 0.3rem;">
+						<div class="col-33">
+							<span class="iconfont icon-chongzhi"></span>
+							<div>充值</div>
+						</div>
+						<div class="col-33">
+							<span class="iconfont icon-yue"></span>
+							<div>余额</div>
+							<div style="font-size: 0.6rem;margin-top: 1%">21.00元</div>
+						</div>
+						<div class="col-33">
+							<span class="iconfont icon-saoyisao"></span>
+							<div>扫一扫</div>
+						</div>
+					</div>
+					<div class="card" style="margin-bottom: 0.3rem">
+						<div class="card-header">相关管理</div>
+						<div class="card-content">
+							<div class="card-content-inner" style="padding: 0;">
+								<div class="row" style="border-bottom: 1px solid #DDDDDD;">
+									<div class="col-50" id="spgl">
+										<i class="iconfont icon-shangpinguanli"></i>
+										<div>商品管理</div>
+									</div>
+									<div class="col-50" id="dpgl">
+										<i class="iconfont icon-dianpuguanli"></i>
+										<div>店铺管理</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-50" id="hdgl">
+										<i class="iconfont icon-plus-activityedit"></i>
+										<div>活动管理</div>
+									</div>
+									<div class="col-50" id="hygl">
+										<i class="iconfont icon-m-members"></i>
+										<div>会员管理</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!--订单-->
+					<div class="list-block" style="margin: 0">
+						<ul>
+							<li class="item-content item-link">
+								<div class="item-media">
+									<i class="iconfont icon-dingdan" style="font-size: 20px"></i>
+								</div>
+								<div class="item-inner" style="margin-left: 0.3rem">
+									<div class="item-title">待处理订单</div>
+									<div class="item-after" style="color: #999999;" id="allOrder">全部订单</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="orderList" hidden></div>
+					<div class="null" style="margin-top: 0.5rem;">
+						<img src="Common/image/null.png" alt="" />
+						<div>还没相应的订单数据哦</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="Common/js/sdk.js"></script>
+		<script type="text/javascript" src="Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			function plusReady() {
+				// 设置
+				$("#setting").click(function() {
+					plus.webview.create('setting.html').show();
+				});
+
+				// 商品管理
+				$("#spgl").click(function() {
+					plus.webview.create('goods/goods.html').show();
+				});
+
+				//店铺管理
+				$("#dpgl").click(function() {
+					plus.webview.create('shop/shop.html').show();
+				});
+
+				//活动管理
+				$("#hdgl").click(function() {
+					plus.webview.create('active/active.html').show();
+				});
+
+				//会员管理
+				$("#hygl").click(function() {
+					plus.webview.create('member/member.html').show();
+				});
+
+				// 全部订单
+				$("#allOrder").click(function() {
+					plus.webview.create('qbdd.html').show();
+				});
+
+				// 待处理订单即待发货订单
+				var shID = "{{CurrentMerchantID}}";
+				var data = {
+					"商户标识": shID,
+					"订单状态": "1"
+				}
+				var tmpl = "{{商户标识}},{{订单状态}}";
+				var params = tmpl.t(data);
+				var proc = "商户订单列表 " + params;
+				var rst = $$.JSONDB.Query(proc).Table;
+				console.log(rst)
+				if(rst.length > 0) {
+					for(var i = 0; i < rst.length; i++) {
+						rst[i].实付金额 = rst[i].实付金额.toFixed(2);
+						var arr = rst[i].商品图片.split(",");
+						rst[i].商品图片 = decodeURI(atob(arr[0]));
+						if(rst[i].订单类别 == 0) {
+							rst[i].订单状态 = "待提货";
+							rst[i].showClass = "no-operate";
+						} else {
+							rst[i].订单状态 = "去发货";
+							rst[i].showClass = "operate";
+						}
+					}
+					$$.Fill("#orderList", rst);
+					$("#orderList").show();
+				} else {
+					$(".null").show();
+				}
+
+				// 点击订单跳转至订单详情
+				$("#orderList li").click(function() {
+					var orderID = $(this).attr("data-id");
+					plus.webview.create('ddxq.html?orderID=' + orderID).show();
+				});
+
+				// 返回键的处理
+				var clickNum = 0;
+				var webview = plus.webview.currentWebview();
+				plus.key.addEventListener('backbutton', function() {
+					webview.canBack(function(e) {
+						clickNum++;
+						if(clickNum > 1) {
+							plus.runtime.quit();
+						} else {
+							plus.nativeUI.toast("再按一次退出应用");
+						}
+					})
+				});
+			}
+
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>创建商品</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/iconfont.css" />
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<style>
+			.list-block .item-after {
+				justify-content: flex-end;
+			}
+			
+			.list-block input[type="text"].number {
+				border-top: 1px solid #ddd;
+				border-bottom: 1px solid #ddd;
+				width: 20%;
+				text-align: center;
+				height: 1.5rem;
+				margin-top: -0.1rem;
+			}
+			
+			.item-after span {
+				display: inline-block;
+				width: 20%;
+				border: 1px solid #dddddd;
+				text-align: center;
+				height: 1.5rem;
+				line-height: 1.4rem;
+				font-size: 1rem;
+				margin-top: -0.1rem;
+			}
+			
+			.item-after span:active {
+				background-color: #5f646e;
+				color: #FFFFFF;
+			}
+			
+			.content-block-title {
+				margin: 0.65rem 0.75rem;
+				font-size: 0.7rem;
+			}
+			
+			.txtColor {
+				color: #e4393c;
+			}
+			
+			label {
+				display: inline-block;
+				border: 1px solid #ddd;
+				background-color: #eeeeee;
+				width: 3rem;
+				height: 2.8rem;
+				line-height: 2.5rem;
+				text-align: center;
+			}
+			
+			.icon-picture {
+				font-size: 1rem;
+			}
+			
+			.list-block ul:after {
+				height: 0;
+			}
+			
+			.button {
+				width: 90%;
+				left: 5%;
+				height: 2rem;
+			}
+			
+			.button.button-fill {
+				line-height: 2rem;
+			}
+			/*图片展示*/
+			
+			.img-box {
+				display: inline-block;
+				position: relative;
+				margin-bottom: 0.3rem;
+			}
+			
+			.sp-img {
+				width: 3rem;
+				height: 2.8rem;
+				vertical-align: middle;
+				margin-right: 0.5rem;
+			}
+			
+			.close {
+				display: inline-block;
+				width: 0.8rem;
+				height: 0.8rem;
+				border-radius: 50%;
+				text-align: center;
+				line-height: 0.8rem;
+				background-color: #E4393C;
+				color: #FFFFFF;
+				position: absolute;
+				top: 0;
+				right: 0.5rem;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<div class="content-block-title">商品名称 <span class="txtColor">*</span></div>
+			<div class="list-block">
+				<ul>
+					<li>
+						<div class="item-content">
+							<div class="item-inner">
+								<div class="item-input">
+									<input type="text" placeholder="请输入商品名称" id="name" value="{{商品名称}}">
+								</div>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="content-block-title">商品描述 <span class="txtColor">*</span></div>
+			<div class="list-block">
+				<ul>
+					<li class="align-top">
+						<div class="item-content">
+							<div class="item-inner">
+								<div class="item-input">
+									<textarea id="des" cols="30" rows="10" placeholder="请输入商品相关描述">{{商品描述}}</textarea>
+								</div>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="content-block-title">商品价格和数量 <span class="txtColor">*</span></div>
+			<div class="list-block">
+				<ul>
+					<li class="item-content">
+						<div class="item-inner">
+							<div class="item-title">结算价</div>
+							<div class="item-after">
+								<input id="jsj" type="number" placeholder="请输入结算价" value="{{采购价格}}" style="text-align: right;margin-top: -0.4rem;">
+							</div>
+						</div>
+					</li>
+					<li class="item-content">
+						<div class="item-inner">
+							<div class="item-title">销售价</div>
+							<div class="item-after">
+								<input id="xsj" type="number" placeholder="请输入销售价" value="{{销售价格}}" style="text-align: right;margin-top: -0.4rem;">
+							</div>
+						</div>
+					</li>
+					<!--<li class="item-content">
+						<div class="item-inner">
+							<div class="item-title">商品数量</div>
+							<div class="item-after">
+								<span class="reduce">-</span>
+								<input id="sl" type="text" value="1" class="number">
+								<span class="add">+</span>
+							</div>
+						</div>
+					</li>-->
+				</ul>
+			</div>
+			<div class="content-block-title">商品图片（建议尺寸750*420px）<span class="txtColor">*</span></div>
+			<div class="list-block">
+				<ul>
+					<li class="item-content">
+						<div class="item-inner" style="display: block;">
+							<label for="file"><span class="icon icon-picture"></span></label>
+							<input type="file" id="file" hidden>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<p>
+				<a href="#" class="button button-fill button-danger" id="fb">确认发布</a>
+			</p>
+			<div class="card" style="margin: 0.5rem;">
+				<div class="card-content">
+					<div class="card-content-inner">
+						<p><span class="iconfont icon-bangzhu" style="color: #E4393C;font-weight: bold;"></span>&nbsp;使用说明</p>
+						<p>当抽奖人数大于等于结算价时，系统会随机抽取一位用户中奖。同时商家获得和结算价相等的积分，积分可以1:1提现，也可以转换为抽奖次数曾送给用户。<span class="txtColor">(提现需要收取10%的手续费)</span></p>
+					</div>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<h1 class="title">创建商品</h1>
+				</header>
+				<div class="content" id="list" hidden></div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script>
+			function plusReady() {
+				$(".add").click(function() {
+					var numV = $(this).prev().val();
+					$(this).prev().val(numV++);
+				});
+
+				$(".reduce").click(function() {
+					var numV = $(this).next().val();
+					if(numV == "1") {
+						return
+					}
+					$(this).next().val(numV--);
+				});
+
+				$("#list").on("click", ".close", function() {
+					$(this).parent().remove();
+				});
+
+				var spID = $$.getParameterValue().spID;
+				if(spID) {
+					var proc = "商户商品详情 " + spID;
+					var rst = $$.JSONDB.Query(proc).Table;
+					if(rst.length > 0) {
+						for(var i = 0; i < rst.length; i++) {
+							var arr = rst[i].商品图片.split(",");
+						}
+
+						$$.Fill("#list", rst);
+						for(var k = 0; k < arr.length; k++) {
+							$("label").before("<div class='img-box'>" +
+								"<span class='close'>×</span>" +
+								"<img src='" + decodeURI(atob(arr[k])) + "'class='sp-img' />" +
+								"</div>");
+						}
+						$("#list").show();
+
+					}
+				} else {
+					spID = "0";
+					var listData = [{
+						"商品名称": "",
+						"商品描述": "",
+						"采购价格": "",
+						"销售价格": ""
+					}]
+					$$.Fill("#list", listData);
+					$("#list").show();
+				}
+
+				$("#fb").click(function() {
+					var name = $("#name").val();
+					var des = $("#des").val();
+					var xsj = $("#xsj").val();
+					var jsj = $("#jsj").val();
+					var imgs = $(".sp-img");
+					var imgSrc = [];
+					if(!name) {
+						layer.open({
+							content: '请输入商品名称',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!des) {
+						layer.open({
+							content: '请输入商品描述',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!xsj) {
+						layer.open({
+							content: '请输入销售价',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!jsj) {
+						layer.open({
+							content: '请输入结算价',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(imgs.length == "0") {
+						layer.open({
+							content: '请选择商品图片',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					} else {
+						for(var i = 0; i < imgs.length; i++) {
+							var item = $(imgs[i]).attr("src");
+							imgSrc.push(btoa(encodeURI(item)));
+						}
+					}
+
+					var shID = "{{CurrentMerchantID}}";
+					var data = {
+						"商品标识v": spID,
+						"商户标识": shID,
+						"商品编码": "",
+						"商品名称": name,
+						"有效日期": "",
+						"原始结算价格": jsj,
+						"原始销售价格": xsj,
+						"商品图片": imgSrc.join(),
+						"商品描述": des,
+						"商品分销类别": "0",
+						"备注": "",
+						"操作用户": shID
+					}
+					var tmpl = "{{商品标识v}},{{商户标识}},'{{商品编码}}','{{商品名称}}','{{有效日期}}',{{原始结算价格}},{{原始销售价格}},'{{商品图片}}','{{商品描述}}',{{商品分销类别}},'{{备注}}','{{操作用户}}'";
+					var params = tmpl.t(data);
+					var proc = "商品新增 " + params;
+					var rst = $$.JSONDB.Query(proc).Table[0];
+
+					if(rst.RESULT == 0) {
+						var msg = spID == "0" ? "创建成功" : "编辑成功";
+						layer.open({
+							content: msg,
+							skin: 'msg',
+							time: 2
+						});
+						location.href = "goods.html"
+					}
+				})
+
+				// 图片上传
+				$("#file").change(function() {
+					//获取file对象
+					var file = this.files[0];
+
+					//判断file的类型是不是图片类型。
+					if(!/image\/\w+/.test(file.type)) {
+						alert("文件必须为图片！");
+						return false;
+					}
+
+					var img = new Image();
+					var reader = new FileReader(); //声明一个FileReader实例
+					reader.readAsDataURL(file); //调用readAsDataURL方法来读取选中的图像文件
+
+					//最后在onload事件中，获取到成功读取的文件内容，并以插入一个img节点的方式显示选中的图片
+					reader.onload = function(e) {
+						img.src = this.result;
+					}
+
+					img.onload = function() {
+						var maxLen = 400;
+
+						//生成比例
+						var width = img.width,
+							height = img.height;
+						console.log(width + "," + height)
+
+						//计算缩放比例
+						var rate = 1;
+						if(width >= height) {
+							if(width > maxLen) {
+								rate = maxLen / width;
+							}
+						} else {
+							if(height > maxLen) {
+								rate = maxLen / height;
+							}
+						};
+						img.width = width * rate;
+						img.height = height * rate;
+
+						//生成canvas
+						var canvas = document.createElement("canvas");
+						var ctx = canvas.getContext("2d");
+						canvas.width = img.width;
+						canvas.height = img.height;
+						ctx.drawImage(img, 0, 0, img.width, img.height);
+						var base64 = canvas.toDataURL('image/jpeg', 0.9);
+						$("label").before("<div class='img-box'>" +
+							"<span class='close'>×</span>" +
+							"<img src='" + base64 + "'class='sp-img' />" +
+							"</div>");
+						//					console.lo ('已选择图片' + file.name + '，大小为' + Math.round(1000 * file.size / (1024 * 1024)) / 1000 + 'M。')
+					};
+				});
+			}
+			
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

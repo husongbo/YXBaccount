@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>上架</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/iconfont.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<script src="../Common/js/layer_mobile/layer.js"></script>
+		<style>
+			.list-block .item-content {
+				padding-left: 0.5rem;
+			}
+			
+			.txtColor {
+				color: #e4393c;
+				font-weight: bold;
+			}
+		</style>
+		<script type="text/template" id="showList_Template">
+			<li>
+				<a class="item-link item-content">
+					<div class="item-media">
+						<img src="{{商品图片}}" style='width:3rem;'>
+					</div>
+					<div class="item-inner">
+						<div class="item-title-row">
+							<div class="item-title">{{商品名称}}</div>
+							<div class="item-after" style="color: #E4393C;">￥{{销售价格}}</div>
+						</div>
+						<div class="item-subtitle color-gray">{{商品描述}}</div>
+					</div>
+				</a>
+			</li>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<h1 class="title">上架</h1>
+				</header>
+				<div class="content">
+					<div class="content-block-title">上架的商品</div>
+
+					<!--商品选择-->
+					<div class="list-block media-list">
+						<ul id="select" hidden="hidden">
+							<li class="item-link item-content">
+								<div class="item-inner">
+									<div class="item-title-row">
+										<div class="item-title">选择需要上架的商品</div>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+
+					<!--商品展示-->
+					<div class="list-block media-list">
+						<ul id="showList" hidden="hidden"></ul>
+					</div>
+
+					<div class="content-block-title">商品价格修改</div>
+					<div class="list-block">
+						<ul>
+							<li>
+								<div class="item-content">
+									<div class="item-inner" style="margin-left: 0.3rem;">
+										<div class="item-title label">结算价</div>
+										<div class="item-input">
+											<input id="jsj" type="text" placeholder="请输入结算价" style="text-align: right;">
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-inner" style="margin-left: 0.3rem;">
+										<div class="item-title label">市场价</div>
+										<div class="item-input">
+											<input id="scj" type="text" placeholder="请输入市场价" style="text-align: right;">
+										</div>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+
+					<div class="content-block-title">订单类别</div>
+					<div class="list-block">
+						<ul id="species">
+							<li class="item-content">
+								<div class="item-inner">
+									<div class="item-title">线下提货</div>
+									<div class="item-after">
+										<span class="icon icon-check txtColor" id="0"></span>
+									</div>
+								</div>
+							</li>
+							<li class="item-content">
+								<div class="item-inner">
+									<div class="item-title">线上发货</div>
+									<div class="item-after">
+										<span class="icon icon-check" id="1"></span>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="content-block">
+						<a href="#" class="button button-fill button-success" id="sj">上架</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			function plusReady() {
+				// spID 选择需要上架的商品
+				var spID = $$.getParameterValue().spID;
+				var dpID = $$.getParameterValue().dpID;
+				var shID = "{{CurrentMerchantID}}";
+
+				// 选择上架商品
+				$(".content").on("click", "#select li,#showList li", function() {
+					plus.webview.create("wsjsp.html?dpID=" + dpID).show();
+				})
+
+				// 上架商品
+				if(spID) {
+					var proc = "商户商品详情 " + spID;
+					var rst = $$.JSONDB.Query(proc).Table;
+					console.log(rst)
+					if(rst.length > 0) {
+						for(var i = 0; i < rst.length; i++) {
+							rst[i].销售价格 = rst[i].销售价格.toFixed(2);
+							var arr = rst[i].商品图片.split(",");
+							rst[i].商品图片 = decodeURI(atob(arr[0]));
+						}
+						$$.Fill("#showList", rst);
+						$("#showList").show();
+					}
+				} else {
+					$("#select").show();
+				}
+
+				// 选择生成订单类别
+				$("#species li").click(function() {
+					$(this).find(".icon").addClass("txtColor");
+					$(this).siblings().find(".icon").removeClass("txtColor");
+				})
+
+				// 上架
+				$("#sj").click(function() {
+					var splen = $("#showList li");
+					var scj = $("#scj").val();
+					var jsj = $("#jsj").val();
+					var spzb = $(".txtColor").attr("id");
+					console.log(spzb)
+					if(splen.length == 0) {
+						layer.open({
+							content: '请选择上架的商品',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!jsj) {
+						layer.open({
+							content: '请输入结算价',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!scj) {
+						layer.open({
+							content: '请输入市场价',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					var data = {
+						"商品标识": spID,
+						"店铺标识": dpID,
+						"市场价格": scj,
+						"结算价格": jsj,
+						"商品种别": spzb,
+						"操作用户": shID
+					}
+					var tmpl = "{{商品标识}},{{店铺标识}},{{市场价格}},{{结算价格}},{{商品种别}},'{{操作用户}}'";
+					var params = tmpl.t(data);
+					var proc = "商品上架 " + params;
+					var rst = $$.JSONDB.Query(proc).Table;
+					console.log(rst)
+					layer.open({
+						content: rst[0].MESSAGE,
+						skin: 'msg',
+						time: 2
+					});
+					plus.webview.create("dpsp.html?dpID=" + dpID).show();
+				})
+			}
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

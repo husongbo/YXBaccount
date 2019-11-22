@@ -1,0 +1,1049 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>腾讯地图</title>
+    <link rel="stylesheet" href="../Common/css/sm.css?v=20181010">
+    <style type="text/css">
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 20px;
+        }
+
+        #container {
+            width: 100%;
+            height:calc(100vh - 90px - 100px);
+        }
+
+        .info-box {
+            width: 12rem;
+        }
+
+        .pull-left {
+            font-size: 0.65rem;
+            width: 7rem;
+            overflow: hidden;
+        }
+
+            .pull-left div {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+        .name {
+            color: #0079FE;
+            font-weight: bold;
+        }
+
+        .sp {
+            color: #C8141E;
+        }
+
+        .addr {
+            color: #9d9d9d;
+            font-size: 0.6rem;
+        }
+
+        .pull-right {
+            width: 4rem;
+            height: 1.8rem;
+            border-radius: 0.2rem;
+            line-height: 1.8rem;
+            background-color: #0079FE;
+            text-align: center;
+            color: #fff;
+            margin-top: 0.8rem;
+            font-size: 0.65rem;
+        }
+
+            .pull-right img {
+                width: 30%;
+                float: left;
+                margin-top: 0.3rem;
+                margin-left: 0.3rem;
+            }
+
+        .list-block {
+            margin: 0;
+        }
+
+            .list-block .item-subtitle,
+            .list-block .item-after {
+                color: #999999;
+                font-size: 0.6rem;
+            }
+
+        .buttons-tab .button.active {
+            color: #0079FE;
+            border-color: #0079FE;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: url(../Common/image/icon.png) no-repeat;
+            vertical-align: middle;
+            background-size: auto 236px;
+        }
+
+        .active .icon-map {
+            background-position: 0 -25px;
+        }
+
+        .icon-list {
+            background-position: 0 -50px;
+        }
+	.mapdistance{
+			width: 100%;
+			height:100px;
+			background: white;
+			z-index: 9999;
+			display: flex;
+			flex-direction: row;
+		}
+		.mapdis{
+			width: 70%;
+			padding: 20px;
+			padding-left: 10px;
+			padding-right: 10px;
+		}
+	.mapdis-top,.mapdis-bom{
+			margin: 5px;
+			margin-top:0px;
+			font-size: 0.9rem;
+			margin-bottom: 0;
+		}
+		.mapdis-bom{
+			font-size: 0.6rem;
+		}
+		.mapdisbtn{
+			width: 40%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			/* align-items: center; */
+		}
+	.mapbtn{
+			background: rgb(50,133,253);
+			color: white;
+			width:50px;
+			height: 50px;
+			text-align: center;
+			line-height:50px;
+			border-radius: 50%;
+			font-size: 0.6rem;
+			box-shadow: 0px 1px 10px rgba(50,133,253,0.8);
+			margin-top: 40upx;
+		}
+		.mapbtn-jy{
+			background: rgb(254,163,60);
+			color: white;
+			width: 50px;
+			height: 50px;
+			text-align: center;
+			line-height:50px;
+			border-radius: 50%;
+			font-size: 0.6rem;
+			box-shadow: 0px 1px 10px rgba(254,163,60,0.8);
+			margin-top: 40upx;
+			margin-right: 10px;
+		}
+
+        .active .icon-list {
+            background-position: 0 -75px;
+        }
+        .tab-item:active {
+            background: #e7e7e7;
+		.adress-li{
+			display: flex;
+			flex-direction: row;
+		}
+		.lileft{
+			width: 60%;
+			padding: 5px 10px;
+		}
+		.lileft div:last-child{
+			font-size: 0.7rem;
+			color: #CCCCCC;
+		}
+        }
+	.aa{
+		visibility:hidden;
+		}
+    </style>
+    <script charset="utf-8" src="http://map.qq.com/api/js?v=2.exp&key=AMZBZ-NBWAR-SCKWS-WSFQU-TZ4R6-YWBEV"></script>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script src="../Common/js/zepto.js"></script>
+    <script src="../Common/js/sm.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+	<script type="text/javascript" src="../Common/js/mui.js"></script>
+    <script type="text/javascript">
+        var My = {
+                citylocation: new qq.maps.CityService({
+                    complete: function (results) {
+                        var location = results.detail.detail.split(",");
+                        if (location.length > 3) {
+                            My.location.province = location[2];
+                        }
+                        My.location.city = location[1];
+			$(".citys").text(location[1]);
+			//alert(My.location.city)
+                        //My.GetCityInfo();
+			
+                    }
+			
+                })
+            };
+            $$.Page_Load = function () {
+                $.init();
+                   
+                var cities = ["成都市", "自贡市", "攀枝花市", "泸州市", "德阳市", "绵阳市", "广元市", "遂宁市", "内江市", "乐山市", "南充市", "宜宾市",
+                    "广安市", "达州市", "眉山市", "雅安市", "巴中市", "资阳市", "阿坝州", "甘孜州", "凉山州  "
+                ];
+                My.Event();
+            }
+            My.GotoMyCardPage = function () {
+                if ($$.Context.Parameter.CardCD) {
+                    var param = {};
+                    param.CardCD = $$.Context.Parameter.CardCD
+                }
+            
+                $$.Goto('wdyk', param);
+            };
+		My.hrefs=function() {
+			$$.Goto('gmjyqs')
+		};
+            My.ShowMap = function () {
+                if (!My.city) {
+                    My.SetCity("成都市");
+                }
+                // My.city = "绵阳市";
+                var proc = "查询城市油站信息 " + "'" + My.city + "'";
+                var rst = $$.JSONDB.Query(proc).Table;
+              //  if (rst.length > 0) {
+                    $$.Goto("dtapi");
+               // } else {
+                 //   var mapUrl = "http://apis.map.qq.com/uri/v1/search?keyword=加油站&center=" + My.location.latitude +
+                //        "," + My.location.longitude + "&radius=1000&referer=myapp";
+                  //  window.location.href = mapUrl;
+               // }
+            };
+            My.GetCityInfo = function () {
+            
+                My.province = My.location.province;
+                My.city = My.location.city;
+                My.SetCity(My.city);
+            };
+            
+            My.SetCity = function (city) {
+                My.city = city;
+                $("#city").text(city);
+		return city;
+            };
+		My.hrefmaps=function(){
+			$("#container").css('visibility','visible')
+			$(".mapdistance").css('visibility','visible')		
+			$("#list").css('visibility','hidden')
+			$(".a").addClass('active')
+			$(".b").removeClass('active')
+		}
+		My.hreflists=function(){
+			$("#container").css('visibility','hidden')
+			$(".mapdistance").css('visibility','hidden')
+			$("#list").css('visibility','visible')
+			$(".a").removeClass('active')
+			$(".b").addClass('active')
+		}
+		My.Go=function(){$$.Goto('gmjyqs')}
+		My.navigation=function(lat, lng, name) {
+				console.log(lat, lng, name)
+				// 获得用户当前位置???
+				// var mapUrl = "http://apis.map.qq.com/tools/routeplan/eword=" + name + "&epointx=" + lng + "&epointy=" + lat + "&sword=绵阳市&spointx=104.563700&spointy=31.538640?referer=myapp&key=OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77";
+				var mapUrl = "http://apis.map.qq.com/tools/routeplan/eword=" + name + "&epointx=" + lng + "&epointy=" + lat + "?referer=myapp&key=OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77";
+				window.location.href = mapUrl;
+			}
+
+        </script>
+
+
+
+		<script id="addrList_Template" type="text/template">
+			<li id="{{index}}">
+				<a href="#" class="item-link item-content">
+					<div class="item-inner">
+						<div class="item-title-row">
+							<div class="item-title" style="font-size: 0.7rem">{{name}}
+							</div>
+							<div class="item-after">{{disce}}</div>
+							
+						</div>
+						<div class="item-subtitle">{{address}}</div>
+					</div>
+				</a>
+			</li>
+    </script>
+</head>
+
+    <body>
+        <div class="page-group">
+            <div class="page page-current">
+                <div class="content">
+                    <!--切换项-->
+                    <div class="buttons-tab">
+                        <a href="#abos" class="tab-link active button"><i class="icon icon-map"></i>地图<span class="citys"></span></a>
+                        <a href="#list" class="tab-link button"><i class="icon icon-list"></i>列表</a>
+                    </div>
+
+                    <!--内容展示-->
+                    <div class="tabs">
+			<div id="abos">
+                        <div id="container" class="tab active"></div>
+			<div  class="mapdistance">
+							
+			</div>
+			</div>
+                        <div id="list" class="tab">
+                            <div class="list-block media-list">
+                                <ul id="addrList"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <nav class="bar bar-tab">
+                    <a class="tab-item external " href="#" onclick="$$.Goto('index')">
+                        <span class="icon icon-img-box" style="background-size:0"> <img src="../Common/image/pub/tab_icon_wode_shouye.png" /></span>
+                        <span class="tab-label">首页</span>
+                    </a>
+                    <a class="tab-item external active" href="#" onclick="My.ShowMap()">
+                        <span class="icon icon-img-box" style="background-size:0"> <img src="../Common/image/pub/tab_icon_dang_daohang.png" /></span>
+                        <span class="tab-label">导航</span>
+                    </a>
+                    <a class="tab-item external" href="#" onclick="My.GotoMyCardPage();">
+                        <span class="icon icon-img-box" style="background-size:0"> <img src="../Common/image/pub/tab_icon_youka.png" /></span>
+                        <span class="tab-label">油卡</span>
+                    </a>
+                    <a class="tab-item external" href="#" onclick="$$.Goto('wdzh')">
+                        <span class="icon icon-img-box" style="background-size:0"> <img src="../Common/image/pub/tab_icon_wode.png" /></span>
+                        <span class="tab-label">我的</span>
+                    </a>
+                </nav>
+
+            </div>
+
+        </div>
+        <script type="text/javascript">
+        	mui.init(
+        	)
+        </script>
+        <script>
+			locations=[
+				{lat:'104.560262054664',lon:'31.535203585382',address:'四川省绵阳市安州区胜果村12号路交汇处',name:'花荄新城加油站',index:1,disce:'',cha:''},
+				{lat:'104.551896306101',lon:'31.5466343393526',address:'四川省绵阳市安州区花兴路',name:'花荄加油站',index:2,disce:'',cha:''},
+				{lat:'104.628543',lon:'31.475698',address:'四川省绵阳市涪城区辽宁大道辅路',name:'永兴加油站',index:3,disce:'',cha:''},
+				{lat:'104.616940068828',lon:'31.4591907312819',address:'四川省绵阳市涪城区高新区磨家镇飞云社区四组',name:'吉龙加油站',index:4,disce:'',cha:''},
+				{lat:'104.485786967573',lon:'31.5207486780902',address:'四川省绵阳市安州区辽安路',name:'兴仁朝荣加油站',index:5,disce:'',cha:''},
+				{lat:'104.61097472525',lon:'31.45060837628',address:'四川省绵阳市涪城区飞云大道中段',name:'狮子山加油站',index:6,disce:'',cha:''},
+				{lat:'104.668695027975',lon:'31.5160986315285',address:'四川省绵阳市涪城区九洲大道',name:'园南加油站',index:7,disce:'',cha:''},
+				{lat:'104.66911378352',lon:'31.5175244802099',address:'四川省绵阳市涪城区九洲大道',name:'园北加油站',index:8,disce:'',cha:''},
+				{lat:'104.604676264215',lon:'31.4471175465075',address:'四川省绵阳市涪城区绵兴西路154',name:'磨家加油站',index:9,disce:'',cha:''},
+				{lat:'104.6376222569',lon:'31.458915657764',address:'四川省绵阳市涪城区永兴镇飞云大道中段',name:'飞云加油站',index:10,disce:'',cha:''},
+				{lat:'104.659596231441',lon:'31.4770681872252',address:'四川省绵阳市涪城区普明北路西段129-7号',name:'普明北路加油站',index:11,disce:'',cha:''},
+				{lat:'104.65593392091',lon:'31.466850973533',address:'四川省绵阳市涪城区永兴镇绵兴中路121号',name:'白云加油站',index:12,disce:'',cha:''},
+				{lat:'104.701712897436',lon:'31.5731443312703',address:'四川省绵阳市涪城区龙门镇香社南北干道',name:'龙门加油站',index:13,disce:'',cha:''},
+				{lat:'104.5179966042',lon:'31.415407951228',address:'四川省德阳市罗江县S1成绵高速复线安县服务区A站',name:'安县服务区A站',index:14,disce:'',cha:''},
+				{lat:'104.5179966042',lon:'31.415407951228',address:'四川省罗江县S1成绵高速复线安县服务区B站',name:'安县服务区B站',index:15,disce:'',cha:''},
+				{lat:'104.71262091928',lon:'31.538309797653',address:'四川省绵阳市涪城区青义镇青龙大道中段中国石油加油站',name:'绵江加油站',index:16,disce:'',cha:''},
+				{lat:'104.69789295759',lon:'31.469713499035',address:'四川省绵阳市涪城区绵兴东路61',name:'高新加油站',index:17,disce:'',cha:''},
+				{lat:'104.728673202029',lon:'31.5493000750975',address:'四川省绵阳市游仙区石马镇甘泉街中国石油石马加油站',name:'石马加油站',index:18,disce:'',cha:''},
+				{lat:'104.73340312253',lon:'31.514366703365',address:'四川省绵阳市涪城区长虹大道北段287号',name:'圣水加油站',index:19,disce:'',cha:''},
+				{lat:'104.7361135909',lon:'31.468212604032',address:'四川省绵阳市涪城区三汇路5号',name:'花园加油站',index:20,disce:'',cha:''},
+				{lat:'104.435541679209',lon:'31.6384989195732',address:'四川省绵阳市北川羌族自治县S105(成青路）',name:'安昌二加油站',index:21,disce:'',cha:''},
+				{lat:'104.74782612869',lon:'31.453368353195',address:'四川省绵阳市涪城区一环路南段-106-8',name:'石塘加油站',index:22,disce:'',cha:''},
+				{lat:'104.419352055672',lon:'31.6439886929249',address:'四川省绵阳市北川羌族自治县中国石油寻龙加油站(辽宁大道北)',name:'安昌一加油站',index:23,disce:'',cha:''},
+				{lat:'104.458963900814',lon:'31.690070619113',address:'四川省绵阳市北川羌族自治县S105(成青路）',name:'永安加油站',index:24,disce:'',cha:''},
+				{lat:'104.76070868089',lon:'31.449137201435',address:'四川省绵阳市涪城区长虹大道南段174',name:'南山加油站',index:25,disce:'',cha:''},
+				{lat:'104.76384892703',lon:'31.449731474738',address:'四川省绵阳市涪城区长虹大道南段188号',name:'城南加油站',index:26,disce:'',cha:''},
+				{lat:'104.78042875824',lon:'31.496896401226',address:'四川省绵阳市游仙区游仙东路23',name:'游仙加油站',index:27,disce:'',cha:''},
+				{lat:'104.77652110811',lon:'31.439662350456',address:'四川省绵阳市涪城区石塘镇红星村九队',name:'南郊加油站',index:28,disce:'',cha:''},
+				{lat:'104.704040645731',lon:'31.7295290857587',address:'四川省绵阳市江油市太平镇桥楼村',name:'普照加油站',index:29,disce:'',cha:''},
+				{lat:'104.254756248074',lon:'31.5083706581996',address:'四川省绵阳市安州区睢水镇建设街(红石村三组)',name:'雎水加油站',index:30,disce:'',cha:''},
+				{lat:'104.346300595273',lon:'31.4994688684383',address:'四川省绵阳市安州区秀水镇新民墩秀路中国石油加油站',name:'秀水加油站',index:31,disce:'',cha:''},
+				{lat:'104.80292254579',lon:'31.43932870224',address:'四川省绵阳市涪城区1号桥与绵盐路交叉口西南',name:'小枧加油站',index:32,disce:'',cha:''},
+				{lat:'104.78807117877',lon:'31.419667749536',address:'四川省绵阳市绵州大道三段与群文街交叉路口,群文村附近',name:'塘汛加油站',index:33,disce:'',cha:''},
+				{lat:'104.79641134934',lon:'31.410275666388',address:'四川省绵阳市经开区塘汛镇205省道与二环路南段交叉口向北路西',name:'塘坊加油站',index:34,disce:'',cha:''},
+				{lat:'104.80493025698',lon:'31.39616319001',address:'中国四川省绵阳市涪城区塘汛镇群丰村一社',name:'三江加油站',index:35,disce:'',cha:''},
+				{lat:'104.73755604674',lon:'31.7713321261581',address:'四川省绵阳市江油市太平路中段492号',name:'太平加油站',index:36,disce:'',cha:''},
+				{lat:'104.347167680333',lon:'31.5024480933443',address:'四川省绵阳市安州区S105(成青路)',name:'东升加油站',index:37,disce:'',cha:''},
+				{lat:'104.790317676419',lon:'31.8120994044795',address:'四川省绵阳市江油市三合镇柏林村一组',name:'中雁加油站',index:38,disce:'',cha:''},
+				{lat:'104.883627946073',lon:'31.2960056346708',address:'四川省绵阳市三台县芦溪镇松林湾',name:'芦溪加油站',index:39,disce:'',cha:''},
+				{lat:'104.949540061725',lon:'31.2999453862696',address:'四川省绵阳市三台花园水磨河村五组',name:'三台花园加油站',index:40,disce:'',cha:''},
+				{lat:'105.03370262305',lon:'31.550821423822',address:'四川省绵阳市游仙区刘柏路',name:'徐家加油站',index:41,disce:'',cha:''},
+				{lat:'105.018666303142',lon:'31.8978105135376',address:'四川省绵阳市江油市小溪坝镇江梓街',name:'江梓加油站',index:42,disce:'',cha:''},
+				{lat:'104.679698034356',lon:'32.03304206949',address:'四川省绵阳市平武县平通镇棉角村林家坝站',name:'林家坝加油站',index:43,disce:'',cha:''},
+				{lat:'104.546436363619',lon:'32.4179976198545',address:'四川省绵阳市平武县九龙路中段',name:'龙崖加油站',index:44,disce:'',cha:''},
+				{lat:'104.318862',lon:'32.755308',address:'四川省绵阳市平武县S205(九环公路)',name:'白马加油站',index:45,disce:'',cha:''},
+				{lat:'104.567226579204',lon:'32.4007970457997',address:'四川省绵阳市平武县金家湾社',name:'迎宾加油站',index:46,disce:'',cha:''},
+				{lat:'105.079155690927',lon:'31.0973028621975',address:'四川省绵阳市三台县潼川镇麻石桥',name:'潼川加油站',index:47,disce:'',cha:''},
+				{lat:'105.078155297538',lon:'30.8669008466323',address:'四川省绵阳市三台县观桥镇',name:'观桥加油站',index:48,disce:'',cha:''},
+				{lat:'105.105052872498',lon:'31.0970780482614',address:'四川省绵阳市三台东河路九号',name:'涪江加油站',index:49,disce:'',cha:''},
+				{lat:'105.016213601186',lon:'31.1634099295476',address:'四川省绵阳市 三台县灵兴镇',name:'灵兴加油站',index:50,disce:'',cha:''},
+				{lat:'105.106799005222',lon:'31.1139469543615',address:'四川省绵阳市三台县樟树路与龙潭路交汇处',name:'三台新区加油站',index:51,disce:'',cha:''},
+				{lat:'105.401500397967',lon:'31.2236373339184',address:'四川省绵阳市盐亭县云溪镇文同路183号',name:'远大加油站',index:52,disce:'',cha:''},
+				{lat:'105.309864584158',lon:'31.2153834513819',address:'四川省绵阳市盐亭县两河镇',name:'两河加油站',index:53,disce:'',cha:''},
+				{lat:'105.411455191562',lon:'31.2509087878252',address:'四川省绵阳市盐亭县梓盐路',name:'万兴加油站',index:54,disce:'',cha:''},
+				{lat:'105.419297414548',lon:'31.2083276471713',address:'四川省绵阳市盐亭县红光东路',name:'兴源加油站',index:55,disce:'',cha:''},
+				{lat:'105.430941038279',lon:'31.195093943905',address:'四川省绵阳市盐亭县经开区临江村2社',name:'月圆加油站',index:56,disce:'',cha:''},
+				{lat:'105.161992301152',lon:'31.618157342703',address:'四川省绵阳市梓潼县长卿镇幸福村一社',name:'梓潼县长卿加油站',index:57,disce:'',cha:''},
+				{lat:'105.169651906771',lon:'31.6301837274837',address:'四川省绵阳市梓潼县文昌镇文昌路南段',name:'文丰加油站',index:58,disce:'',cha:''},
+				{lat:'105.183188265072',lon:'31.6417993693618',address:'四川省绵阳市梓潼县文昌镇城郊村',name:'文昌加油站',index:59,disce:'',cha:''},
+				{lat:'104.787806',lon:'31.819141',address:'四川省绵阳市江油市Y224(玻武路)',name:'柏林加油站',index:60,disce:'',cha:''},
+				{lat:'105.091567766306',lon:'31.0867523390461',address:'四川省绵阳市三台县南河路15',name:'三台县城南加油站',index:61,disce:'',cha:''},
+			];
+			locationCds:[
+				{lat:'103.782297',lon:'31.185935',address:'成都市彭州市小鱼洞镇渔洞村一组88号',name:'小鱼洞加油站',index:62,disce:'',cha:''},
+				{lat:'103.827703',lon:'31.154692',address:'成都市彭州市新兴镇君山村四组',name:'君山加油站',index:63,disce:'',cha:''},
+				{lat:'103.857567',lon:'31.134698',address:'成都市彭州市新兴镇光辉村',name:'光辉加油站',index:64,disce:'',cha:''},
+				{lat:'103.929582',lon:'31.055075',address:'四川省成都市彭州市隆丰镇九龙村7社',name:'四川石油第一加油站',index:65,disce:'',cha:''},
+				{lat:'103.872',lon:'31.054614',address:'四川省成都市彭州市隆裕街-10公里西北',name:'兴桥加油站',index:66,disce:'',cha:''},
+				{lat:'103.699167',lon:'31.043466',address:'四川省都江堰市蒲阳路',name:'蒲阳加油站',index:67,disce:'',cha:''},
+				{lat:'103.887195',lon:'31.038795',address:'成都市彭州市隆丰镇西北村三组',name:'百贤加油站',index:68,disce:'',cha:''},
+				{lat:'103.727928',lon:'31.025889',address:'四川省都江堰市驾虹乡',name:'驾虹加油站',index:69,disce:'',cha:''},
+				{lat:'103.644945',lon:'31.012084',address:'四川省都江堰市蒲阳路722',name:'二王庙加油站',index:70,disce:'',cha:''},
+				{lat:'104.03594',lon:'30.998522',address:'成都市彭州市九尺镇天鹅街165号',name:'九尺加油站',index:71,disce:'',cha:''},
+				{lat:'103.926152',lon:'30.997412',address:'四川省成都市彭州市彭白路南',name:'彭州西郊加油站',index:72,disce:'',cha:''},
+				{lat:'103.663087',lon:'30.995345',address:'四川省都江堰市幸福镇联盟村四社',name:'都江堰加油站',index:73,disce:'',cha:''},
+				{lat:'103.672494',lon:'30.989458',address:'四川省都江堰市幸福镇永寿村',name:'沙西加油站',index:74,disce:'',cha:''},
+				{lat:'103.971567',lon:'30.987652',address:'成都市彭州市天彭镇爱国村一社',name:'彭北加油站',index:75,disce:'',cha:''},
+				{lat:'103.663955',lon:'30.975214',address:'四川省成都市都江堰市永安大道南3段',name:'安达加油站',index:76,disce:'',cha:''},
+				{lat:'103.638045',lon:'30.972936',address:'四川省都江堰市安顺村',name:'滨河加油站',index:77,disce:'',cha:''},
+				{lat:'104.126145',lon:'30.961885',address:'成都市彭州市蒙阳镇东塔村6社',name:'千禧加油站',index:78,disce:'',cha:''},
+				{lat:'103.653843',lon:'30.958178',address:'四川省都江堰市聚源镇金鸡村',name:'都江堰天府加油站',index:79,disce:'',cha:''},
+				{lat:'103.965728',lon:'30.95662',address:'成都市彭州市牡丹大道南段98号',name:'牡丹加油站',index:80,disce:'',cha:''},
+				{lat:'103.694704',lon:'30.946724',address:'四川省都江堰市聚源镇导江村九组',name:'聚源加油站',index:81,disce:'',cha:''},
+				{lat:'104.135107',lon:'30.93233',address:'四川省成都市彭州市蒙阳镇佛踏村12组',name:'天益加油站',index:82,disce:'',cha:''},
+				{lat:'104.383341',lon:'30.922721',address:'四川省成都市金堂县清江镇梓桐村一组',name:'清江加油站',index:83,disce:'',cha:''},
+				{lat:'103.826286',lon:'30.91819',address:'四川省成都市郫都区唐昌镇大云村二组301号',name:'唐昌加油站',index:84,disce:'',cha:''},
+				{lat:'103.997593',lon:'30.916559',address:'四川省成都市新都区清流镇顺河村',name:'腾达加油站',index:85,disce:'',cha:''},
+				{lat:'103.608696',lon:'30.90797',address:'四川省成都市都江堰市大三路250号',name:'青城加油站',index:86,disce:'',cha:''},
+				{lat:'104.250727',lon:'30.902351',address:'四川省成都市青白江区凤凰大道一段与红阳路交叉口东北',name:'新成绵加油站',index:87,disce:'',cha:''},
+				{lat:'104.223319',lon:'30.899323',address:'成都市青白江区108国道与同华大道交叉口向南路西',name:'庆化加油站',index:88,disce:'',cha:''},
+				{lat:'104.223319',lon:'30.899323',address:'成都市青白江区108国道与同华大道交叉口向南路西,新远宏机械厂附近',name:'庆化加油站',index:89,disce:'',cha:''},
+				{lat:'103.775162',lon:'30.899077',address:'四川省成都市郫都区唐昌镇平康村一组300号',name:'城郊加油站',index:90,disce:'',cha:''},
+				{lat:'104.246784',lon:'30.889135',address:'四川省成都市青白江区华金大道二段881号',name:'华严加油站',index:91,disce:'',cha:''},
+				{lat:'104.422155',lon:'30.884564',address:'四川省成都市金堂县赵镇中河村6组',name:'中河加油站',index:92,disce:'',cha:''},
+				{lat:'103.803224',lon:'30.878801',address:'四川省成都市郫县安德镇安平西路5号',name:'望乐加油站',index:93,disce:'',cha:''},
+				{lat:'103.870787',lon:'30.877624',address:'成都市新都区新民镇大成村一社',name:'新民加油站',index:94,disce:'',cha:''},
+				{lat:'104.392277',lon:'30.872574',address:'四川省成都市青白江区十里大道2段-1129',name:'金堂野生动物园加油站',index:95,disce:'',cha:''},
+				{lat:'104.022657',lon:'30.871899',address:'成都市新都区新繁镇繁川家具大道138-140号',name:'新兴加油站',index:96,disce:'',cha:''},
+				{lat:'104.353756',lon:'30.871111',address:'四川省成都市青白江区城厢镇玉龙村九组',name:'玉虹加油站',index:97,disce:'',cha:''},
+				{lat:'104.316079',lon:'30.868733',address:'成都市青白江区成南路附近',name:'城厢加油站',index:98,disce:'',cha:''},
+				{lat:'103.643986',lon:'30.867374',address:'四川省都江堰市石羊镇皂角村一组',name:'都江堰石羊加油站',index:99,disce:'',cha:''},
+				{lat:'103.75804',lon:'30.865175',address:'四川省郫县花园镇',name:'花园加油站',index:100,disce:'',cha:''},
+				{lat:'104.463608',lon:'30.861505',address:'四川省成都市金堂县三星镇兰家店村三组',name:'三星加油站',index:101,disce:'',cha:''},
+				{lat:'103.917219',lon:'30.859191',address:'四川省郫县三道堰镇秦家庙村',name:'三道堰加油站',index:102,disce:'',cha:''},
+				{lat:'104.444846',lon:'30.851164',address:'四川省成都市金堂县赵镇新生村十一组',name:'龙威加油站',index:103,disce:'',cha:''},
+				{lat:'104.346453',lon:'30.851002',address:'青白江区城厢镇沿沱村十四组',name:'香岛加油站',index:104,disce:'',cha:''},
+				{lat:'104.252274',lon:'30.85052',address:'四川省成都市青白江区货运大道冷冻食品交易市场旁边',name:'货运大道B加油站',index:105,disce:'',cha:''},
+				{lat:'104.250799',lon:'30.849833',address:'青白江区桂通村中国石油货运大道加油站',name:'货运大道A加油站',index:106,disce:'',cha:''},
+				{lat:'104.290968',lon:'30.848253',address:'四川省成都市青白江区祥福镇香山村一组',name:'成青B加油站',index:107,disce:'',cha:''},
+				{lat:'103.782641',lon:'30.846679',address:'四川省成都市郫都区友爱镇彭温路',name:'子云加油站',index:108,disce:'',cha:''},
+				{lat:'104.184708',lon:'30.843614',address:'四川省成都市新都区108国道(封赐村卫生站南)',name:'天府加油站',index:109,disce:'',cha:''},
+				{lat:'104.162106',lon:'30.841681',address:'四川省成都市新都区新军街193号',name:'西北加油站',index:110,disce:'',cha:''},
+				{lat:'104.154389',lon:'30.835761',address:'四川省成都市新都区如意大道229号',name:'火车站加油站',index:111,disce:'',cha:''},
+				{lat:'104.349311',lon:'30.835426',address:'四川省成都市青白江区城厢镇前锋村三组',name:'前锋加油站',index:112,disce:'',cha:''},
+				{lat:'103.904091',lon:'30.828131',address:'四川省郫县红兴乡',name:'红兴加油站',index:113,disce:'',cha:''},
+				{lat:'104.135565',lon:'30.82787',address:'新都区新都香城大道华桂路段822号',name:'香城A加油站',index:114,disce:'',cha:''},
+				{lat:'104.13951',lon:'30.82651',address:'成都市新都区新都香城大道华桂路段621号',name:'香城B加油站',index:115,disce:'',cha:''},
+				{lat:'103.893228',lon:'30.823692',address:'四川省郫县成灌西路356号',name:'鹃城加油站',index:116,disce:'',cha:''},
+				{lat:'104.155387',lon:'30.82206',address:'四川省成都市新都区宝光大道南段198号',name:'新都城西加油站',index:117,disce:'',cha:''},
+				{lat:'104.206461',lon:'30.820406',address:'四川省成都市新都区新都镇同仁村四组',name:'流花加油站',index:118,disce:'',cha:''},
+				{lat:'103.979638',lon:'30.818887',address:'四川省成都市郫县团结镇靖源上街277号',name:'团结加油站',index:119,disce:'',cha:''},
+				{lat:'104.29936',lon:'30.816629',address:'青白江区祥福镇福农村2组',name:'日新加油站',index:120,disce:'',cha:''},
+				{lat:'104.164859',lon:'30.809446',address:'四川省成都市新都区新都镇南二路蓉都大道340号',name:'新南加油站',index:121,disce:'',cha:''},
+				{lat:'104.029154',lon:'30.652478',address:'四川省成都市武侯区二环路西一段98号',name:'西一加油站',index:122,disce:'',cha:''},
+				{lat:'104.043284',lon:'30.802408',address:'四川省成都市新都区105省道与龙腾大道交叉口西北侧',name:'华资加油站',index:123,disce:'',cha:''},
+				{lat:'104.296081',lon:'30.801374',address:'四川省成都市青白江区中国石油西江加油站(大石路东)',name:'西江加油站',index:124,disce:'',cha:''},
+				{lat:'104.236073',lon:'30.793692',address:'四川省成都市新都区泰兴镇泰北街349号',name:'高同二加油站',index:125,disce:'',cha:''},
+				{lat:'103.939408',lon:'30.786848',address:'四川省郫县红光镇八里村七社',name:'八里加油站',index:126,disce:'',cha:''},
+				{lat:'104.058181',lon:'30.782075',address:'四川省成都市新都区蓉北路2段-235附近',name:'华美加油站',index:127,disce:'',cha:''},
+				{lat:'103.794952',lon:'30.771778',address:'成都市温江区万春镇幸福村六组',name:'镇子加油站',index:128,disce:'',cha:''},
+				{lat:'104.005325',lon:'30.768739',address:'四川省成都市郫县安靖镇林湾村8社',name:'胜利加油站',index:129,disce:'',cha:''},
+				{lat:'104.076299',lon:'30.765296',address:'四川省成都市新都区大丰镇大天路511号',name:'北新加油站',index:130,disce:'',cha:''},
+				{lat:'104.094119',lon:'30.763687',address:'四川省成都市新都区大丰街道大天路1042号',name:'天都加油站',index:131,disce:'',cha:''},
+				{lat:'104.637126',lon:'30.763272',address:'四川省成都市金堂县三溪镇场镇',name:'三溪加油站',index:132,disce:'',cha:''},
+				{lat:'103.984243',lon:'30.759019',address:'四川省郫县犀浦镇龙吟村',name:'犀浦加油站',index:133,disce:'',cha:''},
+				{lat:'103.995551',lon:'30.758246',address:'四川省成都市郫县犀浦镇校园路东段168号',name:'华浦加油站',index:134,disce:'',cha:''},
+				{lat:'103.789479',lon:'30.750444',address:'四川省成都市温江区温玉路',name:'和盛加油站',index:135,disce:'',cha:''},
+				{lat:'103.543762',lon:'30.74523',address:'四川省崇州市怀远镇泉水村3组',name:'怀远加油站',index:136,disce:'',cha:''},
+				{lat:'104.336595',lon:'30.743546',address:'四川省成都市青白江区福洪镇民主村八组',name:'新福洪加油站',index:137,disce:'',cha:''},
+				{lat:'104.082788',lon:'30.742672',address:'四川省成都市金牛区北星大道一段凤凰山公园西门附近',name:'董家巷加油站',index:138,disce:'',cha:''},
+				{lat:'104.082644',lon:'30.742605',address:'四川省成都市金牛区北星干道一段1892号',name:'钟家堰加油站',index:139,disce:'',cha:''},
+				{lat:'103.627141',lon:'30.733912',address:'元通镇华怀路116号',name:'兴达加油站',index:140,disce:'',cha:''},
+				{lat:'104.115034',lon:'30.733796',address:'四川省成都市成华区将军碑路453',name:'城北加油站（将军碑453）',index:141,disce:'',cha:''},
+				{lat:'104.211077',lon:'30.732768',address:'四川省成都市木兰镇共和村二社',name:'木兰加油站',index:142,disce:'',cha:''},
+				{lat:'104.114498',lon:'30.732009',address:'成都市成华区蓉都大道385号',name:'长运司洗车场加油站',index:143,disce:'',cha:''},
+				{lat:'104.060021',lon:'30.729913',address:'成都市金牛区泉水西路21号',name:'洞子口加油站',index:144,disce:'',cha:''},
+				{lat:'104.05505',lon:'30.72859',address:'成都市金牛区洞子口乡新桥村一组',name:'金彭加油站',index:145,disce:'',cha:''},
+				{lat:'104.080231',lon:'30.728571',address:'成都市北三环路二段辅路与凤凰立交交叉路口向南路西',name:'凤凰内侧加油站',index:146,disce:'',cha:''},
+				{lat:'104.275963',lon:'30.727687',address:'四川省成都市新都区石板滩镇万源大道2号',name:'金三角加油站',index:147,disce:'',cha:''},
+				{lat:'103.64389',lon:'30.726623',address:'四川省郫县红光镇独柏村',name:'郫县平安加油站',index:148,disce:'',cha:''},
+				{lat:'103.643882',lon:'30.726608',address:'崇州市双怀路元通镇大罗村5组',name:'崇州平安加油站',index:149,disce:'',cha:''},
+				{lat:'104.018532',lon:'30.723946',address:'成都市金牛区金泉路25号',name:'金牛坝加油站',index:150,disce:'',cha:''},
+				{lat:'103.907019',lon:'30.719096',address:'四川省成都市温江区永宁镇永福村一社',name:'柳永南加油站',index:151,disce:'',cha:''},
+				{lat:'104.568739',lon:'30.717895',address:'四川省成都市淮口镇淮州大道85号',name:'淮口加油站',index:152,disce:'',cha:''},
+				{lat:'104.041256',lon:'30.716518',address:'四川省成都市金牛区洞子口乡长久村金府路与交大路交叉口金府机电城门口',name:'金府路加油站',index:153,disce:'',cha:''},
+				{lat:'104.041256',lon:'30.716518',address:'成都市金牛区洞子口乡长久村三组',name:'金府加油站',index:154,disce:'',cha:''},
+				{lat:'104.045733',lon:'30.715312',address:'成都市金牛区交大路225号',name:'长久加油站',index:155,disce:'',cha:''},
+				{lat:'104.082817',lon:'30.711611',address:'八里桥路196号',name:'成华加油站',index:156,disce:'',cha:''},
+				{lat:'104.019098',lon:'30.710557',address:'成都市金牛区金牛乡跃进村一组233号',name:'金宏运加油站',index:157,disce:'',cha:''},
+				{lat:'104.061133',lon:'30.710487',address:'成都市金牛区九里堤北路1号附1号',name:'诸葛庙加油站',index:158,disce:'',cha:''},
+				{lat:'104.076193',lon:'30.708339',address:'金牛区云台东一路6号',name:'五块石加油站',index:159,disce:'',cha:''},
+				{lat:'103.867837',lon:'30.704044',address:'温江区南熏大道1段5号',name:'柳东加油站',index:160,disce:'',cha:''},
+				{lat:'104.017379',lon:'30.702198',address:'成都市金牛区羊西线蜀汉路357号',name:'羊西加油站',index:161,disce:'',cha:''},
+				{lat:'104.040982',lon:'30.699494',address:'成都市金牛区茶店子东街1号',name:'金牛加油站',index:162,disce:'',cha:''},
+				{lat:'104.550003',lon:'30.698686',address:'四川省成都市金堂县白果站石燕村六组',name:'白果加油站',index:163,disce:'',cha:''},
+				{lat:'104.168915',lon:'30.697915',address:'四川省成都市成华区东三环路二段73号',name:'龙潭加油站',index:164,disce:'',cha:''},
+				{lat:'104.063838',lon:'30.697772',address:'成都市金牛区九里堤南路74号',name:'九里堤加油站',index:165,disce:'',cha:''},
+				{lat:'104.352445',lon:'30.69753',address:'成都市龙泉驿区洪安镇龙洪路41号',name:'文安加油站',index:166,disce:'',cha:''},
+				{lat:'104.102039',lon:'30.695214',address:'成都市二环路北四段7附1号',name:'市区平安加油站',index:167,disce:'',cha:''},
+				{lat:'104.025743',lon:'30.694902',address:'四川省成都市金牛区蜀汉路424号',name:'黄忠加油站',index:168,disce:'',cha:''},
+				{lat:'103.858034',lon:'30.694238',address:'成都市温江区南江路123号',name:'温江光华加油站',index:169,disce:'',cha:''},
+				{lat:'103.988035',lon:'30.692949',address:'四川省成都市青羊区金辉路301号',name:'联工加油站',index:170,disce:'',cha:''},
+				{lat:'103.851402',lon:'30.692599',address:'成都市温江区南熏大道二段499号',name:'涌泉加油站',index:171,disce:'',cha:''},
+				{lat:'104.117597',lon:'30.691204',address:'成都市成华区新风路23号',name:'八里庄加油站',index:172,disce:'',cha:''},
+				{lat:'104.099546',lon:'30.691182',address:'成都市成华区三友路213号',name:'李家沱加油站',index:173,disce:'',cha:''},
+				{lat:'104.005306',lon:'30.691107',address:'成都市青羊区印象金沙390号',name:'摸底河内侧加油站',index:174,disce:'',cha:''},
+				{lat:'104.136904',lon:'30.689264',address:'成都市成华区二仙桥北二路1号',name:'二仙桥加油站',index:175,disce:'',cha:''},
+				{lat:'104.095346',lon:'30.685863',address:'成都市金牛区一环路北四段217号',name:'城北加油站（一环路北）',index:176,disce:'',cha:''},
+				{lat:'103.962152',lon:'30.685316',address:'成都市青羊区日月大道二段221号',name:'苏坡天山加油站',index:177,disce:'',cha:''},
+				{lat:'104.027476',lon:'30.679205',address:'成都市青羊区二环路西二段83号',name:'浣花加油站',index:178,disce:'',cha:''},
+				{lat:'104.043829',lon:'30.674158',address:'成都市青羊区清江东路2号',name:'青羊加油站',index:179,disce:'',cha:''},
+				{lat:'104.010377',lon:'30.671845',address:'成都市青羊区瑞联路48号',name:'长运司苏坡加油站',index:180,disce:'',cha:''},
+				{lat:'103.852769',lon:'30.671752',address:'温江区涌泉街办华丰村二社',name:'燎原加油站',index:181,disce:'',cha:''},
+				{lat:'104.028443',lon:'30.671521',address:'四川省成都市青羊区二环路西二段8号',name:'白伦加油站',index:182,disce:'',cha:''},
+				{lat:'103.616644',lon:'30.667064',address:'成都市崇州市道明镇白塔湖大道一号',name:'道明加油站',index:183,disce:'',cha:''},
+				{lat:'104.706131',lon:'30.663502',address:'四川省金堂县隆盛镇黄角桠村一组',name:'隆盛加油站',index:184,disce:'',cha:''},
+				{lat:'104.105839',lon:'30.661625',address:'成都市成华区一环路东三段66号',name:'水碾河加油站',index:185,disce:'',cha:''},
+				{lat:'104.125646',lon:'30.661168',address:'成都市成华区万年路149号',name:'万年加油站',index:186,disce:'',cha:''},
+				{lat:'103.702212',lon:'30.655662',address:'崇州市崇阳镇石埂村十五组',name:'安乐加油站',index:187,disce:'',cha:''},
+				{lat:'103.689451',lon:'30.654718',address:'四川崇州市金盆地大道277号',name:'彭州交通加油站',index:188,disce:'',cha:''},
+				{lat:'104.313278',lon:'30.652695',address:'四川省成都市龙泉驿区洛带镇岐山村6组',name:'龙洛加油站',index:189,disce:'',cha:''},
+				{lat:'103.685029',lon:'30.651511',address:'崇州市金盆地大道280号',name:'嘉庆加油站',index:190,disce:'',cha:''},
+				{lat:'103.680653',lon:'30.651042',address:'金盆地大道101号',name:'锦城加油站',index:191,disce:'',cha:''},
+				{lat:'104.045307',lon:'30.647596',address:'成都市武侯区高升桥路6号',name:'成运司城南加油站',index:192,disce:'',cha:''},
+				{lat:'104.339771',lon:'30.647462',address:'四川省成都市龙泉驿区洛带镇双槐村十一组',name:'洛带加油站',index:193,disce:'',cha:''},
+				{lat:'104.027781',lon:'30.647302',address:'成都市武侯区武侯大道双楠段95号',name:'双楠加油站',index:194,disce:'',cha:''},
+				{lat:'104.028231',lon:'30.646778',address:'武侯区武侯大道双楠段16号',name:'泰祥加油站',index:195,disce:'',cha:''},
+				{lat:'104.139144',lon:'30.643172',address:'成都市成华区迎晖路153号',name:'保和加油站',index:197,disce:'',cha:''},
+				{lat:'104.13709',lon:'30.642308',address:'成都市成华区迎晖路190号',name:'蜀欣加油站',index:198,disce:'',cha:''},
+				{lat:'104.080876',lon:'30.639326',address:'成都市武侯区一环路南二段4号',name:'城区城南加油站',index:199,disce:'',cha:''},
+				{lat:'104.157396',lon:'30.636547',address:'成都市成华区和美西路19号',name:'保和外侧加油站',index:200,disce:'',cha:''},
+				{lat:'104.046105',lon:'30.635211',address:'成都市武侯区二环路南四段20号',name:'高新加油站',index:201,disce:'',cha:''},
+				{lat:'104.154586',lon:'30.635109',address:'四川省成都市成华区东三环路五段嘉陵江路2号保和内侧加油站',name:'保和内侧加油站',index:202,disce:'',cha:''},
+				{lat:'103.992374',lon:'30.626334',address:'武侯区武侯大道铁佛段20',name:'铁佛加油站',index:203,disce:'',cha:''},
+				{lat:'104.119068',lon:'30.625972',address:'成都市锦江区三圣乡花果村一组',name:'海地通加油站',index:204,disce:'',cha:''},
+				{lat:'103.461625',lon:'30.624427',address:'四川省成都市大邑县悦来镇前进村8组',name:'悦来加油站',index:205,disce:'',cha:''},
+				{lat:'104.083361',lon:'30.617774',address:'成都市武侯区武侯桂溪乡棕树村五组长寿路1号',name:'棕树加油站',index:206,disce:'',cha:''},
+				{lat:'104.160378',lon:'30.61291',address:'驿都西路236号',name:'洪河加油站',index:207,disce:'',cha:''},
+				{lat:'103.935165',lon:'30.608231',address:'四川省成都市双流东升街道葛陌村1组',name:'金江加油站',index:208,disce:'',cha:''},
+				{lat:'103.935165',lon:'30.608231',address:'成都市温江区金府路东段456号',name:'柳西加油站',index:209,disce:'',cha:''},
+				{lat:'104.056538',lon:'30.607831',address:'成都市高新区盛和三路188号',name:'元华加油站',index:210,disce:'',cha:''},
+				{lat:'103.994512',lon:'30.604322',address:'成都市武侯区武侯大道文昌段2号',name:'望锦加油站',index:211,disce:'',cha:''},
+				{lat:'104.128206',lon:'30.60427',address:'成都市锦江区成龙路街道办事处华兴村1组1号附2号',name:'娇子内侧加油站',index:212,disce:'',cha:''},
+				{lat:'104.129733',lon:'30.603047',address:'成都市锦江区娇子立交外侧成龙街道华兴村一组',name:'娇子外侧加油站',index:213,disce:'',cha:''},
+				{lat:'103.994131',lon:'30.602807',address:'成都市武侯区簇马路一段10号',name:'新苗加油站',index:214,disce:'',cha:''},
+				{lat:'104.094613',lon:'30.602714',address:'成都市锦江区南三环路三段200号',name:'麻柳湾加油站',index:215,disce:'',cha:''},
+				{lat:'104.056521',lon:'30.595201',address:'成都市高新区石羊乡仁和村一组',name:'仁和加油站',index:216,disce:'',cha:''},
+				{lat:'103.868125',lon:'30.585662',address:'四川省双流县彭镇布市村',name:'彭镇加油站',index:217,disce:'',cha:''},
+				{lat:'103.840047',lon:'30.583735',address:'四川省成都市双流区金桥镇场镇',name:'双流岷江加油站',index:218,disce:'',cha:''},
+				{lat:'104.025104',lon:'30.581242',address:'四川省成都市双流西航港街道办事处桂花堰社区7组',name:'成双加油站',index:219,disce:'',cha:''},
+				{lat:'103.972712',lon:'30.577585',address:'成都市双流县东升镇双桂社区3组',name:'机场加油加气站',index:220,disce:'',cha:''},
+				{lat:'104.256744',lon:'30.570612',address:'成都市龙泉驿区驿都大道中路288号',name:'界牌加油站',index:221,disce:'',cha:''},
+				{lat:'103.524376',lon:'30.5706',address:'四川省成都市大邑县晋原镇雪山大道二段758号',name:'大新加油站',index:222,disce:'',cha:''},
+				{lat:'103.544288',lon:'30.568163',address:'四川省成都市大邑县晋原镇大树村七社',name:'益通加油站',index:223,disce:'',cha:''},
+				{lat:'104.097501',lon:'30.566827',address:'成都市高新区中和街道新上街119号',name:'中和加油站(上街119号)',index:224,disce:'',cha:''},
+				{lat:'103.982985',lon:'30.566495',address:'四川省成都市双流县西航港街道办事处寺圣社区3组',name:'大件路加油站',index:225,disce:'',cha:''},
+				{lat:'104.095095',lon:'30.553006',address:'成都市高新区中和街道新下街132号',name:'中和加油站（下街132号）',index:226,disce:'',cha:''},
+				{lat:'103.9868',lon:'30.552568',address:'四川省成都市双流区西航港大道中三段501号',name:'川齿加油站',index:227,disce:'',cha:''},
+				{lat:'103.912779',lon:'30.551851',address:'四川省成都市双流区银河路附近',name:'板桥加油站',index:228,disce:'',cha:''},
+				{lat:'103.79396',lon:'30.54804',address:'四川省成都市崇州市崇州市三江镇委东',name:'三江加油站',index:229,disce:'',cha:''},
+				{lat:'104.053419',lon:'30.540932',address:'四川省成都市天府新区华阳剑南大道南段303号',name:'剑南加油站',index:230,disce:'',cha:''},
+				{lat:'103.644806',lon:'30.489151',address:'四川省成都市大邑县唐场镇三河村一社',name:'唐场加油站',index:231,disce:'',cha:''},
+				{lat:'104.4273',lon:'30.478181',address:'四川省成都市简阳市中国石油银湖加油站(金龙山庄南路)',name:'石盘加油站',index:232,disce:'',cha:''},
+				{lat:'103.866457',lon:'30.460429',address:'新津县兴乐乡花中村5组',name:'成运司花中加油站',index:233,disce:'',cha:''},
+				{lat:'103.795922',lon:'30.456823',address:'四川省成都市新津县五津镇临江村17组新希望大道北沿线',name:'希望加油站',index:234,disce:'',cha:''},
+				{lat:'103.859742',lon:'30.448169',address:'新津县花桥镇长绍村4组',name:'八达加油站',index:235,disce:'',cha:''},
+				{lat:'104.374952',lon:'30.44187',address:'简阳市贾家镇洗银村4社',name:'贾家加油站',index:236,disce:'',cha:''},
+				{lat:'104.389021',lon:'30.438288',address:'简阳市贾家镇兴隆寺街20号',name:'柏林加油站',index:237,disce:'',cha:''},
+				{lat:'103.82104',lon:'30.429943',address:'四川省成都市新津县五津北路261号',name:'岷江加油站',index:238,disce:'',cha:''},
+				{lat:'103.811495',lon:'30.425886',address:'四川省成都市新津县五津镇平岗村49号',name:'平岗加油站',index:239,disce:'',cha:''},
+				{lat:'104.509267',lon:'30.425738',address:'简阳市石桥镇回龙寺村',name:'回龙寺加油站',index:240,disce:'',cha:''},
+				{lat:'103.809808',lon:'30.423238',address:'四川省成都新津迎宾大道232号',name:'城关加油站',index:241,disce:'',cha:''},
+				{lat:'103.863685',lon:'30.414015',address:'新津县花桥镇长春村',name:'新津新普加油站',index:242,disce:'',cha:''},
+				{lat:'103.90308',lon:'30.410462',address:'四川省成都市新津县中国石油普兴加油站(新津县普兴镇委东北)',name:'普兴加油站',index:243,disce:'',cha:''},
+				{lat:'103.812905',lon:'30.410446',address:'四川省成都市新津县五河路107号附近',name:'新津城南加油站',index:244,disce:'',cha:''},
+				{lat:'103.695145',lon:'30.407862',address:'成都市邛崃市泉水镇新建村4组',name:'成运司好运加油站',index:245,disce:'',cha:''},
+				{lat:'103.783031',lon:'30.407695',address:'成都市新津县新平金水村四组',name:'迎先加油站',index:246,disce:'',cha:''},
+				{lat:'104.543608',lon:'30.407581',address:'简阳市简城镇节约村一社',name:'城北加油站',index:247,disce:'',cha:''},
+				{lat:'103.62189',lon:'30.406521',address:'成都市邛崃市高埂镇和平村',name:'高埂加油站',index:248,disce:'',cha:''},
+				{lat:'103.686163',lon:'30.405388',address:'邛崃羊安镇泉水街上',name:'泉水加油站',index:249,disce:'',cha:''},
+				{lat:'103.806139',lon:'30.401655',address:'永商镇车灌村',name:'永兴加油站',index:250,disce:'',cha:''},
+				{lat:'103.838723',lon:'30.395763',address:'成都市新津县邓双镇岷江大道三段8号',name:'邓双加油站',index:251,disce:'',cha:''},
+				{lat:'103.769124',lon:'30.394178',address:'新津县中国石油铁溪加油站(成新蒲快速路)',name:'安西加油站',index:252,disce:'',cha:''},
+				{lat:'104.570953',lon:'30.39144',address:'简阳市东溪镇奎星村三社',name:'东溪加油站',index:253,disce:'',cha:''},
+				{lat:'103.469179',lon:'30.391225',address:'成都市邛崃市临邛镇文笔村三组',name:'土地坡加油站',index:254,disce:'',cha:''},
+				{lat:'103.887613',lon:'30.38839',address:'成都市新津县金华镇五星村四组',name:'新津金华加油站',index:255,disce:'',cha:''},
+				{lat:'103.23526',lon:'30.387757',address:'成都市邛崃市火井镇状元路96号',name:'井溪加油站',index:256,disce:'',cha:''},
+				{lat:'104.561099',lon:'30.386062',address:'四川省简阳市白塔路',name:'简阳城南加油站',index:257,disce:'',cha:''},
+				{lat:'104.545844',lon:'30.380318',address:'简阳市简城建设西路',name:'简阳城西加油站',index:258,disce:'',cha:''},
+				{lat:'104.529642',lon:'30.367725',address:'四川省资阳市简阳市简三路G76夏蓉高速入口与G76夏蓉高速出口交叉口南50米',name:'阳安加油站',index:259,disce:'',cha:''},
+				{lat:'104.046076',lon:'30.366562',address:'四川省成都市天府新区煎茶镇鹿溪河村6组201号',name:'煎茶加油站',index:260,disce:'',cha:''},
+				{lat:'104.642594',lon:'30.350435',address:'四川省简阳市平泉镇龙泉村',name:'平泉加油站',index:261,disce:'',cha:''},
+				{lat:'103.972061',lon:'30.328144',address:'四川省成都市双流区黄龙大道四段3560',name:'金盾加油站',index:262,disce:'',cha:''},
+				{lat:'104.757117',lon:'30.309636',address:'四川省成都市简阳市施家镇红日大桥中国石油施家加油站',name:'施家加油站',index:263,disce:'',cha:''},
+				{lat:'103.518963',lon:'30.301966',address:'蒲江县西来镇两河村八组72号',name:'西崃加油站',index:264,disce:'',cha:''},
+				{lat:'103.632002',lon:'30.276635',address:'四川省蒲江县寿安镇利民路北段',name:'寿安加油站',index:265,disce:'',cha:''},
+				{lat:'103.516843',lon:'30.215389',address:'蒲江县鹤山镇鹤山村一社',name:'蒲塘加油站',index:266,disce:'',cha:''},
+				{lat:'103.528558',lon:'30.212579',address:'四川省成都市蒲江县鹤山镇干柏村6组',name:'城东加油站',index:267,disce:'',cha:''},
+				{lat:'103.531701',lon:'30.206051',address:'四川省成都市蒲江县中国石油朝阳加油站(蒲江客运中心西南)',name:'朝阳加油站',index:268,disce:'',cha:''},
+				{lat:'103.508764',lon:'30.182873',address:'成都蒲江县鹤山镇梁江村二社',name:'梁江加油站',index:269,disce:'',cha:''},
+			];
+			var City="";
+			var lat="";
+			var lng="";
+			// 获取用户位置信息
+			//var signPackage = $$.GetJSSDKParameter();
+			//alert(signPackage)
+			var aa=window.location.href
+			//alert(aa)
+			var datas=`{params=method:"GetWeInfo",url:"${aa}"}`
+			//alert(`http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params=method:"GetWeInfo",url:"${aa}"`)
+			$.ajax({
+		        type:"get",
+		        url:`http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetWeInfo",url:"${aa}"}`,
+				async: true,
+		        success:function(data){
+				//alert(JSON.stringify(data))
+		          // alert(JSON.parse(data).appId)
+				wx.config({
+				debug: false,
+				appId: JSON.parse(data).appId,
+				timestamp: JSON.parse(data).timpstamp,
+				nonceStr: JSON.parse(data).noncestr,
+				signature: JSON.parse(data).signature,
+				jsApiList: [
+					// 所有要调用的 API 都要加到这个列表中
+					'checkJsApi',
+					'openLocation',
+					'getLocation'
+				]
+				});
+				wx.ready(function() {
+				wx.getLocation({
+					success: function(res) {
+						mui.showLoading("正在加载..","div");
+						//alert(JSON.stringify(res))
+						lat = res.latitude;
+						lng = res.longitude;
+						//wx.loadCity
+						//var rsts = queryData(lat, lng);
+						//alert(JSON.stringify(rsts));
+						My.location = {};
+                        			My.location.latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                        			My.location.longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                        			My.location.speed = res.speed; // 速度，以米/每秒计
+                        			My.location.accuracy = res.accuracy; // 位置精度
+                        			//设置经纬度信息
+                       				 var latLng = new qq.maps.LatLng(My.location.latitude, My.location.longitude);
+
+	
+						
+						Mys.citylocation.searchCityByLatLng(latLng);
+                        			//调用城市经纬度查询接口实现经纬查询
+						
+				
+                        
+					},
+					fail: function(res) {
+						alert("aa")
+						alert(JSON.stringify(res))
+					},
+					cancel: function(res) {}
+				});
+			});
+		        },
+		        error:function(jqXHR){
+				//alert("no")
+		          //alert(JSON.stringify(jqXHR))
+		        }
+			});
+			
+				
+			var Mys = {
+                		citylocation: new qq.maps.CityService({
+                    		complete: function (results) {
+                       		var location = results.detail.detail.split(",");
+                        	if (location.length > 3) {
+                           		 My.location.province = location[2];
+                        	}
+                        	City = location[1];
+				if(City=='绵阳市'){
+				var locationok=[];
+					for(var i=0;i<locations.length;i++){
+					var obj=bd_decrypt(locations[i].lat,locations[i].lon);
+					//alert(JSON.stringify(obj));
+					locations[i].lat=obj.lng;
+					locations[i].lon=obj.lat;
+					locationok.push(locations[i]);	
+					}
+					//alert(JSON.stringify(locationok))
+					var rst=locationok;	
+				}
+				else{
+					var rst=locationCds;
+				}	
+				var latlngs=dealDatas(rst, lat, lng);			
+				init(rst, lat, lng, latlngs);
+                       		elemClick(rst, lat, lng, latlngs);
+	
+						
+                    		}
+			
+                		})
+           		 };
+			function bd_decrypt(bd_lng, bd_lat) {
+				var X_PI = Math.PI * 3000.0 / 180.0;
+				var x = bd_lng - 0.0065;
+				var y = bd_lat - 0.006;
+				var z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * X_PI);
+				var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * X_PI);
+				var gg_lng = z * Math.cos(theta);
+				var gg_lat = z * Math.sin(theta);
+				return {lng: gg_lng, lat: gg_lat}
+			}
+			// 查询周边油站信息
+			function queryData(lat, lng) {
+				var data = {
+					"经度": lng,
+					"维度": lat
+				};
+				var tmpl = "{{经度}},{{维度}}";
+				var params = tmpl.t(data);
+				var proc = "查询周边油站信息 " + params;
+				return $$.JSONDB.Query(proc).Table;
+			}
+			function dealDatas(rst,lat,lng){
+				var latlngs = [];
+				var pusharr=[];
+				for(var k = 0; k < rst.length; k++) {
+					latlngs.push(new qq.maps.LatLng(rst[k].lon, rst[k].lat));
+					var tence=getDisance(lat,lng,rst[k].lon,rst[k].lat);
+					rst[k].disce=Transformation(tence).middles;
+					rst[k].cha=Transformation(tence).mid;
+				}
+				rst.sort(sortdis);
+				//alert(JSON.stringify(rst));
+				$$.Fill("#addrList", rst);
+				return latlngs;
+			}
+			function sortdis(a,b){
+				a=parseFloat(a.cha)
+				b=parseFloat(b.cha)
+				return a-b;
+			}
+			//转坐标
+			//function Convert(lat,lng){
+				//var pi=3.14159265358979324 * 3000.0 / 180.0;
+				//var x = lng - 0.0065;
+				//var y = lat - 0.006;
+				//var z = sqrt(x * x + y * y) - 0.00002 * sin(y * pi);
+				//var theta = atan2(y, x) - 0.000003 * cos(x * pi);
+				//lng = z * cos(theta);
+				//lat = z * sin(theta);
+				//alert(z);
+				//return {lan:lat,log:lng};
+			//}
+			// 数据处理
+			function dealData(rst, lat, lng) {
+				var latlngs = [];
+				for(var k = 0; k < rst.length; k++) {
+					if(rst[k].油站优惠 == 0) {
+						rst[k].油站优惠 = "";
+					} else {
+						rst[k].油站优惠 = "(直降" + rst[k].油站优惠 + "元)";
+					}
+					if(rst[k].能否圈存 == 0) {
+						rst[k].能否圈存 = "";
+					} else {
+						rst[k].能否圈存 = "(可圈存)";
+					}
+					rst[k].油站距离 = parseInt(rst[k].油站距离);
+					latlngs.push(new qq.maps.LatLng(rst[k].油站维度, rst[k].油站经度));
+				}
+				$$.Fill("#addrList", rst);
+				return latlngs;
+			}
+			//距离
+			function getDisance(lat1, lng1, lat2, lng2){
+				var dis = 0;
+				var radLat1 = toRad(lat1);
+				var radLat2 = toRad(lat2);
+				var deltaLat = radLat1 - radLat2;
+				var deltaLng = toRad(lng1) - toRad(lng2);
+				var dis = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(deltaLat / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(deltaLng / 2), 2)));
+				return dis * 6378137;
+			}
+			function toRad(txt){
+				return txt * Math.PI/180;
+			}
+ 			function Transformation(item){
+				var val=parseInt(item);
+				if(val<1000){
+					return {middles:val+"m",mid:val*0.001};
+				}
+				var thounds=parseInt(val/1000)
+				var mintes=parseInt(val%1000).toString()
+				mintes=mintes.substring(0,2)
+				return {middles:thounds+"."+mintes+"km",mid:thounds+"."+mintes};
+			}
+
+			// 地图相关
+			var latlngs = [];
+
+			function init(rst, lat, lng, latlngs) {
+				var pinfo;
+				if(rst.length > 1) {
+					pinfo = rst[0];
+				} else {
+					pinfo = rst;
+				}
+
+				// 地图的中心坐标，获得用户当前位置信息
+				var myLatlng = new qq.maps.LatLng(lat, lng);
+
+				// div 容器中创建地图
+				var map = new qq.maps.Map(document.getElementById("container"), {
+					center: myLatlng,
+					zoom: 13
+				});
+
+				// 创建信息提示窗口
+				var infoWin = new qq.maps.InfoWindow({
+					map: map
+				});
+
+				// 默认显示的信息窗口
+				var marker = new qq.maps.Marker({
+					position: new qq.maps.LatLng(pinfo.lon, pinfo.lat),
+					map: map
+				});
+
+				// Marker 自定义图标属性
+				var size = new qq.maps.Size(20, 20);
+				icon = new qq.maps.MarkerImage(
+					"../Common/image/tus1.png",
+					size
+				);
+				marker.setIcon(icon);
+				infoWin.open();
+				var param = pinfo.lon + ',' + pinfo.lat + ',' + "'" + pinfo.name + "'";
+				infoWin.setContent('<div class="info-box">' +
+					'<div class="pull-left">' +
+					'<div class="name">' + pinfo.name + '</div>' +
+					'<div class="sp"></div>' +
+					'<div class="addr">' + pinfo.address + '</div></div>' +
+					'<div class="pull-right" onclick="navigation(' + param + ')"><img src="../Common/image/arrow.png" alt="">去这里</div></div>'
+				);
+				
+				infoWin.setPosition(new qq.maps.LatLng(pinfo.lon, pinfo.lat));
+					$(".mapdistance").children().remove();
+					var htmls=`<div class='mapdis'>
+							<div class="mapdis-top">"${pinfo.name}"</div>
+							<div class="mapdis-bom">"${pinfo.address}"</div>
+							</div>
+							<div class="mapdisbtn">
+							<div class="mapbtn-jy" onclick="My.hrefs()">去加油</div>
+							<div class="mapbtn" style="margin-left: 30upx;margin-right: 10upx;" onclick='My.navigation("${pinfo.lon}","${pinfo.lat}","${pinfo.name}")'>导航</div>
+							`
+				$(".mapdistance").append(htmls);
+				mui.hideLoading();
+				// 添加信息窗口
+				for(var i = 0; i < latlngs.length; i++) {
+					(function(n) {
+						var marker = new qq.maps.Marker({
+							position: latlngs[n],
+							map: map
+						});
+
+						// Marker 自定义图标属性
+						var size = new qq.maps.Size(20, 20);
+						icon = new qq.maps.MarkerImage(
+							"../Common/image/tus1.png",
+							size 
+						);
+						marker.setIcon(icon);
+
+						// 点击出现信息窗口
+						qq.maps.event.addListener(marker, 'click', function() {
+							var lat = marker.position.lat;
+							var lng = marker.position.lng;
+							var name = "",
+								// sp = "",
+								addr = "";
+								// circle = "";
+							
+							for(var item = 0; item < rst.length; item++) {
+								if((rst[item].lon == lat) && (rst[item].lat == lng)) {
+									name = rst[item].name;
+									// sp = rst[item].油站优惠;
+									addr = rst[item].address;
+									// circle = rst[item].能否圈存;
+									continue;
+								}
+							}
+							infoWin.open();
+							var param = lat + ',' + lng + ',' + "'" + name + "'";
+							infoWin.setContent('<div class="info-box">' +
+								'<div class="pull-left">' +
+								'<div class="name">' + name + '</div>' +
+								'<div class="sp"></div>' +
+								'<div class="addr">' + addr + '</div></div>' +
+								'<div class="pull-right" onclick="navigation(' + param + ')"><img src="../Common/image/arrow.png" alt="">去这里</div></div>'
+							);
+							infoWin.setPosition(latlngs[n]);
+							$(".mapdistance").children().remove();
+							var htmls=`<div class='mapdis'>
+							<div class="mapdis-top">"${name}"</div>
+							<div class="mapdis-bom">"${addr}"</div>
+							</div>
+							<div class="mapdisbtn">
+							<div class="mapbtn-jy" onclick="">去加油</div>
+							<div class="mapbtn" style="margin-left: 30upx;margin-right: 10upx;" onclick='My.navigation("${pinfo.lon}","${pinfo.lat}","${pinfo.name}")'>导航</div>
+							`
+				$(".mapdistance").append(htmls);
+						
+
+						});
+					})(i);
+				}
+			}
+
+			// 去这里
+			function navigation(lat, lng, name) {
+				console.log(lat, lng, name)
+				// 获得用户当前位置???
+				// var mapUrl = "http://apis.map.qq.com/tools/routeplan/eword=" + name + "&epointx=" + lng + "&epointy=" + lat + "&sword=绵阳市&spointx=104.563700&spointy=31.538640?referer=myapp&key=OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77";
+				var mapUrl = "http://apis.map.qq.com/tools/routeplan/eword=" + name + "&epointx=" + lng + "&epointy=" + lat + "?referer=myapp&key=OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77";
+				window.location.href = mapUrl;
+			}
+
+			// 元素点击事件
+			function elemClick(rst, lat, lng) {
+				$("#addrList").on("click", "li", function() {
+					$("a[href='#list']").removeClass("active");
+					$("a[href='#abos']").addClass("active");
+					$("#abos").show();
+					$("#list").hide();
+					var pid = $(this).attr("id");
+					var pinfo;
+					for(var o = 0; o < rst.length; o++) {
+						if(rst[o].index == pid) {
+							pinfo = rst[o];
+						}
+					}
+					init(pinfo, lat, lng, latlngs);
+				});
+			}
+
+			// 列表点击之后，tab项的切换
+			$(".buttons-tab a").click(function() {
+				var eid = $(this).attr("href");
+				$(this).addClass("active").siblings().removeClass("active");
+				$(eid).show().siblings().hide();
+			});
+        </script>
+		<script type="text/javascript">
+				//扩展mui.showLoading
+		(function($, window) {
+		    //显示加载框
+		    $.showLoading = function(message,type) {
+		        if ($.os.plus && type !== 'div') {
+		            $.plusReady(function() {
+		                plus.nativeUI.showWaiting(message);
+		            });
+		        } else {
+		            var html = '';
+		            html += '<i class="mui-spinner mui-spinner-white"></i>';
+		            html += '<p class="text">' + (message || "数据加载中") + '</p>';
+		
+		            //遮罩层
+		            var mask=document.getElementsByClassName("mui-show-loading-mask");
+		            if(mask.length==0){
+		                mask = document.createElement('div');
+		                mask.classList.add("mui-show-loading-mask");
+		                document.body.appendChild(mask);
+		                mask.addEventListener("touchmove", function(e){e.stopPropagation();e.preventDefault();});
+		            }else{
+		                mask[0].classList.remove("mui-show-loading-mask-hidden");
+		            }
+		            //加载框
+		            var toast=document.getElementsByClassName("mui-show-loading");
+		            if(toast.length==0){
+		                toast = document.createElement('div');
+		                toast.classList.add("mui-show-loading");
+		                toast.classList.add('loading-visible');
+		                document.body.appendChild(toast);
+		                toast.innerHTML = html;
+		                toast.addEventListener("touchmove", function(e){e.stopPropagation();e.preventDefault();});
+		            }else{
+		                toast[0].innerHTML = html;
+		                toast[0].classList.add("loading-visible");
+		            }
+		        }   
+		    };
+		
+				//隐藏加载框
+				  $.hideLoading = function(callback) {
+					if ($.os.plus) {
+						$.plusReady(function() {
+							plus.nativeUI.closeWaiting();
+						});
+					} 
+					var mask=document.getElementsByClassName("mui-show-loading-mask");
+					var toast=document.getElementsByClassName("mui-show-loading");
+					if(mask.length>0){
+						mask[0].classList.add("mui-show-loading-mask-hidden");
+					}
+					if(toast.length>0){
+						toast[0].classList.remove("loading-visible");
+						callback && callback();
+					}
+				  }
+			})(mui, window);
+			</script>
+    </body>
+
+</html>

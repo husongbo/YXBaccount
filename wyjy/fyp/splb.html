@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>商品列表</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css">
+		<style type="text/css">
+			.img-area{
+				height: 5rem;
+			}
+			
+			.img-area img {
+				width: 100%;
+				height: 100%;
+			}
+			
+			.text-area{
+				padding: 0.3rem;
+			}
+			
+			button{
+				background-color: #E4393C;
+				color: #FFFFFF;
+				padding: 0.2rem 0.5rem;
+				border-radius: 1rem;
+				border: none;
+				font-size: 0.65rem;
+				margin-top: 0.2rem;
+				box-sizing: border-box;
+			}
+		</style>
+
+		<!--商品列表-->
+		<script id="list_Template" type="text/template">
+			<li data-spid="{{商品标识}}" data-dpid="{{店铺标识}}">
+				<div class="img-area">
+					<img src="{{商品图片}}" alt="" />
+				</div>
+				<div class="text-area">
+					<div>{{商品名称}}</div>
+					<div style="color: #E4393C;font-weight: bold;font-size: 0.9rem;">￥{{销售价格}}</div>
+					<div class="describe">{{商品描述}}</div>
+					<button>立即购买</button>
+				</div>
+			</li>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a class="icon icon-left pull-left back"></a>
+					<h1 class="title">商品列表</h1>
+				</header>
+				<div class="content">
+					<div class="content-block-title">热销商品</div>
+					<div class="content-block">
+						<ul class="flex-between-box" id="list"></ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+	<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+	<script type="text/javascript" src="../../Common/js/sdk.js"></script>
+	<script type="text/javascript" src="../../Common/js/sdk_data_validation.js"></script>
+	<script type="text/javascript" src="../../Common/js/sdk_db.js"></script>
+	<script type="text/javascript">
+		var dpID = $$.getParameterValue().dpID;
+		var proc = "店铺商品列表 " + dpID;
+		var rst = $$.JSONDB.Query(proc).Table;
+		if(rst.length > 0) {
+			for(var i = 0; i < rst.length; i++) {
+				rst[i].销售价格 = rst[i].市场价格.toFixed(2);
+				var arr = rst[i].商品图片.split(",");
+				rst[i].商品图片 = decodeURI(atob(arr[0]));
+			}
+			console.log(rst)
+			$$.Fill("#list", rst);
+		}
+
+		// 列表到详情
+		$("#list li").click(function() {
+			var spID = $(this).attr("data-spid");
+			var dpID = $(this).attr("data-dpid");
+			window.location.href = "spxq.html?spID=" + spID + "&dpID=" + dpID;
+		});
+	</script>
+
+</html>

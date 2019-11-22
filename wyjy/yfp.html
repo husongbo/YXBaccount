@@ -1,0 +1,215 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>预分配</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    
+    <script type="text/javascript">
+		var My = {
+
+		};
+		$$.Page_Load = function() {
+			$.init();
+			
+			My.QueryAccount();
+		}
+		
+		My.QueryAccount = function() {
+			var balance = Bill.GetAccountBalance();
+			$(".quota-account").text(balance[0].REMAINING_SUM);
+			
+			balance = Bill.GetAccountBalance(1);
+			$(".imprest-account").text(balance[0].REMAINING_SUM);
+		}
+		
+		My.Predistribution = function () {
+			var amount = $('#amount').val();
+			if (amount == "") {
+				return;
+			}
+			var data = {};
+			data.TYPE = "预分配扣费";								
+			data.AMOUNT = amount * -1;
+			data.tableId = 0;
+			data.ORDER_ID = "ORDERID" + parseInt(Math.random() * 1000000);								
+
+			var date = new Date();
+			var year = date.getFullYear();
+			var month = date.getMonth() + 1;
+			month = (month < 10 ? "0" + month : month);
+			day = date.getDate();
+			day = (day < 10 ? "0" + day : day);
+			today = (year.toString() + month.toString()) + day; 
+			data.YMD = today;
+			// 扣除额度账户
+			var rst = Bill.AddTradingRecord(data);
+			
+			var success = true;
+			var msg = "预分配成功";
+			if (!rst) {
+				success = false;
+				msg = "预分配失败，请重试";
+			}
+			if (rst && rst.Table[0].RESULT == -1) {
+				success = false;
+				msg = "余额不足，请充值";				
+			}
+			
+			if (!success) {
+				layer.open({
+					content: msg
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;
+			}			
+			
+			data.TYPE = "预分配充值";
+			data.tableId = 1;
+			data.AMOUNT *= -1;
+			// 增加备用账户
+			rst = Bill.AddTradingRecord(data);
+			
+			if (rst && rst.Table[0].RESULT == 0) {
+				$('#amount').val("");
+				layer.open({
+					content: '预分配成功'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+			} else {
+				layer.open({
+					content: '预分配失败，请重试'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+			}
+			
+			$('#amount').val("");
+			My.QueryAccount();
+			$$.CommonEvent();
+		}
+    </script>
+    <style>
+        #MainPage{
+            background-color: #f5f5f5;
+        }
+        .Color_B1 , .innerboxs{
+            background:-webkit-linear-gradient(left, #f58059 0%,#f7705c 100%);
+            background: -o-linear-gradient(left, #f58059 0%,#f7705c 100%);
+            background: -ms-linear-gradient(left, #f58059 0%,#f7705c 100%);
+            background: linear-gradient(left, #f58059 0%,#f7705c 100%);
+        }
+        .innerboxs{
+            position: relative;
+            height:9.5rem;
+        }
+        .bar:after {
+            content: '';
+            height: 0px;
+        }
+        .sui-bottom-text {
+            margin: 0;
+            padding-top: 4rem;
+            color: #fff;
+            padding-left: 0.5rem;
+        }
+        .card-wrap{
+            position: absolute;
+            width: 100%;
+            top: 0px;
+            left: 0;
+        }
+        .button.button-big {
+            font-size: 0.8rem;
+            height: 2rem;
+            line-height: 1.9rem;
+        }
+        .card{
+            background: #fff;
+            box-shadow: none;
+            margin: 0.5rem;
+            position: relative;
+            border-radius: 0.2rem;
+            font-size: 0.7rem;
+            padding: 0.8rem 0;
+        }
+        .button {
+            border: 1px solid #f58059;
+            color: #f58059;
+        }
+
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">预分配</h1>
+            </header>
+
+            <div id="PageContent" class="content">
+					<div class="card-content card-info has-card">
+						<div class="list-block media-list">
+							<ul>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title-row">
+												<div class="item-title namefont">额度账户</div>
+												<div class="item-after  quota-account money">0</div>
+											</div>
+										</div>
+									</div>
+								</li>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title-row">
+												<div class="item-title namefont">备用账户</div>
+												<div class="item-after imprest-account money">0</div>
+											</div>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				<div class="card-content-inner">
+					<input class="card-number" type="number" value="" id="amount"/>
+					<input type="button" value="预分配" id="recharge" onclick="My.Predistribution();"/>
+				</div>
+            </div>
+        </div>        
+    </div>
+</body>
+</html>

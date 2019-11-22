@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>先加后买</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>	
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/QuickStore.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+
+	<script id="Debt_Template" type="text/template">
+		<i>已经借入</i>
+		<strong class="money balance">{{REMAINING_SUM}}</strong>
+    </script>
+
+	<script id="TradingRecord_Template" type="text/template">
+		<li>
+			<div class="item-content">
+				<div class="item-media">{{TYPE}}：</div>
+				<div class="item-inner">
+					<div class="item-title-row">
+						<div class="item-title"></div>
+						<div class="item-after money" style="color: blue;">{{AMOUNT}}</div>	
+					</div>
+					<div class="item-title-row">
+						<div class="item-title"></div>
+						<div class="item-after">{{YMD}}</div>	
+					</div>
+				</div>
+			</div>
+		</li>
+	</script>
+
+    <script type="text/javascript">
+		var My = {
+
+		};
+		
+		$$.Page_Load = function(){
+			$.init();
+		}
+		
+    </script>
+
+	<style>
+		.card{
+			background: #fff;
+			box-shadow: 0 0 0.6rem rgba(245, 127, 89, 0.3);
+			margin: 0.5rem;
+			position: relative;
+			border-radius: 0.4rem;
+			font-size: 0.7rem;
+		}
+		.button:active  {
+			background: burlywood;
+		}
+		.button{
+			line-height: 1.7rem;
+			padding: 0 0.8rem;
+			height: 1.8rem;
+			border: 1px solid #f57c59;
+			color: #F57C59;
+		}
+		.mony strong{
+			font-size:1.2rem;
+			color: #fff;
+		}
+		.mony i{
+			font-style: normal;
+			color: #000000;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: white;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: white;">先加后买</h1>
+            </header>
+	    	<div id="PageContent" class="content">
+				<div class="card card-header" style="margin-top:0.5rem; margin-left: 0;margin-right: 0;">
+					<a class="button has-card" href="sqjk.html">申请</a>
+					<div class="mony" id="Debt">
+					</div>
+					<a class="button has-card">还款</a>
+				</div>
+	    		<div id="Bill">
+			    	<div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+			    		<ul id="TradingRecord">
+						</ul>
+					</div>	    			
+	    		</div>
+	        </div>
+        </div>        
+    </div>
+</body>
+</html>

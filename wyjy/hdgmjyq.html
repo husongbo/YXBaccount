@@ -1,0 +1,1592 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>活动购买加油券</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+	<link rel="stylesheet" href="../Common/css/mui.min.css" />
+	<link rel="stylesheet" href="../Common/css/zhifu.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+	<script type="text/javascript" src="../Common/js/mui.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+    <script type="text/javascript" src="../Common/js/utf.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/template" id="couponList_Template">
+        <div class="yhq-list">
+            <div class="card card-list">
+                <div class="content-padded grid-demo">
+                    <div class="row">
+                        <div class="row-left">
+                            <span class="fh">￥</span><span class="row-price">{{礼品价格}}</span>
+                        </div>
+                        <div class="row-right">
+                            <div class="title-yxq">
+                                <div class="lp-title">油信宝加油券</div>
+                                <div class="lp-yxq">领券日期：{{发放日期}}</div>
+                            </div>
+
+                            <div class="lp-bz">支付时抵扣</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <label class="label-checkbox item-content">
+                <input type="checkbox" name="my-checkbox" id="{{礼品标识}}" value="{{礼品价格}}" class="checkbox-money" />
+                <div class="item-media checkbox-div">
+                    <i class="icon icon-form-checkbox"></i>
+                </div>
+            </label>
+
+        </div>
+
+    </script>
+    <style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background: #fff;
+        }
+
+        input[type='number'] {
+            border: none;
+            width: 90%;
+            box-sizing: border-box;
+            padding-left: 5%;
+            font-size: 0.6rem;
+            padding-bottom: 0.3rem;
+        }
+
+        .content-block-title {
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+
+        .checkbox-money {
+            height: 4rem;
+            line-height: 4rem;
+        }
+
+        label.label-checkbox input[type="checkbox"]:checked + .item-media i.icon-form-checkbox {
+            background-color: #ff8200;
+        }
+
+        .yh-yhjts img {
+            height: 0.7rem;
+        }
+
+        .yh-yhjts {
+            font-size: 0.6rem;
+            height: 0;
+            min-height: 0rem;
+            padding-left: 0.3rem;
+        }
+
+        .row {
+            margin: 0;
+        }
+
+        .row-left {
+            width: 30.7%;
+            float: left;
+            text-align: center;
+            height: 4rem;
+            line-height: 4rem;
+            color: #fff;
+        }
+
+        .row-right {
+            width: 69.3%;
+            margin-left: 30%;
+            padding-left: 1rem;
+        }
+
+        .row-price {
+            font-size: 1rem;
+            font-family: DIN-Bold;
+        }
+
+        .ljlq {
+            width: 25%;
+            float: left;
+            padding-top: 1.6rem;
+        }
+
+            .ljlq img {
+                width: 80%;
+            }
+
+        .lp-yxq {
+            font-size: 0.6rem;
+        }
+
+        .content-padded {
+            margin: 0 auto;
+        }
+
+        .lp-title {
+            padding: 0.3rem 0;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .title-yxq {
+            width: 100%;
+            float: left;
+            color: #666;
+        }
+
+        .lp-bz {
+            bottom: 0.15rem;
+            position: absolute;
+            color: #999;
+            font-size: 0.6rem;
+        }
+
+        .content-padded {
+            padding-top: 0.2rem;
+            width: 100%;
+        }
+
+        #couponList .card {
+            margin: 0;
+            box-shadow: none;
+            background: url("../Common/image/wycz/img_diyongquan.png") no-repeat left top;
+            background-size: 100% 100%;
+            width: 85%;
+            float: left;
+            height: 4.3rem;
+        }
+
+        .color-gray {
+            color: #e4393c;
+        }
+
+        yhq-list {
+            padding-bottom: 0.5rem;
+        }
+
+        .card-footer {
+            margin-top: 1rem;
+            padding: 0;
+        }
+
+        #cz,#ok{
+            background-color: #ff8200;
+            color: #FFFFFF;
+            font-weight: bold;
+            -- border-radius:0.3rem;
+        }
+
+        .js-button {
+            background-color: rgba(0,0,0,0);
+        }
+
+        .bar-tab:before {
+            background-color: rgba(0,0,0,0);
+        }
+
+        .content-block-title {
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+
+        .card-header:after {
+            background-color: rgba(0, 0, 0, 0);
+        }
+
+        label.label-checkbox i.icon-form-checkbox {
+            border: 1px solid #ff8200;
+        }
+
+        .checkbox-div {
+            height: 4.3rem;
+            line-height: 4.3rem;
+        }
+
+        .icon-form-checkbox {
+            left: 5%;
+        }
+
+        .price {
+            font-size: 1rem;
+            color: #e4393c;
+            margin-bottom: 1%;
+            margin-top: -3%;
+            font-weight: bold;
+        }
+
+        .list-block {
+            margin: 0.75rem 0;
+        }
+
+        .shuoming-box {
+            background: url("../Common/image/gmjyq/xflf.png") no-repeat center top;
+            background-size: 100% auto;
+            text-align: center;
+            display: none;
+            position: absolute;
+            top: 14%;
+            z-index: 999;
+            border-radius: 0.3rem;
+            width: 100%;
+        }
+
+        .shuoming-content {
+            padding: 15% 6% 0 6%;
+            color: #FFFFFF;
+            font-size: 0.8rem;
+        }
+
+            .shuoming-content div {
+                color: #ffffff;
+                font-size: 1.2rem;
+                padding: 1rem 0;
+            }
+
+        .quxiao {
+            background-color: rgba(0, 0, 0, 0);
+            height: 12%;
+            width: 36%;
+            position: absolute;
+            bottom: 14%;
+            left: 14%;
+        }
+
+        .quding {
+            background-color: rgba(0, 0, 0, 0);
+            height: 12%;
+            width: 36%;
+            position: absolute;
+            bottom: 14%;
+            right: 14%;
+        }
+
+
+        .huojiang-box {
+            background: url("../Common/image/gmjyq/huojiang.png") no-repeat center top;
+            background-size: 100% auto;
+            text-align: center;
+            display: none;
+            width: 100%;
+            position: absolute;
+            top: 14%;
+            z-index: 999;
+            border-radius: 0.3rem;
+        }
+
+        .huojiang-content {
+            padding: 5% 6% 0 6%;
+            color: #FFFFFF;
+            font-size: 2rem;
+            padding-top: 46%;
+            padding-right: 18%;
+        }
+
+            .huojiang-content span {
+                color: #ffffff;
+                font-size: 1rem;
+                padding: 1rem 0;
+            }
+
+        .huojiang-guanbi {
+            background-color: rgba(0, 0, 0, 0);
+            height: 2rem;
+            width: 2rem;
+            position: absolute;
+            bottom: 0.1rem;
+            right: 44%;
+        }
+
+
+        .weihuojiang-box {
+            background: url("../Common/image/gmjyq/weihuojiang.png") no-repeat center top;
+            background-size: 100% auto;
+            text-align: center;
+            display: none;
+            width: 100%;
+            position: absolute;
+            top: 14%;
+            z-index: 999;
+            border-radius: 0.3rem;
+        }
+
+        .weihuojiang-guanbi {
+            background-color: rgba(0, 0, 0, 0);
+            height: 2rem;
+            width: 2rem;
+            position: absolute;
+            bottom: 6%;
+            right: 44%;
+        }
+		.cengs{
+			width: 100%;
+			height: 100vh;
+			background: rgb(0,0,0,0.5);
+			position: fixed;
+			top: 0;
+			left: 0;
+			z-index: 90;
+			display: none;
+		}
+		.price-bom{
+			width: 100%;
+			/* height: 100px; */
+			background: white;
+			position: absolute;
+			bottom:-50%;
+			left: 0;
+			z-index: 999;
+			/* display: none; */
+
+		}
+		.price-boms{
+			width: 100%;
+			/* height: 100px; */
+			background: white;
+			position: absolute;
+			bottom:0;
+			left:0;
+			z-index: 999;
+			display: none;
+		}
+		.get{
+			animation: .2s get linear;
+			animation-fill-mode:forwards;
+		}
+		.put{
+			animation: .2s put linear;
+			animation-fill-mode:forwards;
+		}
+		.left{
+			animation: .5s leftss linear;
+			animation-fill-mode:forwards;
+		}
+		.lefts{
+			animation: .5s lefts linear;
+			animation-fill-mode:forwards;
+		}
+		.right{
+			animation: .5s right linear;
+			animation-fill-mode:forwards;
+		}
+		.rights{
+			animation: .5s rights linear;
+			animation-fill-mode:forwards;
+		}
+		.price-bom-top{
+			width: 100%;
+			height: 30px;
+			position: relative;
+		}
+		.price-bom-mid,.price-bom-mids{
+			margin-top: 5%;
+			width: 100%;
+			height: 40px;
+			line-height: 40px;
+		}
+		.fangshi{
+			float: left;
+			font-size: 0.7rem;
+			color: #C7C7CC;
+			padding-left: 10px;
+		}
+		.imges{
+			float: right;
+		}
+		.dianjis1:active{
+			background:red;
+		}
+		.price-bom-mid:active{
+			background:#ccc;
+		}
+		@keyframes get{
+			from{
+				bottom: -50%;
+			}
+			to{
+				bottom: 0px;
+			}
+		}
+		@keyframes put{
+			from{
+				bottom: 0px;
+			}
+			to{
+				bottom: -50%;
+			}
+		}
+		@keyframes leftss{
+			from{
+				left: 0;
+			}
+			to{
+				left: -100%;
+			}
+		}
+		@keyframes lefts{
+			from{
+				left: -100%;
+			}
+			to{
+				left: 0;
+			}
+		}
+		@keyframes right{
+			from{
+				left: 100%;
+			}
+			to{
+				left: 0%;
+			}
+		}
+		@keyframes rights{
+			from{
+				left: 0%;
+			}
+			to{
+				left: 100%;
+			}
+		}
+		.imgb{
+			display: none;
+		}
+		
+		
+		
+		
+		/*----------------mui.showLoading---------------*/
+		.mui-show-loading {
+			position: fixed;
+			padding: 5px;
+			width: 120px;
+			min-height: 120px;
+			top: 45%;
+			left: 50%;
+			margin-left: -60px;
+			background: rgba(0, 0, 0, 0.6);
+			text-align: center;
+			border-radius: 5px;
+			color: #FFFFFF;
+			visibility: hidden;
+			margin: 0;
+			z-index: 2000;
+		
+			-webkit-transition-duration: .2s;
+			transition-duration: .2s;
+			opacity: 0;
+			-webkit-transform: scale(0.9) translate(-50%, -50%);
+			transform: scale(0.9) translate(-50%, -50%);
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+		}
+		.mui-show-loading.loading-visible {
+			opacity: 1;
+			visibility: visible;
+			-webkit-transform: scale(1) translate(-50%, -50%);
+			transform: scale(1) translate(-50%, -50%);
+		}
+		.mui-show-loading .mui-spinner{
+			margin-top: 24px;
+			width: 36px;
+			height: 36px;
+		}
+		.mui-show-loading .text {
+			line-height: 1.6;
+			font-family: -apple-system-font,"Helvetica Neue",sans-serif;
+			font-size: 14px;
+			margin: 10px 0 0;
+			color: #fff;
+		}
+		
+		.mui-show-loading-mask {
+		  position: fixed;
+		  z-index: 1000;
+		  top: 0;
+		  right: 0;
+		  left: 0;
+		  bottom: 0;
+		}
+		.mui-show-loading-mask-hidden{
+			display: none !important;
+		}
+		a{
+			color: black;
+		}
+		
+		
+		
+		
+		
+		
+    </style>
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current" id="main">
+            <!-- 遮罩层 -->
+            <div id="cover" style="background: #000; position: absolute; left: 0px; top: 0px; width: 100%; filter: alpha(opacity=30); opacity: 0.7; display: none; z-index: 102 "></div>
+            <!-- 弹窗 -->
+            <div class="shuoming-box">
+                <!--   <div class="shuoming-close close-shuoming"> <img src="../Common/image/gmjyq/btn_guanbi.png" /> </div>-->
+                <div class="shuoming-content">
+                </div>
+                <div class="quxiao"></div>
+                <div class="quding"></div>
+            </div>
+
+            <!-- 弹窗 -->
+            <div class="huojiang-box">
+                <div class="huojiang-content">
+                </div>
+                <div class="huojiang-guanbi"></div>
+
+            </div>
+            <!-- 弹窗 -->
+            <div class="weihuojiang-box">
+                <div class="weihuojiang-guanbi"></div>
+
+            </div>
+
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left pull-left back" style="color: #333;" onclick="window.history.back()"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">活动购买加油券</h1>
+                <a class="icon pull-right" style="color: #333;font-size:0.7rem" onclick="$$.Goto('ewmjyjl');">交易记录</a>
+            </header>
+            <nav class="bar bar-tab js-button">
+                <a class="tab-item external" style="font-weight: bold;">
+                    <span style="font-size: 0.65rem;color: #333;">应支付:</span>
+                    <span id="total" style="color: #ff8200;font-size: 0.85rem;">￥0.00</span>
+                </a>
+                <a  class="tab-item external" id="ok">结算</a>
+            </nav>
+			<!-- 层 -->
+			<div class="cengs">
+			</div>
+			<!-- 第一步 -->
+			<div class="price-bom">
+				<div class="price-bom-top">
+					<img src="../Common/image/bzfk/close.png" class="closeimgs" style="width: 25px;height: 25px;position: absolute;top: 5px;right: 5px;">
+				</div>
+				<div class="price-bom-mid dianjis1">
+					<div class="divprice" style="width: 100%;text-align: center;font-size: 1.5rem;font-weight: bold;">￥0.99</div>
+				</div>
+				<div class="price-bom-mid fukuans" style="margin:5% 0;">
+					<div class="fangshi">付款方式</div>
+					<div class="imges">
+						<img src="../Common/image/bzfk/next.png" style="width: 20px;height: 20px;margin-top:-5px;">
+					</div>
+					<div class="fangshi texzts" style="float: right;">
+						微信
+					</div>
+				</div>
+				<button type="button" style="padding: 10px 0;margin: 0;" class="mui-btn btnok mui-btn-primary mui-btn-block">立即付款</button>
+			</div>
+			<!-- 第二部 -->
+			<div class="price-boms">
+				<div class="price-bom-top">
+					<img src="../Common/image/bzfk/back.png" class="backss" style="width: 25px;height: 25px;margin: 5px;">
+				</div>
+				<div class="price-bom-mids mida" style="margin:3% 0;">
+					<div class="fangshi" style="color:black;">微信支付</div>
+					<div class="imges imga">
+						<img src="../Common/image/bzfk/ok.png" style="width: 20px;height: 20px;margin-top: 10px;margin-right: 10px;">
+					</div>
+				</div>
+				<div class="price-bom-mids midb" style="margin:3% 0;">
+					<div class="fangshi" style="color:black;">账户余额<span class="jine" style="margin-left: 10px;color: #C9DACA;">0</span></div>
+					<div class="imges imgb" >
+						<img src="../Common/image/bzfk/ok.png" style="width: 20px;height: 20px;margin-top: 10px;margin-right: 10px;">
+						
+					</div>
+				</div>
+			</div>
+			
+			
+			 <!--浮动层-->
+			 <div class="ftc_wzsf">
+			     <div class="srzfmm_box">
+			         <div class="qsrzfmm_bt clear_wl">
+			             <img src="images/xx_03.jpg" class="tx close fl">
+			             <!-- <img src="images/jftc_03.png" class="tx fl"> -->
+			             <span class="fl">请输入支付密码</span></div>
+			         <div class="zfmmxx_shop">
+			             <div class="mz">付款金额</div>
+			             <div class="zhifu_price"></div></div>
+			         <ul class="mm_box">
+			             <li></li>
+						 <li></li>
+						 <li></li>
+						 <li></li>
+						 <li></li>
+						 <li></li>
+			         </ul>
+			     </div>
+			     <div class="numb_box">
+			         <div class="xiaq_tb">
+			             <img src="images/jftc_14.jpg" height="10"></div>
+			         <ul class="nub_ggg">
+			             <li><a href="javascript:void(0);" class="zf_num">1</a></li>
+			             <li><a href="javascript:void(0);" class="zj_x zf_num">2</a></li>
+			             <li><a href="javascript:void(0);" class="zf_num">3</a></li>
+			             <li><a href="javascript:void(0);" class="zf_num">4</a></li>
+			             <li><a href="javascript:void(0);" class="zj_x zf_num">5</a></li>
+			             <li><a href="javascript:void(0);" class="zf_num">6</a></li>
+			             <li><a href="javascript:void(0);" class="zf_num">7</a></li>
+			             <li><a href="javascript:void(0);" class="zj_x zf_num">8</a></li>
+			             <li><a href="javascript:void(0);" class="zf_num">9</a></li>
+			             <li><a href="javascript:void(0);" class="zf_empty">清空</a></li>
+			             <li><a href="javascript:void(0);" class="zj_x zf_num">0</a></li>
+			             <li><a href="javascript:void(0);" class="zf_del">删除</a></li>
+			         </ul>
+			     </div>
+			     <div class="hbbj"></div>
+			 </div>
+			
+			
+			
+			
+            <div id="PageContent" class="content">
+                <div class="card margin-zero">
+                    <div class="card-content czje">
+                        <div class="card-content-inner">
+                            <p class="cz-czje">加油金额</p>
+                            <p style=" border-bottom 1px solid #DDDDDD;margin-top:1.7rem" class="je">
+                                <span style="font-size: 0.6rem;font-weight: normal;">￥</span>
+                                <input type="number" placeholder="请输入加油金额"  class="numprice" style="border-bottom: 1px solid rgba(0,0,0,.2)!important"/>
+                                <div class="container"></div>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="border"></div>
+
+
+                <div class="content-block-title mode-title bklc-title yjy-title">
+                    <a class="icon pull-right" style="color:#333;"></a>优惠券
+                </div>
+                <div class="yhq-list-box">
+                    <div class="card" hidden id="no-dyq">
+
+                        <div class="card-header yh-yhjts">
+                            <div class="yhjts-img">
+                                <img src="../Common/image/wycz/no-dyq.png" alt="" />
+                                <span>优惠券</span>
+                            </div>
+                            <div class="color-gray">无抵用券使用</div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="dyq">
+
+                        <div class="card-header yh-yhjts">
+                            <div class="yhjts-img">
+                                <img src="../Common/image/wycz/no-dyq.png" alt="" />
+                                <span>优惠券</span>
+                            </div>
+                            <div class="color-gray" id="totalCoupon"></div>
+                        </div>
+                        <div class="card-content">
+                            <div id="couponList"> </div>
+                        </div>
+                        <div class="card-footer">
+                            <label class="label-checkbox" style="padding-right: 0.75rem;">
+                                <input type="checkbox" name="all-checkbox">
+                                <div class="item-media">
+                                    <i class="icon icon-form-checkbox"></i>&nbsp;&nbsp;全选
+                                </div>
+                            </label>
+                            <div>
+                                已选&nbsp;
+                                <span id="selNum">0</span>&nbsp;张,可抵用&nbsp;
+                                <span id="selPrice">0.00</span>&nbsp;元
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!--生成二维码-->
+        <div class="page" id="code">
+            <div class="content">
+                <div style="background-color: #FFFFFF;text-align:center;" class="code-title">
+                    <div id="qrcodeCanvas" style="margin: 5% 23%;"></div>
+                    <div class="price">00.00</div>
+                    <div style="color: #999999;font-size: 0.65rem;">交易成功</div>
+                </div>
+                <div class="list-block" id="details">
+                    <ul>
+                        <li class="item-content">
+                            <div class="item-inner">
+                                <div class="item-title">账单分类</div>
+                                <div class="item-after">加油</div>
+                            </div>
+                        </li>
+                        <li class="item-content">
+                            <div class="item-inner">
+                                <div class="item-title">渠道信息</div>
+                                <div class="item-after">油信宝</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div style="padding: 0.3rem 0.75rem;font-size: 0.7rem;">
+                    <span style="color: #ff8200;">说明：</span>请在加油站向收银员出示此二维码
+                </div>
+            </div>
+        </div>
+    </div>
+	<script type="text/javascript">
+			//扩展mui.showLoading
+	(function($, window) {
+	    //显示加载框
+	    $.showLoading = function(message,type) {
+	        if ($.os.plus && type !== 'div') {
+	            $.plusReady(function() {
+	                plus.nativeUI.showWaiting(message);
+	            });
+	        } else {
+	            var html = '';
+	            html += '<i class="mui-spinner mui-spinner-white"></i>';
+	            html += '<p class="text">' + (message || "数据加载中") + '</p>';
+	
+	            //遮罩层
+	            var mask=document.getElementsByClassName("mui-show-loading-mask");
+	            if(mask.length==0){
+	                mask = document.createElement('div');
+	                mask.classList.add("mui-show-loading-mask");
+	                document.body.appendChild(mask);
+	                mask.addEventListener("touchmove", function(e){e.stopPropagation();e.preventDefault();});
+	            }else{
+	                mask[0].classList.remove("mui-show-loading-mask-hidden");
+	            }
+	            //加载框
+	            var toast=document.getElementsByClassName("mui-show-loading");
+	            if(toast.length==0){
+	                toast = document.createElement('div');
+	                toast.classList.add("mui-show-loading");
+	                toast.classList.add('loading-visible');
+	                document.body.appendChild(toast);
+	                toast.innerHTML = html;
+	                toast.addEventListener("touchmove", function(e){e.stopPropagation();e.preventDefault();});
+	            }else{
+	                toast[0].innerHTML = html;
+	                toast[0].classList.add("loading-visible");
+	            }
+	        }   
+	    };
+	
+			//隐藏加载框
+			  $.hideLoading = function(callback) {
+				if ($.os.plus) {
+					$.plusReady(function() {
+						plus.nativeUI.closeWaiting();
+					});
+				} 
+				var mask=document.getElementsByClassName("mui-show-loading-mask");
+				var toast=document.getElementsByClassName("mui-show-loading");
+				if(mask.length>0){
+					mask[0].classList.add("mui-show-loading-mask-hidden");
+				}
+				if(toast.length>0){
+					toast[0].classList.remove("loading-visible");
+					callback && callback();
+				}
+			  }
+		})(mui, window);
+		</script>
+	<script>
+		var parseQuery = function (query) {
+			var reg = /([^=&\s]+)[=\s]*([^&\s]*)/g;
+			var obj = {};
+			while (reg.exec(query)) {
+				obj[RegExp.$1] = RegExp.$2;
+			}
+			return obj;
+		}
+		var locations=window.location.href.split('?')
+		var proc = "查询基本信息 " + Bill.userId;
+		var rst = $$.JSONDB.Query(proc);
+		var data = rst.Table[0];
+		var id=data.用户标识;
+		locations=parseQuery(locations[1])
+		 //alert(JSON.stringify(locations))
+		 //alert(id)
+		var Codeid=''
+		var CodeFlag=false
+		var HDid='H2019082613416878'
+		//alert(locations.promid)	
+		if(locations.promid!=undefined){
+			Codeid=locations.promid
+			//alert(Codeid)
+			$.ajax({
+				type: "post",
+				url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"ExistsInvationCode",user_id:"${id}"}`,
+				data:{},
+				async:false,
+				success: function (res) {
+					if(JSON.parse(res).result==0&&JSON.parse(res).message=='邀请码不存在'){
+						return
+					}
+					if(JSON.parse(JSON.parse(res).data)==undefined){
+						return
+					}
+					// alert(JSON.stringify(JSON.parse(res).data))
+					console.log(JSON.parse(JSON.parse(res).data))
+					JSON.parse(JSON.parse(res).data).forEach((item)=>{
+						if(item.PM0004_INVATION_CODE==Codeid){
+							CodeFlag=true
+						}
+					})
+				},
+				error:function(err){
+					console.log(err)
+				}
+			});
+		}
+		var flag=false
+		$("#ok").click(function(){
+			if(CodeFlag){
+				mui.toast('不可以自己邀请自己哟。')
+				return
+			}
+			if($(".numprice").val()==''||$(".numprice").val()==null){
+				layer.open({
+					content: "请输入加油金额",
+					skin: 'msg',
+					 time: 2
+				});
+				return;
+			}
+			
+			var datas=`params={method:"CheckBalanceInfo"}`
+			console.log(datas)	
+			
+			
+			var datas=`params={method:"CheckBalanceInfo"}`
+				// console.log(datas)
+				$.ajax({
+				    type: "get",
+				    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+				    data: datas,
+				    async: true,
+				    success: function (data) {
+						console.log(data)
+						var json=$.parseJSON(data).data;
+						var jsontext=$.parseJSON(json).result_message
+						var jsonprice=$.parseJSON(jsontext)
+						var price=parseFloat(jsonprice.余额)
+						// price=500
+						var tyxprice=parseFloat(jsonprice.备付金停用线)
+						if(price<tyxprice){
+							layer.open({
+							    content: "暂停使用",
+							    skin: 'msg',
+							    time: 2
+							});
+							return;
+						}
+						var proc = "查询基本信息 " + Bill.userId;
+						var rst = $$.JSONDB.Query(proc);
+						var data = rst.Table[0];
+						var id=data.用户标识;
+						// var id="3052109275300000002";
+						var datas=`params={method:"GetUserMoneyInfo",user_id:"${id}"}`
+						console.log(datas)
+						$.ajax({
+						    type: "post",
+						    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+						    data: datas,
+						    async: true,
+						    success: function (data) {
+								var jsondata=$.parseJSON(data)
+								console.log(jsondata)
+								if(jsondata.result==1){
+									var moneylist=$.parseJSON(jsondata.data_score)
+									$(".jine").text("￥"+moneylist[0].MONEY)
+									var jines=parseFloat(price)
+									var numprices=parseFloat($(".numprice").val())
+									if(jines<numprices){
+										$(".midb").find(".fangshi").css('color','#C9DACA')
+									}
+									else{
+										flag=true
+									}
+									
+									console.log(jines)
+									// console.log(moneylist.MONEY)
+								}
+								$(".divprice").text("￥"+$(".numprice").val())
+								$(".cengs").show()
+								$(".price-bom").show()
+								$(".price-bom").removeClass('put')
+								$(".price-bom").addClass('get')
+								console.log(jsondata)
+						    }
+						});
+						// $(".jine").text("￥"+price)
+						
+						
+				    },
+					error(err){
+						alert(JSON.stringify(err))
+					}
+				});
+			
+			
+		})
+		$(".closeimgs").click(function(){
+			$(".cengs").hide()
+			$(".price-bom").removeClass('get')
+			$(".price-bom").addClass('put')
+			layer.open({
+				content: "已取消支付",
+				skin: 'msg',
+				time: 2
+			});
+		})
+		$(".cengs").click(function(){
+			$(".cengs").hide()
+			$(".price-boms").hide()
+			$(".price-bom").removeClass('get')
+			$(".price-bom").addClass('put')
+			layer.open({
+				content: "已取消支付",
+				skin: 'msg',
+				time: 2
+			});
+		})
+		$(".fukuans").click(function(){
+			$(".price-bom").hide()
+			$(".price-boms").show()
+		})
+		$(".backss").click(function(){
+			$(".price-bom").show()
+			$(".price-boms").hide()
+		})
+		$(".mida").click(function(){
+			
+			$(".price-bom").show()
+			$(".price-boms").hide()
+			$(this).find(".imges").show()
+			$(".midb").find(".imges").hide()
+			$(".texzts").text("微信")
+		})
+		$(".midb").click(function(){
+			if(flag){
+			$(".price-bom").show()
+			$(".price-boms").hide()
+			$(this).find(".imges").show()
+			$(".mida").find(".imges").hide()
+			$(".texzts").text("账户余额")
+			}
+		})
+	</script>
+    <script type="text/javascript">
+		var psd;
+			//出现浮动层
+			$(".btnok").click(function(){
+				var texts=$(".texzts").text().trim()
+				// alert(texts)
+				if(texts=="微信"){
+					
+					weixin()
+					return;
+				}
+				$(".zhifu_price").text("￥"+parseFloat($(".numprice").val()))
+				$(".ftc_wzsf").show();
+			});
+			//关闭浮动
+			$(".close").click(function(){
+				$(".ftc_wzsf").hide();
+				$(".mm_box li").removeClass("mmdd");
+				$(".mm_box li").attr("data","");
+				i = 0;
+			});
+				//数字显示隐藏
+			$(".xiaq_tb").click(function(){
+				$(".numb_box").slideUp(500);
+			});
+			$(".mm_box").click(function(){
+				$(".numb_box").slideDown(500);
+			});
+				//----
+			var i = 0;
+			$(".nub_ggg li .zf_num").click(function(){
+					
+				if(i<6){
+					$(".mm_box li").eq(i).addClass("mmdd");
+					$(".mm_box li").eq(i).attr("data",$(this).text());
+					i++
+					if (i==6) {
+					  setTimeout(function(){
+						var data = "";
+							$(".mm_box li").each(function(){
+							data += $(this).attr("data");
+						});
+						i=0	
+						console.log("支付成功"+data);
+						psd=data
+						mui.showLoading("正在支付..","div");
+						weixin()
+					  },100);
+					};
+				} 
+			});
+				
+			$(".nub_ggg li .zf_del").click(function(){
+				if(i>0){
+					i--
+					$(".mm_box li").eq(i).removeClass("mmdd");
+					$(".mm_box li").eq(i).attr("data","");
+				}
+			});
+		
+			$(".nub_ggg li .zf_empty").click(function(){
+				$(".mm_box li").removeClass("mmdd");
+				$(".mm_box li").attr("data","");
+				i = 0;
+			});
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+        var currentQRCode = "";
+        var cjje = 0;
+        var is_hd = 0;//是否有已抽中但是没有刷新到这个页面的优惠券；0：没有  1：有
+        // 查询优惠券
+        var SearchGift = function () {
+            var proc = "支付_可用优惠券列表 " + Bill.userId;
+            var rst = $$.JSONDB.Query(proc).Table;
+            if (rst.length > 0) {
+                for (var i = 0; i < rst.length; i++) {
+                    rst[i].礼品价格 = rst[i].礼品价格.toFixed(2);
+                    var time = rst[i].发放日期;
+                    rst[i].发放日期 = time.substr(0, 4) + "-" + time.substr(4, 2) + "-" + time.substr(6, 2)
+                }
+                $$.Refill("#couponList", rst);
+                $("#totalCoupon").text(rst.length + "张券可用/共" + rst.length + "张券");
+                $("#dyq").show();
+
+                $("#selNum").text("0");
+                $("#selPrice").text("0.00");
+            } else {
+                $("#dyq").text("");
+                $("#no-dyq").show();
+
+            }
+        }
+
+    var timer;
+    // 查询用户购买的加油券
+        function queryCoupon() {
+            var proc = "查询电子券卡券 " + Bill.userId;
+        var rst = $$.JSONDB.Query(proc).Table;
+        if (rst.length > 0) {
+            if (currentQRCode == rst[0].卡券码) {
+                return;
+            }
+            currentQRCode = rst[rst.length-1].卡券码;
+            $("#main").removeClass("page-current");
+            $("#code").addClass("page-current");
+            $$.Fill("#details", rst[rst.length-1]);
+            $(".price").text(rst[rst.length-1].卡券金额.toFixed(2));
+            var codeUrl = rst[rst.length-1].卡券码;
+            $("#qrcodeCanvas").text("");
+
+            var qrcode = new QRCode("qrcodeCanvas", {
+                text: codeUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            if (!timer) {
+                timer = setInterval(function () {
+                    queryCoupon();
+                }, 2000);
+            }
+        } else {
+            SearchGift();
+            $("#main").addClass("page-current");
+            $("#code").removeClass("page-current");
+            clearInterval(timer);
+            timer = null;
+            var proccj = "查询可用抽奖次数 " + Bill.userId;
+            var cjrst = $$.JSONDB.Query(proccj).Table;
+            if (cjrst.length > 0) {
+                if (cjrst[0].参与抽奖状态 == 0 && cjrst[0].可用抽奖次数 > 0) {//有可用次数，但是状态为0，证明用户是直接关闭窗口。清空所有。
+                    var procsc = "删除用户随机立返机会 " + Bill.userId;
+                    $$.JSONDB.Query(procsc).Table;
+                }
+            }
+            sjlf();
+        }
+    }
+
+        //queryCoupon();
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+        // 微信结算
+        function weixin() {
+	    var proc = "查询电子券卡券 " + Bill.userId;
+            var rst = $$.JSONDB.Query(proc).Table;
+            // if (rst.length > 0) {
+            //     layer.open({
+            //         content: "您有未核销的二维码，不用重复购买",
+            //         skin: 'msg',
+            //         time: 3,
+            //         end: function () {
+            //             currentQRCode = rst[0].卡券码;
+            //             $("#main").removeClass("page-current");
+            //             $("#code").addClass("page-current");
+            //             $$.Fill("#details", rst[0]);
+            //             $(".price").text(rst[0].卡券金额.toFixed(2));
+            //             var codeUrl = rst[0].卡券码;
+            //             $("#qrcodeCanvas").text("");
+            //             var qrcode = new QRCode("qrcodeCanvas", {
+            //                 text: codeUrl,
+            //                 width: 200,
+            //                 height: 200,
+            //                 colorDark: '#000000',
+            //                 colorLight: '#ffffff',
+            //                 correctLevel: QRCode.CorrectLevel.H
+            //             });
+            //             if (!timer) {
+            //                 timer = setInterval(function () {
+            //                     queryCoupon();
+            //                 }, 2000);
+            //             }
+            //         }
+            //     });
+            // } else {
+                var num = $("input[type='number']").val();
+                if (!num) {
+                    layer.open({
+                        content: '最低金额不能小于0.01元',
+                        skin: 'msg',
+                        time: 4
+                    });
+                    return;
+                }
+				var datas=`params={method:"CheckBalanceInfo"}`
+				console.log(datas)
+				$.ajax({
+				    type: "get",
+				    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+				    data: datas,
+				    async: true,
+				    success: function (data) {
+						var json=$.parseJSON(data).data;
+						var jsontext=$.parseJSON(json).result_message
+						var jsonprice=$.parseJSON(jsontext)
+						var price=parseFloat(jsonprice.余额)
+						var tyxprice=parseFloat(jsonprice.备付金停用线)
+						if(price<tyxprice){
+							layer.open({
+							    content: "暂停使用",
+							    skin: 'msg',
+							    time: 2
+							});
+							return;
+						}
+						console.log(tyxprice)
+						var discountIDs = [];
+						var data = {};
+						// 通联支付金额以分为单位
+						data.allAmount = num;
+						var checkBox = $("input[name='my-checkbox']");
+						if (checkBox.length > 0) {
+						    for (var i = 0; i < checkBox.length; i++) {
+						        if ($(checkBox[i]).prop("checked")) {
+						            var checkedID = $(checkBox[i]).attr("id");
+						            discountIDs.push(checkedID)
+						        }
+						    }
+						    data.discountIDs = discountIDs.join(",");
+						} else {
+						    data.discountIDs = '';
+						}
+						data.trxamt = (Number(num) - Number(selPrice)) * 100;
+						data.body = "购买服务";
+						data.remark = "";
+						data.orderType = "saleService";
+						if(locations.promid!=undefined){
+							data.invation_code=locations.promid
+						}
+						else{
+							data.invation_code=''
+						}
+						var priceif=$(".texzts").text().trim();
+						if(priceif=="微信"){
+							GetWxJsApiParam(data);
+							return;
+						}
+						data.payPwd=psd
+						GetzhjeJsApiParam(data)
+				    }
+				});  
+            // }
+        };
+        GetWxJsApiParam = function (pData) {
+            var url = "/App/Common/CSharp/Pay/Fuiou/GetFuiouApi.ashx";
+            var data = "";
+            data = JSON.stringify(pData);
+	//alert(data)
+            var layerId = layer.open({
+                type: 2
+            });
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: function (result) {
+                    if (result.result_msg == "SUCCESS") {
+                        var payInfo = JSON.parse(result.reserved_pay_info);
+                        CallPay(payInfo);
+                    } else {
+                        result = JSON.stringify(result);
+                    }
+                },
+                complete: function () {
+                    layer.close(layerId);
+                },
+                dataType: 'json'
+            });
+        }
+		GetzhjeJsApiParam = function (pData) {
+		    var url = "/App/Common/CSharp/Pay/Balance/GetBalanceApi.ashx";
+		    var data = "";
+		    data = JSON.stringify(pData);
+			//alert(data)
+		    //var layerId = layer.open({
+		   //     type: 2
+		   // });
+		    $.ajax({
+		        type: 'POST',
+		        url: url,
+		        data: data,
+		        success: function (data) {
+					//data=JSON.parse(data)
+					var msg;
+		            if (data.result =='0') {
+		               msg="支付密码未设置"
+					}
+		            else if(data.result =='1'){
+		               msg="支付密码错误"
+		            }
+					else if(data.result =='2'){
+					   msg="余额不足"
+					}
+					else{
+					   msg="支付成功"
+					   setTimeout(function(){window.location.href='./Coupons.html'},1000)
+					}
+					mui.hideLoading();
+					layer.open({
+					    content: msg,
+					    skin: 'msg',
+					    time: 1
+					});
+					$(".ftc_wzsf").hide();
+					   $(".mm_box li").removeClass("mmdd");
+					   $(".mm_box li").attr("data","");
+					   $(".cengs").hide()
+					   $(".price-bom").removeClass('get')
+					
+				}	
+		    });
+		}
+    //调用微信JS api 支付
+    var JsApiCall = function (wxJsApiParam) {
+        WeixinJSBridge.invoke(
+            'getBrandWCPayRequest',
+            wxJsApiParam, //josn串
+            function (res) {
+                WeixinJSBridge.log(res.err_msg);
+                var msg = "购买成功";
+                if (res.err_msg == "get_brand_wcpay_request:ok") {
+                    queryCoupon();
+
+                    timer = setInterval(function () {
+                        queryCoupon();
+                    }, 2000);
+                } else {
+                    msg = "购买失败";
+                }
+                layer.open({
+                    content: msg,
+                    skin: 'msg',
+                    time: 3
+                });
+                });
+        }
+
+        var CallPay = function (wxJsApiParam) {
+            if (typeof WeixinJSBridge == "undefined") {
+                if (document.addEventListener) {
+                    document.addEventListener('WeixinJSBridgeReady', JsApiCall(wxJsApiParam), false);
+                } else if (document.attachEvent) {
+                    document.attachEvent('WeixinJSBridgeReady', JsApiCall(wxJsApiParam));
+                    document.attachEvent('onWeixinJSBridgeReady', JsApiCall(wxJsApiParam));
+                }
+            } else {
+                JsApiCall(wxJsApiParam);
+            }
+        };
+
+        // 全选
+        var isCheckAll = false;
+        var selNum = 0;
+        var selPrice = 0;
+        $("input[name='all-checkbox']").click(function () {
+            var num = Number($("input[type='number']").val());
+            if (!num) {
+                layer.open({
+                    content: "请先输入加油金额",
+                    skin: 'msg',
+                    time: 3
+                });
+                $(this).prop("checked", false);
+                return
+            }
+
+            selNum = 0, selPrice = 0;
+            if (isCheckAll) {
+                $("input[name='my-checkbox']").each(function () {
+                    this.checked = false;
+                });
+                isCheckAll = false;
+            } else {
+                $("input[name='my-checkbox']").each(function () {
+                    this.checked = true;
+                    selNum++;
+                    selPrice += Number(this.value);
+                });
+                isCheckAll = true;
+                if ((num - selPrice).toFixed(2) <= 0) {
+                    layer.open({
+                        content: "优惠金额不能大于等于输入金额",
+                        skin: 'msg',
+                        time: 3
+                    });
+                    selNum = 0, selPrice = 0;
+                    $(this).prop("checked", false);
+                    $("input[name='my-checkbox']").prop("checked", false);
+                    isCheckAll = false;
+                    return
+                }
+            }
+            var total = (num - selPrice).toFixed(2);
+            $("#total").text("￥" + total);
+            $("#selNum").text(selNum);
+            $("#selPrice").text(selPrice.toFixed(2));
+        });
+
+        // 优惠券复选
+        $("#couponList").on("click", "input[name='my-checkbox']", function () {
+            var num = Number($("input[type='number']").val());
+            if (!num) {
+                layer.open({
+                    content: "请先输入加油金额",
+                    skin: 'msg',
+                    time: 3
+                });
+                $(this).prop("checked", false);
+                return
+            }
+
+            var isChecked = $(this).prop("checked");
+            if (isChecked == true) {
+                selNum++;
+                selPrice += Number($(this).val());
+                if ((num - selPrice).toFixed(2) <= 0) {
+                    layer.open({
+                        content: "优惠金额不能大于等于输入金额",
+                        skin: 'msg',
+                        time: 3
+                    });
+                    selNum--;
+                    selPrice -= Number($(this).val());
+                    $(this).prop("checked", false);
+                    return
+                }
+            } else {
+                selNum = selNum == 0 ? 0 : selNum - 1;
+                selPrice -= Number($(this).val());
+            }
+            var checkedArr = $("input[name='my-checkbox']").not(function () {
+                return !this.checked
+            });
+
+            if (checkedArr.length == 0) {
+                $("input[name='all-checkbox']").prop("checked", false);
+            }
+
+            var total = (num - selPrice).toFixed(2);
+            $("#total").text("￥" + total);
+            $("#selNum").text(selNum);
+            $("#selPrice").text(selPrice.toFixed(2));
+        });
+
+        // 输入框失去焦点
+        $("input[type='number']").bind('input propertychange', function () {
+            var num = $(this).val();
+            var total = Number(num).toFixed(2);
+            $("#total").text("￥" + total);
+        });
+        $(".quxiao").click(function () {
+            var procsc = "删除用户随机立返机会 " + Bill.userId;
+            $$.JSONDB.Query(procsc).Table;
+            if (localStorage.getItem('获得')) {
+                is_hd = localStorage.getItem('获得');
+            }
+            if (is_hd > 0) {
+                localStorage.getItem('获得',0)
+                location.reload();
+            } else {
+
+                $('.shuoming-box').hide();  //隐藏弹窗
+                $('#cover').css('display', 'none');   //显示遮罩层
+            }
+
+        })
+
+        $(".huojiang-guanbi").click(function () {
+            var proccj = "查询可用抽奖次数 " + Bill.userId;
+            var cjrst = $$.JSONDB.Query(proccj).Table;
+            if (cjrst.length > 0) {
+                if (cjrst[0].可用抽奖次数 > 0) {
+                    localStorage.setItem("获得", 1);
+                    $('.huojiang-box').hide();  //隐藏弹窗
+                    $('#cover').css('display', 'none');   //显示遮罩层
+                    sjlf();
+                }
+                else {
+                    location.reload();
+                }
+            } else {
+                location.reload();
+            }
+        })
+        $(".weihuojiang-guanbi").click(function () {
+            if (localStorage.getItem('获得')) {
+                is_hd = localStorage.getItem('获得');
+            }
+            var proccj = "查询可用抽奖次数 " + Bill.userId;
+            var cjrst = $$.JSONDB.Query(proccj).Table;
+            if (cjrst.length > 0) {
+                if (cjrst[0].可用抽奖次数 > 0) {
+                    $('.weihuojiang-box').hide();  //隐藏弹窗
+                    $('#cover').css('display', 'none');   //显示遮罩层
+                    sjlf()
+                }
+                else {//已抽完
+                    if (is_hd > 0) { //前面几次抽中了，需要刷新页面
+                        location.reload();
+                    } else { //前面几次没有抽中了，直接关闭提示
+                        $('.weihuojiang-box').hide();  //隐藏弹窗
+                        $('#cover').css('display', 'none');   //显示遮罩层
+                    }
+                }
+            } else {//非正常情况
+                $('.weihuojiang-box').hide();  //隐藏弹窗
+                $('#cover').css('display', 'none');   //显示遮罩层
+            }
+
+
+        })
+
+        // 立即抽奖按钮
+        $(".quding").click(function () {
+            $('.shuoming-box').hide();  //隐藏弹窗
+            $('#cover').css('display', 'none');   //显示遮罩层
+            if (cjje > 0) {
+                var procYhcj = "获得抽奖礼品 " + Bill.userId + ',' + cjje;
+                var yhcjRst = $$.JSONDB.Query(procYhcj).Table;
+                if (yhcjRst.length > 0) {
+                    $(".huojiang-content").html("<span>¥</span>" + cjje);
+                    $(".huojiang-box").show();
+                    $('#cover').css('display', 'block'); //显示遮罩层
+                    $('#cover').css('height', document.body.clientHeight + 'px');
+                    var huojaingwidth = $(".huojiang-box").width();
+                    $(".huojiang-box").css("height", huojaingwidth + 'px');
+
+                }
+            } else {
+                $(".weihuojiang-box").show();
+                $('#cover').css('display', 'block'); //显示遮罩层
+                $('#cover').css('height', document.body.clientHeight + 'px');
+                var weihuojaingwidth = $(".weihuojiang-box").width();
+                $(".weihuojiang-box").css("height", weihuojaingwidth + 'px');
+            }
+
+        });
+
+        function sjlf() {
+            var proccj = "查询可用抽奖次数 " + Bill.userId;
+            var cjrst = $$.JSONDB.Query(proccj).Table;
+            if (cjrst.length > 0) {
+                if (cjrst[0].可用抽奖次数 > 0) {
+                    var procewmcj = "抽奖_二维码抽奖 " + Bill.userId + ',1';//每次只抽1次
+                    var ewmcjRst = $$.JSONDB.Query(procewmcj).Table;
+                    if (ewmcjRst.length > 0) {
+                        cjje = ewmcjRst[0].抽奖金额
+                    }
+                    if (cjrst[0].参与抽奖状态 > 0) {
+                        $(".shuoming-content").html("<div>恭喜您获得" + cjrst[0].可用抽奖次数 + "次</div>领取随机立减券机会");
+                    } else {
+                        $(".shuoming-content").html("<div>恭喜您还有" + cjrst[0].可用抽奖次数 + "次</div>领取随机立减券机会");
+                    }
+
+                    $(".shuoming-box").show();
+                    $('#cover').css('display', 'block'); //显示遮罩层
+                    $('#cover').css('height', document.body.clientHeight + 'px');
+                    var shuomingwidth = $(".shuoming-box").width();
+                    $(".shuoming-box").css("height", shuomingwidth + 'px');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

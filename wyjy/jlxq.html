@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>二维码加油记录</title>
+	<link rel="stylesheet" href="../Common/css/index.css" />
+	<link rel="stylesheet" href="../Common/css/LCalendar.css" />
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+	<link rel="stylesheet" href="../Common/css/mui.min.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+	<script type="text/javascript" src="../Common/js/LCalendar.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/QuickStore.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+	<script type="text/javascript" src="../Common/js/mui.js"></script>
+	<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+    <script id="jyjl_Template" type="text/template">
+        <li style="margin: 0.2rem 0;">
+            <div class="item-content" style="border: 0.1rem; background: #FFFFFF;">
+                <div style="width: 2.5rem;">
+                    <img src="../Common/image/mx1.png" style="height: auto; width: auto; max-height: 100%; max-width: 100%; padding: 0.5rem;" />
+                </div>
+                <div class="item-inner">
+                    <div class="item-title-row">
+                        <div class="item-title">
+                            <div style="font-size: 60%; line-height: 1rem;">二维码加油</div>
+                            <div style="font-size: 30%" class="item-after">{{购买时间}}</div>
+                        </div>
+                        <div class="item-media">
+                            <div class="item-after money" style="color: #ff8200;">{{金额}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </script>
+    <script type="text/javascript">
+        $$.Page_Load = function () {
+            $.init();
+          //   var querySql = '二维码加油记录 ' + Bill.userId;
+          //   var rst = $$.JSONDB.Query(querySql).Table;
+          // 
+          //   $$.Fill("#jyjl", rst);
+        }
+    </script>
+    <style>
+        body {
+            line-height: 0.7rem;
+        }
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background: #fff;
+        }
+		.mui-content{
+			margin-top: 44px;
+			padding-top: 10px;
+			background: white;
+		}
+		.xqmid{
+			margin-top: 44px;
+			height: calc(100vh - 44px);
+			background: white;
+			padding: 20px 5%;
+			overflow-y: scroll;
+		}
+		.xqmid-shu{
+			width: 100%;
+			height: 50px;
+			display: flex;
+			flex-direction: row;
+			border-bottom: #dfdfdf solid 0.01rem;
+			color: #666;
+			font-size: 0.8rem;
+		}
+		.shu-left{
+			height: 50px;
+			line-height: 50px;
+			float: left;
+			width: 30%;
+			font-size: 0.7rem;
+		}
+		.shu-right{
+			height: 50px;
+			line-height: 50px;
+			float: left;
+			width: 70%;
+			font-size: 0.7rem;
+		}
+		input{
+			border: 0;
+			border-bottom: 1px solid #dfdfdf;
+			background: white;
+		}
+    </style>
+</head>
+<body>
+    <div id="MainPage" class="page-current">
+		
+        <header class="bar bar-nav Color_B1">
+            <a class="icon icon-left  pull-left" style="color: #333;" onclick="window.history.back();"></a>
+            <h1 id="MainPage_Title" class="title" style="color: #333;">记录详情</h1>
+        </header>
+		<div class="xqmid">
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					订单号
+				</div>
+				<input class="shu-right" disabled="disabled" :value="Ordernumber"/>
+			</div>
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					油站名称
+				</div>
+				<input class="shu-right" disabled="disabled" :value="youname"/>
+			</div>
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					订单金额
+				</div>
+				<div class="shu-right">
+					{{orderprice}}
+				</div>
+			</div>
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					油品类型
+				</div>
+				<input class="shu-right" disabled="disabled" :value="youlei"/>
+			</div>
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					电子券码
+				</div>
+				<input class="shu-right" disabled="disabled" :value="quanma"/>
+			</div>
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					电子券状态
+				</div>
+				<div class="shu-right">
+					{{quanstates}}
+				</div>
+			</div>
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					单价
+				</div>
+				<div class="shu-right">
+					{{price}}
+				</div>
+			</div>
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					消费升数
+				</div>
+				<input class="shu-right" disabled="disabled" :value="shengshuL"/>
+			</div>
+			<div class="xqmid-shu">
+				<div class="shu-left">
+					核销时间
+				</div>
+				<div class="shu-right">
+					{{times}}
+				</div>
+			</div>
+		</div>
+		
+    </div>
+	
+	<script type="text/javascript">
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+	</script>
+	<script type="text/javascript">
+		// $(function(){
+			
+			// console.log(JSON.parse(json))
+		// })
+		new Vue({
+			el:"#MainPage",
+			data:{
+				Ordernumber:'',//订单号
+				youname:'',//油站名称
+				orderprice:'',//订单金额
+				youlei:'',//油品类型
+				quanma:'',//电子券码
+				quanstates:'',//电子券状态
+				price:'',//单价
+				shengshuL:'',//升数
+				times:'',//审核时间
+			},
+			created() {
+				var json=JSON.parse(localStorage.getItem("records"))
+				this.Ordernumber=json.COUPON_TRADEID
+				this.youname=json.COUPON_STATION
+				this.orderprice=json.COUPON_AMOUNT
+				this.youlei=json.COUPON_NAME
+				this.quanma=json.COUPON_NO
+				// alert(json.COUPON_STATUS)
+				if(parseInt(json.COUPON_STATUS)==3){
+					this.quanstates="已核销"
+				}
+				else{
+					this.quanstates="未核销"
+				}
+				this.price=json.COUPON_UNITPRICE
+				this.shengshuL=json.COUPON_VOLUMN
+				this.times=json.COUPON_USETIME
+				console.log(json)
+			}
+		})
+	</script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>收货地址</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<link rel="stylesheet" href="Common/css/iconfont.css" />
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<style>
+			.card-footer {
+				padding: 0rem 0.75rem;
+				min-height: 2rem;
+			}
+			
+			.default,
+			.no-default {
+				padding: 0.1rem 0.4rem;
+				font-size: 0.55rem;
+				border-radius: 0.7rem;
+			}
+			
+			.no-default {
+				border: 1px solid #DDDDDD;
+				color: #999;
+			}
+			
+			.default {
+				border: 1px solid #E4393C;
+				color: #E4393C;
+			}
+			
+			.layui-m-layercont {
+				padding: 30px;
+			}
+			
+			.delete {
+				margin-left: 1rem;
+			}
+			
+			/*修改input默认样式*/
+			#showList div.setDefault {
+				position: relative;
+				line-height: 30px;
+			}
+			
+			.card-footer input[type="radio"] {
+				width: 25px;
+				height: 100%;
+				opacity: 0;
+			}
+			
+			.card-footer label {
+				position: absolute;
+				left: 5px;
+				top: 3px;
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				border: 1px solid #999;
+			}
+			/*设置选中的input的样式*/
+			/* + 是兄弟选择器,获取选中后的label元素*/
+			
+			.card-footer input:checked+label {
+				background-color: #e4393c;
+				border: 1px solid #e4393c;
+			}
+			
+			.card-footer input:checked+label::after {
+				position: absolute;
+				content: "";
+				width: 5px;
+				height: 10px;
+				top: 1.5px;
+				left: 6px;
+				border: 2px solid #fff;
+				border-top: none;
+				border-left: none;
+				transform: rotate(45deg)
+			}
+		</style>
+
+		<!--选择地址-->
+		<script type="text/template" id="selectList_Template">
+			<div class="card" id="{{M0006_ID}}">
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div class="list-block media-list">
+							<ul>
+								<li data-id="{{M0006_ID}}">
+									<label class="label-checkbox item-content">
+                                    <input type="radio" name="my-radio" data-type="{{M0006_TRANS_TYPE}}">
+                                    <div class="item-media"><i class="icon icon-form-checkbox"></i></div>
+                                    <div class="item-inner">
+                                        <div class="item-title-row">
+                                            <div class="item-title">{{M0006_TRANS_CONSIGNEE}}</div>
+                                            <div class="item-after">{{M0006_TRANS_PHONE}}</div>
+                                        </div>
+                                        <div class="item-subtitle">
+                                            {{M0006_TRANS_PROVINCE}}{{M0006_TRANS_CITY}}{{M0006_TRANS_AREA}}{{M0006_TRANS_ADDRESS}}
+                                        </div>
+                                    </div>
+                                </label>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="card-footer">
+					<!--<div class="setDefault {{type}}"><span>{{type_text}}</span></div>-->
+					<div class="setDefault">
+						<input type="radio" name="radio" data-type="{{M0006_TRANS_TYPE}}" id="type_{{M0006_ID}}" data-id="{{M0006_ID}}" />
+						<label for="type_{{M0006_ID}}"></label>
+						<span style="font-size: 0.65rem;">{{type_text}}</span>
+					</div>
+					<div>
+						<span class="iconfont icon-bianji edit" data-id="{{M0006_ID}}"></span>
+						<span class="iconfont icon-lajitong delete" data-id="{{M0006_ID}}"></span>
+					</div>
+				</div>
+			</div>
+		</script>
+
+		<!--地址展示-->
+		<script type="text/template" id="showList_Template">
+			<div class="card" id="{{M0006_ID}}">
+
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div class="list-block media-list">
+							<ul>
+								<li class="item-content">
+									<div class="item-inner">
+										<div class="item-title-row">
+											<div class="item-title">{{M0006_TRANS_CONSIGNEE}}</div>
+											<div class="item-after">{{M0006_TRANS_PHONE}}</div>
+										</div>
+										<div class="item-subtitle">
+											{{M0006_TRANS_PROVINCE}}{{M0006_TRANS_CITY}}{{M0006_TRANS_AREA}}{{M0006_TRANS_ADDRESS}}
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="card-footer">
+					<div class="setDefault">
+						<input type="radio" name="radio" data-type="{{M0006_TRANS_TYPE}}" id="type_{{M0006_ID}}" data-id="{{M0006_ID}}" />
+						<label for="type_{{M0006_ID}}"></label>
+						<span style="font-size: 0.65rem;">{{type_text}}</span>
+					</div>
+					<div>
+						<span class="iconfont icon-bianji edit" data-id="{{M0006_ID}}"></span>
+						<span class="iconfont icon-lajitong delete" data-id="{{M0006_ID}}"></span>
+					</div>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<h1 class="title">收货地址</h1>
+				</header>
+				<div class="content">
+					<div id="selectList" hidden="hidden"></div>
+					<div id="showList" hidden="hidden"></div>
+					<div class="list-block" id="xzList">
+						<ul>
+							<li class="item-content">
+								<div class="item-inner">
+									<div class="item-title">新增收货地址</div>
+									<div class="item-after">
+										<span id="xz" class="iconfont icon-xinzeng"></span>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="//g.alicdn.com/msui/sm/0.6.2/js/sm-city-picker.min.js" charset="utf-8"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script>
+			function plusReady() {
+				var selectID = $$.getParameterValue().selectID;
+
+				// 查询地址列表   @hyID 会员标识  @addrID 配送地址标识
+				var hyID = "{{CurrentMerchantID}}";
+				var addrID = "0";
+
+				var data = {
+					"会员标识": hyID,
+					"配送地址标识": "0"
+				}
+				var tmpl = "{{会员标识}},{{配送地址标识}}";
+				var parmars = tmpl.t(data);
+				var proc = "配送地址列表 " + parmars;
+				var rst = $$.JSONDB.Query(proc).Table;
+				console.log(rst)
+				if(rst.length > 0) {
+					for(var i = 0; i < rst.length; i++) {
+						if(rst[i].M0006_TRANS_TYPE == "默认配送地") {
+							rst[i].type_text = "默认地址";
+							rst[i].type = "default"
+						} else {
+							rst[i].type_text = "设为默认";
+							rst[i].type = "no-default"
+						}
+					}
+
+					// 选择地址与地址展示
+					if(selectID) {
+						$$.Fill("#selectList", rst);
+						var num = $("input[type='radio']");
+						for(var k = 0; k < num.length; k++) {
+							if($(num[k]).attr("data-type") == "默认配送地") {
+								$(num[k]).attr("checked", true)
+							}
+						}
+						$("#selectList").show();
+					} else {
+						$$.Fill("#showList", rst);
+						$("#showList").show();
+					}
+				}
+
+				// 删除
+				$(".content").on("click", ".delete", function() {
+					var addrID = $(this).attr("data-id");
+
+					layer.open({
+						content: '您确定要删除改地址吗？',
+						btn: ['确定', '不要'],
+						yes: function(index) {
+							var data = {
+								"会员标识": hyID,
+								"配送地址标识": addrID
+							}
+							var tmpl = "{{会员标识}},{{配送地址标识}}";
+							var parmars = tmpl.t(data);
+							var proc = "配送地址删除 " + parmars;
+							var rst = $$.JSONDB.Query(proc);
+							$("#" + addrID).remove();
+							layer.close(index);
+						}
+					});
+				});
+
+				// 编辑
+				$(".content").on("click", ".edit", function() {
+					var addrID = $(this).attr("data-id");
+					plus.webview.create("create.html?addrID=" + addrID).show();
+				});
+
+				// 新增
+				$("#xz").click(function() {
+					plus.webview.create('create.html').show();
+				});
+
+				// 设为默认
+				$(".content").on("click", ".setDefault input,.setDefault", function() {
+					$(".setDefault span").text("设为默认");
+					$(this).siblings("span").text("已设为默认");
+					var addrID = $(this).attr("data-id");
+					var data = {
+						"会员标识": hyID,
+						"配送地址标识": addrID
+					}
+					var tmpl = "{{会员标识}},{{配送地址标识}}";
+					var parmars = tmpl.t(data);
+					var proc = "配送地址设置默认 " + parmars;
+					var rst = $$.JSONDB.Query(proc);
+					layer.open({
+						content: '默认地址设置成功',
+						skin: 'msg',
+						time: 2
+					});
+				});
+
+				// 选择地址
+				$("#selectList li").click(function() {
+					var argument = $$.getParameterValue();
+					var orderID = argument.orderID;
+					var addrID = $(this).attr("data-id");
+					plus.webview.create("../ddxq.html?orderID=" + orderID + "&addrID=" + addrID).show();
+				})
+			}
+
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>登录</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/iconfont.css" />
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<script type="text/javascript" src="Common/js/layer_mobile/layer.js">
+		</script>
+		<style type="text/css">
+			.content-block div {
+				width: 100%;
+				background-color: #FFFFFF;
+				height: 2.5rem;
+				margin-bottom: 1rem;
+				border-radius: 0.3rem;
+				border: 1px solid #DDDDDD;
+				padding-left: 0.5rem;
+				line-height: 100%;
+			}
+			
+			input {
+				height: 100%;
+				border: none;
+				font-size: 0.7rem;
+				padding-left: 0.3rem;
+			}
+			
+			button {
+				float: right;
+				margin-top: 0.55rem;
+				margin-right: 0.5rem;
+				font-size: 0.65rem;
+				border: none;
+				height: 1.4rem;
+				border-radius: 0.2rem;
+				background-color: #E4393C;
+				color: #FFFFFF;
+			}
+			
+			.iconfont {
+				float: left;
+				font-size: 20px;
+				margin-top: 0.8rem;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<h1 class="title">登录</h1>
+				</header>
+				<div class="content">
+					<div class="content-block">
+						<div>
+							<span class="iconfont icon-shoujihao"></span>
+							<input id="tel" type="number" placeholder="请输入手机号" style="width: 80%;" />
+						</div>
+						<div>
+							<span class="iconfont icon-yanzhengma"></span>
+							<input id="valid" type="number" placeholder="请输入验证码" style="width: 50%;" />
+							<button id="getCode">获取验证码</button>
+						</div>
+						<p>
+							<a id="login" class="button button-fill button-success">登录</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="Common/js/sdk.js"></script>
+		<script type="text/javascript" src="Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript">
+			var countdown = 90;
+			var tempCode = "";
+			var tel = $("#tel").val();
+			var valid = $("#valid").val();
+
+			// 获取验证码
+			$("#getCode").click(function() {
+				var tel = $("#tel").val();
+				if(!DV_MOBILE_PHONE.test(tel)) {
+					layer.open({
+						content: '请输入正确的手机号码',
+						skin: 'msg',
+						time: 2
+					});
+					return;
+				}
+
+				var data = {
+					phone: tel
+				}
+
+				var rst = "";
+				$.ajax({
+					url: "/App/Common/Mall/Merchant/SendVerifyCode.ashx",
+					data: data,
+					async: false,
+					contentType: "application/x-www-form-urlencoded",
+					success: function(data) {
+						console.log(data)
+						rst = JSON.parse(data);
+						layer.open({
+							content: rst.MESSAGE,
+							skin: 'msg',
+							time: 2
+						});
+					}
+				})
+				if(rst.RESULT == "0") {
+					settime($(this));
+				}
+			});
+
+			// 发送验证码倒计时
+			function settime(obj) {
+				if(countdown == 0) {
+					obj.removeAttr("disabled");
+					obj.text("获取验证码");
+					countdown = 90;
+					return;
+				} else {
+					obj.attr('disabled', true);
+					obj.text("重新发送(" + countdown + ")");
+					countdown--;
+				}
+				setTimeout(function() {
+					settime(obj)
+				}, 1000)
+			}
+
+			// 登录
+			$("#login").click(function() {
+				var tel = $("#tel").val();
+				var valid = $("#valid").val();
+				if(!DV_MOBILE_PHONE.test(tel)) {
+					layer.open({
+						content: '请输入正确的手机号码',
+						skin: 'msg',
+						time: 2
+					});
+					return;
+				}
+
+				if(!valid) {
+					layer.open({
+						content: '请输入验证码',
+						skin: 'msg',
+						time: 2
+					});
+					return;
+				}
+
+				// 验证码验证
+				var rst = $$.login(tel, valid).Table[0];
+				var msg = rst.MESSAGE;
+				layer.open({
+					content: msg,
+					skin: 'msg',
+					time: 2
+				});
+
+				if(rst.RESULT == 0) {
+					location.href = "index.html";
+				}
+			})
+		</script>
+	</body>
+
+</html>

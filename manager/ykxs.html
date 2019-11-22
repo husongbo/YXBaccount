@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>面对面售卡</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>	
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/QuickStore.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+
+	<script id="CardList_Template" type="text/template">
+		<li onclick="My.ShowQRCode('{{PT0003_CARD_CD}}')">
+			<div class="item-content">
+				<div class="item-media">卡号：</div>
+				<div class="item-inner" style="color: blue;">{{PT0003_CARD_CD}}</div>	
+			</div>
+		</li>
+	</script>
+	<script id="QRCode_Template" type="text/template">
+		<div class="card demo-card-header-pic">
+		    <div valign="bottom" class="card-header">
+		      <img class='card-cover' src="/images/manager/CardQRCode/{{PT0003_CARD_CD}}.png" alt="">
+		    </div>
+			<div class="item-content">
+				<div class="item-media">卡号：{{PT0003_CARD_CD}}</div>
+			</div>
+		 </div>
+	</script>
+
+    <script type="text/javascript">
+		var My = {
+			cardList: {}
+		};
+		$$.Page_Load = function(){
+			$.init();
+			My.GetUnusedCard();  
+			
+            if (My.cardList.length == 0) {
+            	$("#CardList").html('<span style="margin-top: 60px;text-align: center; display: block;font-size: 20pt;color: #747474;">油卡售光了:-)</span>');
+            } else {
+				My.ShowQRCode(My.cardList[0].PT0003_CARD_CD);
+			}
+		}
+		
+		My.GetUnusedCard = function() {
+            var querySql = "SELECT PT0003_CARD_CD FROM PT0003_CARD_OUT WHERE M0001_ID_USER=0 AND PT0003_CARD_OUT.PT0003_DATA_STATE = 1 AND M0001_ID_MANAGER=" + Bill.userId;
+			var rst = $$.JSONDB.Query(querySql);
+			
+			My.cardList = rst.Table;
+			$$.Fill("#CardList", My.cardList);
+		}
+		
+		My.ShowQRCode = function(cardCD) {
+			My.CreateQRCode(cardCD);
+			var cd = {PT0003_CARD_CD: cardCD};
+			var code = $("#QRCode_Template").html().t(cd);
+			layer.open({
+			    type: 1
+			    ,content: code
+			    ,anim: 'up'
+			    ,style: 'position:fixed; bottom:0; left:0; width: 80%; height: auto; padding:0 10%; padding-bottom: 30px; background: transparent'
+			    ,end: function() {
+			    	My.ReloadCardInfo();
+			    }
+	 		});
+		}
+		
+		My.CreateQRCode = function(cardCD) {
+			var param = {
+				'type': 'card',
+				'CARD_CD':cardCD
+			};
+			
+			$.ajax({
+				type:"POST",
+				url:'/App/Common/CSharp/Manager/CardSales.ashx',
+				data:param,
+				success:function(data){
+					rst = data;
+				},
+				dataType:'JSONP',
+				async: false,
+			});
+			
+			return rst;
+		}
+		
+		My.ReloadCardInfo = function() {
+			$("#CardList").empty();
+			My.GetUnusedCard();
+		}
+    </script>
+
+	<style>
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .page, .page-group {
+            background: #fff;
+        }
+		.card{
+			background: #fff;
+			box-shadow: 0 0 0.6rem rgba(245, 127, 89, 0.3);
+			margin: 0.5rem;
+			position: relative;
+			border-radius: 0.4rem;
+			font-size: 0.7rem;
+		}
+		.item-content:active  {
+			background: burlywood;
+		}
+		.button{
+			line-height: 1.7rem;
+			padding: 0 0.8rem;
+			height: 1.8rem;
+			border: 1px solid #f57c59;
+			color: #F57C59;
+		}
+		.mony strong{
+			font-size:1.2rem;
+			color: #fff;
+		}
+		.mony i{
+			font-style: normal;
+			color: #000000;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">面对面售卡</h1>
+            </header>
+	    	<div id="PageContent" class="content">
+	    		<div id="Bill">
+			    	<div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+			    		<ul id="CardList">
+						</ul>
+					</div>	    			
+	    		</div>
+	        </div>
+        </div>
+    </div>
+</body>
+</html>

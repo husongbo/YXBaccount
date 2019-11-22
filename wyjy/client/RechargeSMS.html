@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>充值成功提醒</title>
+    <script type="text/javascript" src="../../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../../Common/js/sdk_sim.js"></script>
+
+	<script id="SMS_DATA_Template" type="text/template">
+        <tr>
+            <td>{{M0001_NAME}}</td>
+            <td>{{M0001_PHONE}}</td>
+            <td>{{PT0001_CARD_CD}}</td>
+            <td>{{T0401_CONTENT}}</td>
+            <td>{{T0401_SEND_STATE}}</td>
+        </tr>
+	</script>
+    <script type="text/javascript">
+        $$.Page_Load = function () {
+            My.GetMainCardId();
+            My.QueryData();
+        }
+
+        My = {
+            unsendList: []
+        }
+
+        My.GetMainCardId = function () {
+            My.MainCardId = 0;
+            if (window.external.GetAllViewSelectData) {
+                var allData = null;
+                allData = window.external.GetAllViewSelectData();
+                var obj = JSON.parse(allData);
+                My.RechargeRecordId = obj.充值记录列表[0]._充值记录标识;
+            }
+        }
+
+        My.QueryData = function() {
+            var parameter = {};
+            parameter.type = "query";
+            parameter.recordId = My.RechargeRecordId;
+
+            var rst = null;
+            $.ajax({
+                type: "post",
+                url: "/App/Common/Csharp/App/Client/RechargeSuccessMessage.ashx",
+                data: parameter,
+                async: false,
+                success: function (data) {
+                    rst = $.parseJSON(data);
+                }
+            });
+            $$.Update("#SMS_DATA", rst);
+
+            My.unsendList = [];
+            $.each(rst, function (index, item) {
+                if (item['T0401_SEND_STATE'] == '未发送') {
+                    My.unsendList.push(item['T0401_ID']);
+                }
+            });
+
+            if (My.unsendList.length == 0) {
+                $("#SendSMS").hide();
+            }
+            $("#table").show();
+        }
+
+        My.SendSMS = function () {
+            var parameter = {};
+            parameter.type = "send";
+            parameter.list = JSON.stringify(My.unsendList);
+
+            var rst = null;
+            $.ajax({
+                type: "post",
+                url: "/App/Common/Csharp/App/Client/RechargeSuccessMessage.ashx",
+                data: parameter,
+                async: false,
+                success: function (data) {
+                    rst = data;
+                }
+            });
+
+            My.QueryData();
+        }
+    </script>
+</head>
+<body>
+    <div id="prompt" style="display: none">当前二级油卡下没有未发送的充值通知短信.</div>
+    <table cellpadding="5" cellspacing="0" border="1" id="table" style="display: none">
+        <thead>
+            <tr>
+                <th>用户名称</th>
+                <th>用户电话</th>
+                <th>油卡卡号</th>
+                <th>短信内容</th>
+                <th>发送状态</th>
+            </tr>
+        </thead>
+        <tbody id="SMS_DATA">
+        </tbody>
+    </table>
+    <p><input id="SendSMS" type="button" value="发送短信" onclick="My.SendSMS();" /></p>
+</body>
+</html>
+
+<script>
+</script>

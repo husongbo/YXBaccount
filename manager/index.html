@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>油卡管理</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript">
+		$$.Page_Load = function(){
+			$.init();
+		}
+	</script>
+	<style>
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .page, .page-group {
+            background: #fff;
+        }
+		#MainPage{
+			background-color: #f5f5f5;
+		}
+		.Color_B1 {
+			background-color:#f57c59;
+		}
+		.list-block.media-list .item-title{
+			position: relative;
+			padding-left: 1.45rem;
+			font-weight: bold;
+			font-size: 0.8rem;
+		}
+		.list-block.media-list .item-title img{
+			width: 1.2rem;
+			height: 1.2rem;
+			position: absolute;
+			left: 0px;
+			top:0;
+		}
+		.sui-bottom-text {
+			color: #666666;
+			margin: 0;
+			padding: 0.4rem 0.6rem;
+			margin-bottom: 1rem;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">油卡管理</h1>
+            </header>
+
+            <div id="PageContent" class="content">
+            	<div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+            		<ul>
+            			<li>
+            				<a class="item-link item-content" onclick="$$.Goto('ykxs')">
+            					<div class="item-inner">
+            						<div class="item-title-row">
+            							<div class="item-title">
+        									<img src="../Common/image/zcxx.png"/>
+            								<span>面对面售卡</span>
+            							</div>
+            							<div class="item-after"></div>
+            						</div>
+            					</div>
+            				</a>
+            			</li>
+            			<li>
+            				<a class="item-link item-content" onclick="$$.Goto('khjl')">
+            					<div class="item-inner">
+            						<div class="item-title-row">
+            							<div class="item-title">
+        									<img src="../Common/image/zcxx.png"/>
+            								<span>客户经理二维码</span>
+            							</div>
+            							<div class="item-after"></div>
+            						</div>
+            					</div>
+            				</a>
+            			</li>
+						<li>
+							<a class="item-link item-content" onclick="$$.Goto('cb')">
+								<div class="item-inner">
+									<div class="item-title-row">
+										<div class="item-title">
+											<img src="../Common/image/zcxx.png"/>
+											<span>卡包售卡</span>
+										</div>
+										<div class="item-after"></div>
+									</div>
+								</div>
+							</a>
+						</li>
+            		</ul>
+            		
+            	</div>
+            </div>
+        </div>        
+    </div>
+</body>
+
+</html>

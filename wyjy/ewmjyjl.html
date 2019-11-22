@@ -1,0 +1,432 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>二维码加油记录</title>
+	<link rel="stylesheet" href="../Common/css/index.css" />
+	<link rel="stylesheet" href="../Common/css/LCalendar.css" />
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+	<link rel="stylesheet" href="../Common/css/mui.min.css" />
+	<link rel="stylesheet" href="../Common/css/mui.picker.min.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+	<script type="text/javascript" src="../Common/js/LCalendar.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/QuickStore.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+	<script type="text/javascript" src="../Common/js/mui.js"></script>
+	<script src="../Common/js/mui.picker.min.js"></script>
+	
+    <script id="jyjl_Template" type="text/template">
+        <li style="margin: 0.2rem 0;">
+            <div class="item-content" style="border: 0.1rem; background: #FFFFFF;">
+                <div style="width: 2.5rem;">
+                    <img src="../Common/image/mx1.png" style="height: auto; width: auto; max-height: 100%; max-width: 100%; padding: 0.5rem;" />
+                </div>
+                <div class="item-inner">
+                    <div class="item-title-row">
+                        <div class="item-title">
+                            <div style="font-size: 60%; line-height: 1rem;">二维码加油</div>
+                            <div style="font-size: 30%" class="item-after">{{购买时间}}</div>
+                        </div>
+                        <div class="item-media">
+                            <div class="item-after money" style="color: #ff8200;">{{金额}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </script>
+    <script type="text/javascript">
+        $$.Page_Load = function () {
+            $.init();
+          //   var querySql = '二维码加油记录 ' + Bill.userId;
+          //   var rst = $$.JSONDB.Query(querySql).Table;
+          // 
+          //   $$.Fill("#jyjl", rst);
+        }
+    </script>
+    <style>
+        body {
+            line-height: 0.7rem;
+        }
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background: #fff;
+        }
+		.mui-content{
+			margin-top: 44px;
+			padding-top: 10px;
+			background: white;
+		}
+		#date{
+			color:transparent;
+		}
+		
+		.date_btn{
+			/* height: 20px; */
+			line-height: 33px;
+			height: 33px;
+			/* background: #CCCCCC; */
+			color: #00A2FF;
+			margin-left: 5%;
+			font-size: 0.7rem;
+			border-radius: 2px;
+		}
+		.dates{
+			margin-top: 70px;
+			float: left;
+			clear: both;
+			width: 100%;
+			padding-left: 10%;
+			/* height: 50px; */
+		}
+		.list{
+			width: 90%;
+			float: left;
+			clear: both;
+			margin-left:5%;
+			margin-right: 5%;
+			margin-top: 20px;
+			background: white;
+			box-shadow: 0 0 0.6rem rgba(136, 130, 129, 0.3);
+		}
+		.list-children{
+			height:60px;
+			border-bottom: 1px solid #ECECEC;
+			margin-bottom: 10px;
+			margin-top: 10px;
+			
+			/* isplay: flex;
+			align-items: center; */
+		}
+		.list-children:last-child{
+			margin-bottom: 0;
+		}
+		.list-chi-left{
+			float: left;
+			width: 50px;
+			height: 50px;
+			padding: 5px;
+			
+		}
+		.list-chi-right{
+			float: left;
+			margin-top: 5px;
+		}
+		.list-chi-rights{
+			float: right;
+		}
+		#MainPage{
+			float: left;
+			clear: both;
+			overflow-y: scroll;
+			width: 100%;
+		}
+		.date_title{
+			background:#ECECEC;
+			font-size: 0.8rem;
+			color: #808080;
+			height:33px;
+			line-height:33px;
+			text-align: center;
+			position: relative;
+		}
+		.date_roll div{
+			/* height: 6em; */
+			font-size: 0.7rem;
+		}
+		.close{
+			margin-left: 0!important;
+			float: left;
+			/* line-height: 1.2rem; */
+		}
+		.getok{
+			float: right;
+			margin: 0!important;
+		}
+		.years{
+			position: absolute;
+			width: 100%;
+			height: 33px;
+			line-height: 33px;
+			text-align: center;
+			top: 0;
+			left: 0;
+		}
+    </style>
+</head>
+<body>
+    <div id="MainPage" class="page-current">
+		
+        <header class="bar bar-nav Color_B1">
+            <a class="icon icon-left  pull-left" style="color: #333;" onclick="window.history.back();"></a>
+            <h1 id="MainPage_Title" class="title" style="color: #333;">二维码加油记录</h1>
+        </header>
+		<div style="height:100vh;background: white;float: left;clear: both;width: 100%;overflow-y: scroll;">
+        <div class="dates">
+			<div style="float: left;margin-top: 3px;">
+				<div data-options='{"type":"month"}' id="datees" name="date" readonly="readonly" style="width:4rem;height: 30px;padding: 0;border: 0;color: black;font-size: 1rem;line-height: 30px;"></div>
+			</div>
+			<div style="float: left;width: 20px;height: 20px;margin-top: 7px;">
+			<img  src="../Common/image/bzfk/downs.png"  width="16px">
+			</div>
+		</div>
+		<div class="list">
+			<!-- <div class="list-children">
+				<div class="list-chi-left">
+					<img src="../Common/image/sqjy.png" >
+				</div>
+				<div class="list-chi-right">
+					<div style="padding: 5px;padding-left: 20px;padding-top: 0;"></div>
+					<div style="padding-left: 20px;padding-top: 10px;color: #CCD0D2;">2019/05/24</div>
+				</div>
+				<div class="list-chi-rights">
+					<div style="padding: 5px;padding-left: 20px;padding-top:10px;padding-right: 15px;">-500</div>
+	
+				</div>
+			</div>
+			<div class="list-children">
+				<div class="list-chi-left">
+					<img src="../Common/image/sqjy.png" >
+				</div>
+				<div class="list-chi-right">
+					<div style="padding: 5px;padding-left: 20px;padding-top: 0;">沃尔玛</div>
+					<div style="padding-left: 20px;padding-top: 10px;color: #CCD0D2;">2019/05/24</div>
+				</div>
+				<div class="list-chi-rights">
+					<div style="padding: 5px;padding-left: 20px;padding-top:10px;padding-right: 15px;">-500</div>
+				</div>
+			</div> -->
+			<div class="nosj" style="width: 100%;text-align: center;padding: 10px 0;font-size: 0.7rem;">无记录</div>
+			<div id='result' class="ui-alert"></div>
+		</div>
+    </div>
+	
+	<script type="text/javascript">
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+	</script>
+	<script>
+		
+	</script>
+	<script type="text/javascript">
+		
+		
+		var datimes;
+		(function($) {
+			$.init();
+			var result = $('#result')[0];
+			var btnss = $('#datees')[0];
+			var btns = $('#datees');
+			btns.each(function(i, btn) {
+				btn.addEventListener('tap', function() {
+					var _self = this;
+					if(_self.picker) {
+						// _self.picker.show(function (rs) {
+						// 	// result.innerText = '选择结果: ' + rs.text;
+						// 	_self.picker.dispose();
+						// 	_self.picker = null;
+						// });
+					} else {
+						var optionsJson = this.getAttribute('data-options') || '{}';
+						var options = JSON.parse(optionsJson);
+						var id = this.getAttribute('id');
+						/*
+						 * 首次显示时实例化组件
+						 * 示例为了简洁，将 options 放在了按钮的 dom 上
+						 * 也可以直接通过代码声明 optinos 用于实例化 DtPicker
+						 */
+						_self.picker = new $.DtPicker(options);
+						_self.picker.show(function(rs) {
+							/*
+							 * rs.value 拼合后的 value
+							 * rs.text 拼合后的 text
+							 * rs.y 年，可以通过 rs.y.vaue 和 rs.y.text 获取值和文本
+							 * rs.m 月，用法同年
+							 * rs.d 日，用法同年
+							 * rs.h 时，用法同年
+							 * rs.i 分（minutes 的第二个字母），用法同年
+							 */
+							btnss.innerText =rs.text;
+							// datimes=result.innerText
+							
+							/* 
+							 * 返回 false 可以阻止选择框的关闭
+							 * return false;
+							 */
+							/*
+							 * 释放组件资源，释放后将将不能再操作组件
+							 * 通常情况下，不需要示放组件，new DtPicker(options) 后，可以一直使用。
+							 * 当前示例，因为内容较多，如不进行资原释放，在某些设备上会较慢。
+							 * 所以每次用完便立即调用 dispose 进行释放，下次用时再创建新实例。
+							 */
+							_self.picker.dispose();
+							_self.picker = null;
+						});
+					}
+					
+				}, false);
+			});
+		})(mui);
+		
+		
+		
+		var record;
+		$("body").on("click",".gearDate",function(){
+			$(this).hide()
+		});
+		$("body").on("click",".mui-btn-blue",function(event){
+			var months;
+			setTimeout(function(){
+				months=$("#datees").text()
+				console.log($("#datees").text())
+			
+			console.log($("#datees").text())
+			console.log($(".list").children().length)
+			if($(".list").children(".list-children").length>=1){
+				$(".list").children(".list-children").remove()
+			}
+			var proc = "查询基本信息 " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+			var data = rst.Table[0];
+			var userid=data.用户标识;
+			console.log(months)
+			// var userid="2071611150600000001";
+			var datas=`params={method:"GetUserCouponVerificationRecod",user_id:"${userid}",month:"${months}"}`
+				// console.log(datas)
+				$.ajax({
+				    type: "get",
+				    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+				    data: datas,
+				    async: true,
+				    success: function (data) {
+						console.log(data)
+						var json=JSON.parse(data)
+						if(json.result==0){
+							$(".nosj").show()
+							return;
+						}
+						
+						var jsondata=JSON.parse(json.data)
+						record=jsondata
+						console.log(jsondata)
+						$(".nosj").hide()
+						for(var i=0;i<jsondata.length;i++){
+							var pricess=jsondata[i].COUPON_UNITPRICE/100
+							jsondata[i].COUPON_UNITPRICE=pricess
+							var prices=jsondata[i].COUPON_AMOUNT/100
+							jsondata[i].COUPON_AMOUNT=prices
+							jsondata[i].COUPON_UNITPRICE=pricess
+							var tiems=jsondata[i].COUPON_USETIME.slice(0,10)
+							var hours=jsondata[i].COUPON_USETIME.slice(11,19)
+							jsondata[i].COUPON_USETIME=tiems+" "+hours
+							var hrmltext=`<div class="list-children" onclick="getrecord(${jsondata[i].COUPON_NO})">
+								<div class="list-chi-left">
+									<img src="../Common/image/sqjy.png" >
+								</div>
+								<div class="list-chi-right">
+									<div style="padding: 5px;padding-left: 20px;padding-top: 0;">${jsondata[i].COUPON_NAME}</div>
+									<div style="padding-left: 20px;padding-top: 10px;color: #CCD0D2;">${jsondata[i].COUPON_USETIME}</div>
+								</div>
+								<div class="list-chi-rights">
+									<div style="padding: 5px;padding-left: 20px;padding-top:10px;padding-right: 15px;">${jsondata[i].COUPON_AMOUNT}</div>
+								</div>
+							</div>`;
+							$(".list").append(hrmltext)
+						}
+				    }
+				});
+			},100)
+		});
+		function getrecord(val){
+			console.log(record)
+			for(var i=0;i<record.length;i++){
+				if(record[i].COUPON_NO==val){
+					var cord=JSON.stringify(record[i])
+					localStorage.setItem("records",cord)
+				}
+				$$.Goto('jlxq');
+			}
+		}
+		
+		$(function(){
+			var myDate = new Date();
+			var year=myDate.getFullYear(); //获取完整的年份(4位,1970-????)
+			var month=myDate.getMonth()+1;
+			if(month<10){
+				month="0"+month
+			}
+			$("#datees").text(year+"-"+month)
+			var datese=year+"-"+month
+			console.log(year+"-"+month)
+			var proc = "查询基本信息 " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+			var data = rst.Table[0];
+			var userid=data.用户标识;
+			var datas=`params={method:"GetUserCouponVerificationRecod",user_id:"${userid}",month:"${datese}"}`
+				 console.log(datas)
+				$.ajax({
+				    type: "get",
+				    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+				    data: datas,
+				    async: true,
+				    success: function (data) {
+						var json=JSON.parse(data)
+						if(json.result==0){
+							$(".nosj").show()
+							return;
+						}
+						var jsondata=JSON.parse(json.data)
+						record=jsondata
+						$(".nosj").hide()
+						for(var i=0;i<jsondata.length;i++){
+							var tiems=jsondata[i].COUPON_USETIME.slice(0,10)
+							var hours=jsondata[i].COUPON_USETIME.slice(11,19)
+							jsondata[i].COUPON_USETIME=tiems+" "+hours
+							var pricess=jsondata[i].COUPON_UNITPRICE/100
+							jsondata[i].COUPON_UNITPRICE=pricess
+							var prices=jsondata[i].COUPON_AMOUNT/100
+							jsondata[i].COUPON_AMOUNT=prices
+							var hrmltext=`<div class="list-children" onclick="getrecord(${jsondata[i].COUPON_NO})">
+								<div class="list-chi-left">
+									<img src="../Common/image/sqjy.png" >
+								</div>
+								<div class="list-chi-right">
+									<div style="padding: 5px;padding-left: 20px;padding-top: 0;">${jsondata[i].COUPON_NAME}</div>
+									<div style="padding-left: 20px;padding-top: 10px;color: #CCD0D2;">${jsondata[i].COUPON_USETIME}</div>
+								</div>
+								<div class="list-chi-rights">
+									<div style="padding: 5px;padding-left: 20px;padding-top:10px;padding-right: 15px;">${jsondata[i].COUPON_AMOUNT}</div>
+								</div>
+							</div>`;
+							$(".list").append(hrmltext)
+							
+						}
+				    }
+				});
+		})
+		
+	</script>
+	<script type="text/javascript">
+	</script>
+</body>
+</html>

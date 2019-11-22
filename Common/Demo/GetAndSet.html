@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+		<meta name="misapplication-tap-highlight" content="no"/>
+		<meta name="HandheldFriendly" content="true"/>
+		<meta name="MobileOptimized" content="320"/>
+		<title>DEMO</title>
+		<link type="text/css" href="../../Common/css/common.css" />
+		<script src="../../plugins/jquery/jquery-3.1.1.js" type="text/javascript"></script>
+		<script src="../js/sdk.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			
+			$(function(){
+				$("#btnLoad").click(function(){
+					btn_click();
+				});
+			})
+			
+			function btn_click(){
+				$$.Log("$Init");
+				$$.Log("$StartTime");
+				
+				//$$.Get("txtText__value");
+				
+				var obj = {
+					"txtText__value":"",
+					"ArrayA":[],
+					"ArrayA_Obj":{'ArrayA_0__class':'','ArrayA__text':[]},
+					"ArrayA_Func":function(){
+						var ary = new Array();
+						for (var i = 0; i < 4; i++) {
+							var data ={};
+							data['ArrayA_' + i + '__text'] = "";
+							data['ArrayA_' + i + '__class'] = "";
+							$$.Get(data);
+							ary.push(data);
+						}
+						return ary;
+					},
+				};
+				$$.Get(obj);
+				$$.Log(obj);
+				//alert("从页面读取数据成功！");
+				
+				obj = {
+					"txtText__value":"s1",
+					"ArrayA__class":["s2","s3","s4","s5"],
+					"ArrayA_Obj":{'ArrayA_0__class':'s6','ArrayA__text':["s7","s8","s9","s10"]},
+					"ArrayA_Func":function(){
+						//自定义赋值过程
+						$("#ItemList").text("bbbbb");
+					},
+				};
+				$$.Set(obj);
+				
+				obj.ArrayA = [];
+				obj.ArrayA_Obj.ArrayA__text = [];
+				$$.Get(obj);
+				$$.Log(obj);
+				alert("向页面设定数据成功！");
+				
+				//alert($.isArray({}));
+				
+				$$.Log("$EndTime");
+			}
+		</script>
+	</head>
+	<body style="overflow: hidden;">
+		<div>
+			<input id="btnLoad"  type="button" value="加载更多">
+
+			</input>
+			<input id = "txtText" type="text" value="45"/>
+			<div id="ItemList" class="button-select">
+				<div> zhw</div>
+			</div>
+			 
+			<div class="button-select">
+				<div id="ArrayA_0" class="button-select"> ArrayA1_val</div>
+				<div id="ArrayA_1" class="button-select"> ArrayA2_val</div>
+				<div id="ArrayA_2" class="button-select"> ArrayA3_val</div>
+				<div id="ArrayA_3" class="button-select"> ArrayA4_val</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/immersed.js"  ></script>
+	</body>
+</html>
+ 

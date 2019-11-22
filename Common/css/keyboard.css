@@ -1,0 +1,86 @@
+@font-face {
+    font-family: 'iconfont';
+    /* project id 756210 */
+    src: url('http://at.alicdn.com/t/font_756210_jdp01lae4h.eot');
+    src: url('http://at.alicdn.com/t/font_756210_jdp01lae4h.eot?#iefix') format('embedded-opentype'), url('http://at.alicdn.com/t/font_756210_jdp01lae4h.woff') format('woff'), url('http://at.alicdn.com/t/font_756210_jdp01lae4h.ttf') format('truetype'), url('http://at.alicdn.com/t/font_756210_jdp01lae4h.svg#iconfont') format('svg');
+}
+
+.iconfont {
+    font-family: "iconfont" !important;
+    font-size: 1.2rem;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: 0.2px;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.keyboard-box {
+    background: #fff;
+    font-size: 18px;
+    position: fixed;
+    bottom: 0;
+    left: 15px;
+    right: 15px;
+}
+
+.keyboard-box i {
+    font-size: 24px;
+}
+
+.keyboard-numBtn .row .col-xs-4,
+.keyboard-operation .row_1 .col-xs-12 {
+    border-top: 1px solid #ddd;
+    text-align: center;
+    height: 5rem;
+    line-height: 5rem;
+}
+
+.keyboard-numBtn .row .col-xs-4 {
+    border-right: 1px solid #ddd;
+}
+
+.keyboard-operation .row_2 .col-xs-12 {
+    border-top: 1px solid #ddd;
+    text-align: center;
+    color: #fff;
+    height: 15rem;
+    line-height: 15rem;
+}
+
+.keyboard-operation-submit {
+    background: #13ae13;
+}
+
+.keyboard-show-text {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.keyboard-show-text input[disabled] {
+    background: #fff;
+    border: none;
+    opacity: 1;
+    color: #333;
+    -webkit-text-fill-color: #333;
+}
+
+.keyboard-money,
+.keyboard-password {
+    padding: 15px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.keyboard-money {
+    width: 15%;
+    border: 1px solid #ddd !important;
+    margin: 0 -1px 0 0;
+}
+
+.keyboard-password {
+    width: 100%;
+    border-bottom: 1px solid #ddd !important;
+}

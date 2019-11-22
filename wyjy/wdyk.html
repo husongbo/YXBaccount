@@ -1,0 +1,1131 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>我的油卡</title>
+    <link rel="stylesheet" href="../Common/css/sm.css?v=20181010" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script type="text/javascript" src="http://map.qq.com/api/js?v=2.exp"></script>
+    <script type="text/javascript">
+			$$.Page_Load = function() {
+				$.init();
+
+				if($$.Context.Parameter.manager) {
+					My.CardCD = My.GetCardCDFromManager($$.Context.Parameter.manager); // 客户经理
+				} else if($$.Context.Parameter.CardCD) {
+					My.CardCD = $$.Context.Parameter.CardCD; // 具体卡的二维码
+				} else if($$.Context.Parameter.CardPackage) { // 卡包
+					My.CardCD = My.GetCardCDFromCardPackage($$.Context.Parameter.CardPackage);
+				}
+
+				My.GetUserRegisterInfo();
+
+                var cities = ["成都市", "自贡市", "攀枝花市", "泸州市", "德阳市", "绵阳市", "广元市", "遂宁市", "内江市", "乐山市", "南充市", "宜宾市",
+                    "广安市", "达州市", "眉山市", "雅安市", "巴中市", "资阳市", "阿坝州", "甘孜州", "凉山州  "
+                ];
+                $("#city-picker").picker({
+                    toolbarTemplate: '<header class="bar bar-nav">\
+					<button class="button button-link pull-right close-picker">确定</button>\
+					<h1 class="title">请选择城市</h1>\
+					</header>',
+                    cols: [{
+                        textAlign: 'left',
+                        values: cities
+                    }],
+                    onClose: function (obj) {
+                        My.SetCity(obj.value[0]);
+                    }
+                });
+
+                // return;
+                My.LoadWxApi();
+                wx.ready(function () {
+                    My.GetLocation();
+                });
+
+				My.Event();
+			};
+
+			var My = {
+				CardCD: "",
+				RegistedCardCD: "",
+				ApplyRecordId: 0,
+                IMAGES: [],
+                citylocation: new qq.maps.CityService({
+                    complete: function (results) {
+                        var location = results.detail.detail.split(",");
+                        if (location.length > 3) {
+                            My.location.province = location[2];
+                        }
+                        My.location.city = location[1];
+
+                        My.GetCityInfo();
+                    }
+                })
+
+        };
+        My.GotoMyCardPage = function () {
+            if ($$.Context.Parameter.CardCD) {
+                var param = {};
+                param.CardCD = $$.Context.Parameter.CardCD
+            }
+
+            $$.Goto('wdyk', param);
+        };
+        My.ShowMap = function () {
+            if (!My.city) {
+                My.SetCity("成都市");
+            }
+            // My.city = "绵阳市";
+            var proc = "查询城市油站信息 " + "'" + My.city + "'";
+            var rst = $$.JSONDB.Query(proc).Table;
+            if (rst.length > 0) {
+                $$.Goto("dtapi");
+            } else {
+                var mapUrl = "http://apis.map.qq.com/uri/v1/search?keyword=加油站&center=" + My.location.latitude +
+                    "," + My.location.longitude + "&radius=1000&referer=myapp";
+                window.location.href = mapUrl;
+            }
+        };
+
+        My.LoadWxApi = function () {
+            var signPackage = $$.GetJSSDKParameter();
+
+            wx.config({
+                debug: false,
+                appId: signPackage["AppId"],
+                timestamp: signPackage["Timestamp"],
+                nonceStr: signPackage["Noncestr"],
+                signature: signPackage["Signature"],
+                jsApiList: [
+                    // 所有要调用的 API 都要加到这个列表中
+                    'checkJsApi',
+                    'openLocation',
+                    'getLocation'
+                ]
+            });
+        };
+
+        My.GetLocation = function () {
+            wx.getLocation({
+                success: function (res) {
+                    My.location = {};
+                    My.location.latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    My.location.longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    My.location.speed = res.speed; // 速度，以米/每秒计
+                    My.location.accuracy = res.accuracy; // 位置精度
+                    //设置经纬度信息
+                    var latLng = new qq.maps.LatLng(My.location.latitude, My.location.longitude);
+                    //调用城市经纬度查询接口实现经纬查询
+                    My.citylocation.searchCityByLatLng(latLng);
+                },
+                cancel: function (res) {
+                    //alert('用户拒绝授权获取地理位置');
+                }
+            });
+            };
+
+            My.GetCityInfo = function () {
+                //				My.city = $.fn.cookie("city");
+                //				if(!My.city) {
+                My.province = My.location.province;
+                My.city = My.location.city;
+                //					$.fn.cookie("province", My.prototype);
+                //					$.fn.cookie("city", My.city);
+                //				}
+                My.SetCity(My.city);
+            };
+
+            My.SetCity = function (city) {
+                //				$.fn.cookie("city", city);
+                My.city = city;
+                $("#city").text(city);
+            };
+            My.CloseAd = function () {
+                layer.closeAll();
+            };
+
+
+
+			My.ShowRegisterInfo = function() {
+				$(".hide").hide();
+				$(".register").show();
+			};
+
+			My.ShowOilCard = function() {
+				$(".hide").hide();
+				$(".oil-card").show();
+			};
+
+			My.ShowApplyCardTip = function() {
+				$(".oil-card").hide();
+				$(".register").hide();
+				$(".no-card").css("display", "block");
+			};
+
+			// 查询注册信息
+			My.GetUserRegisterInfo = function() {
+				var proc = "查询基本信息 " + Bill.userId;
+				var rst = $$.JSONDB.Query(proc);
+
+				if(!rst) {
+					return;
+				}
+				var data = rst.Table[0];
+				if(!data) {
+					return;
+				}
+
+				if(!data.手机) {
+					My.ShowRegisterInfo();
+					return;
+				}
+
+				// 查询油卡信息
+				My.GetOilCardInfo();
+				if(My.RegistedCardCD == "") {
+					if(My.CardCD == "") {
+						My.ShowApplyCardTip();
+					} else {
+						My.AllocCard();
+					}
+				}
+			};
+
+			My.ApplyOilCard = function() {
+				My.AllocCard();
+			};
+
+			My.GetOilCardInfo = function() {
+				var rst = Bill.GetUserCardInfo();
+				// 注册过油卡已经分配
+				if(rst && rst.Table.length != 0) {
+					this.RegistedCardCD = rst.Table[0].CARD_CD;
+					$('#card_cd').html(My.GetFormatDisplayCardCD());
+					// $(".card-manager-name").text(rst.Table[0].MANAGER_NAME);
+					My.ShowOilCard();
+				}
+			};
+
+			My.GetFormatDisplayCardCD = function() {
+				var startElement = '<span class="card-cd"><span class="card-number">';
+				var endElement = '</span></span>';
+				var showHtml = "";
+				for(var i = 0; i < this.RegistedCardCD.length; i++) {
+					showHtml += startElement + this.RegistedCardCD[i] + endElement;
+				}
+				return showHtml;
+			};
+
+			My.Register = function(data) {
+				setTimeout(function() {
+					My.RegisterProc(data);
+					My.GetUserRegisterInfo();
+				}, 1);
+			};
+
+			My.RegisterProc = function(record) {
+				record.标识 = Bill.userId;
+
+				var procTmpl = "更新基本信息 {{标识}}, N'{{姓名}}', N'{{身份证号}}', '{{手机}}', '{{邮箱}}', N'{{国家}}', N'{{省}}', N'{{市}}', N'{{区}}',  N'{{详细地址}}' ";
+				var proc = procTmpl.t(record);
+				var rst = $$.JSONDB.Query(proc);
+			};
+
+			My.GetCardCDFromManager = function(manager) {
+				var proc = "查询客户经理油卡 " + manager;
+				var rst = $$.JSONDB.Query(proc);
+				if(rst.Table && rst.Table.length > 0) {
+					return rst.Table[0].油卡卡号;
+				}
+
+				return "";
+			};
+
+			// 查询卡包未销售的卡
+			My.GetCardCDFromCardPackage = function(cardPackage) {
+				var proc = "查询卡包未销售油卡 " + cardPackage;
+				var rst = $$.JSONDB.Query(proc);
+				if(rst.Table && rst.Table.length > 0) {
+					return rst.Table[0].油卡卡号;
+				}
+			};
+
+			My.AllocCard = function(data) {
+				layer.open({
+					type: 2
+				});
+				setTimeout(function() {
+					var rst = My.AllocCardProc(data);
+					layer.closeAll();
+
+					var msg = "卡号分配失败";
+					switch(rst.RESULT) {
+						case 0:
+							msg = "卡号分配成功";
+							break;
+						default:
+							if(rst.MESSAGE) {
+								msg = rst.MESSAGE;
+							}
+							break;
+					}
+
+					function callbackFunc() {
+						if(My.CardCD && rst.RESULT == 0) {
+							$$.Goto("index");
+						} else {
+							My.GetOilCardInfo();
+						}
+					}
+
+					layer.open({
+						content: msg,
+						skin: 'msg',
+						time: 4 //4秒后自动关闭
+							,
+						end: function() {
+							callbackFunc();
+						}
+					});
+				}, 1);
+			};
+
+			My.BindCard = function() {
+				var cardCd = $('#oil_card_cd').val();
+				if(cardCd == "") {
+					layer.open({
+						content: '请输入油卡卡号',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+				var confirmCardCd = $('#confirm_card_cd').val();
+				if(confirmCardCd == "") {
+					layer.open({
+						content: '请输入确认卡号',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				if(confirmCardCd != cardCd) {
+					layer.open({
+						content: '两次输入的卡号不一致',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				My.CardCD = cardCd;
+
+				My.AllocCard();
+			};
+
+			My.AllocCardProc = function(record) {
+				var tmpl = "{{标识}}, '{{卡号}}', '{{手机}}', N'{{姓名}}', N'{{身份证号}}', N'{{国家}}', N'{{省}}', N'{{市}}', N'{{区}}', N'{{详细地址}}', '{{邮箱}}'";
+
+				if(!record) {
+					tmpl = "{{标识}}, '{{卡号}}'";
+					record = {};
+				}
+
+				record.标识 = Bill.userId;
+				record.卡号 = this.CardCD;
+
+				var params = tmpl.t(record);
+				var proc = "ApplyCard " + params;
+				var rst = $$.JSONDB.Query(proc);
+				return rst.Table[0];
+			};
+
+			// 注册信息的校验
+			My.CheckInputInfo = function() {
+				var data = {};
+
+				data.手机 = $('#phone').val();
+				if(!DV_MOBILE_PHONE.test(data.手机)) {
+					layer.open({
+						content: '请输入正确的手机号码格式',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				data.姓名 = $('#name').val();
+				if(data.姓名 == "") {
+					layer.open({
+						content: '请输入姓名',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				data.身份证号 = $('#identity_card').val();
+				if(data.身份证号 == "") {
+					layer.open({
+						content: '请输入身份证号',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				var cArea = $('#city-picker').val();
+				if(cArea == "") {
+					layer.open({
+						content: '请选择地区',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+				cityArea = cArea.split(' ');
+				data.国家 = '中国'
+				data.省 = cityArea[0];
+				data.市 = cityArea[1];
+				data.区 = cityArea[2];
+
+				if(data.省 == "" || data.市 == "") {
+					layer.open({
+						content: '请选择地区',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				data.详细地址 = $('#address').val();
+				if(data.详细地址 == "") {
+					layer.open({
+						content: '请输入详细地址',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				data.邮箱 = $('#mail').val();
+				if(!DV_EMAIL.test(data.邮箱)) {
+					layer.open({
+						content: '请输入正确的电子邮箱地址',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				data.code = $('#verify_code').val();
+				if(data.code == "") {
+					layer.open({
+						content: '请输入手机验证码',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				My.registerInfo = data;
+				return data;
+			}
+
+			My.BindGiftCard = function() {
+				var cardCd = $('#gift_card_cd').val();
+				if(cardCd == "") {
+					layer.open({
+						content: '请输入礼品油卡卡号',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+				var confirmCardCd = $('#confirm_gift_card_cd').val();
+				if(confirmCardCd == "") {
+					layer.open({
+						content: '请输入确认卡号',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				if(confirmCardCd != cardCd) {
+					layer.open({
+						content: '两次输入的卡号不一致',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+				var record = {};
+
+				record.标识 = Bill.userId;
+				record.卡号 = cardCd;
+
+				layer.open({
+					type: 2
+				});
+				setTimeout(function() {
+					var rst = My.BindGiftCardProc(record);
+					layer.closeAll();
+
+					var msg = "卡号绑定失败";
+					switch(rst.RESULT) {
+						case 0:
+							msg = "卡号绑定成功";
+							break;
+						default:
+							if(rst.MESSAGE) {
+								msg = rst.MESSAGE;
+							}
+							break;
+					}
+
+					layer.open({
+						content: msg,
+						skin: 'msg',
+						time: 4,
+						end: function() {
+							My.GetOilCardInfo();
+						}
+					});
+				}, 1);
+			}
+
+			My.BindGiftCardProc = function(record) {
+				var tmpl = "{{标识}}, '{{卡号}}'";
+
+				var params = tmpl.t(record);
+				var proc = "BindGiftCard " + params;
+				var rst = $$.JSONDB.Query(proc);
+				return rst.Table[0];
+			}
+
+			My.CheckVerifyCode = function(baseInfo) {
+				var layerId = layer.open({
+					type: 2
+				});
+				var parameter = {};
+				parameter.phone = baseInfo.手机;
+				parameter.code = baseInfo.code;
+
+				$.ajax({
+					type: "post",
+					url: "/App/Common/CSharp/CheckVerifyCode.ashx",
+					data: parameter,
+					async: true,
+					success: function(data) {
+						var json = $.parseJSON(data);
+						var msg = json.MESSAGE;
+						if(json.RESULT == 0) {
+							My.Register(baseInfo);
+						}
+						layer.close(layerId);
+					}
+				});
+			}
+
+			My.Commit = function() {
+				var baseInfo = My.CheckInputInfo();
+				if(!baseInfo) {
+					return;
+				}
+
+				My.CheckVerifyCode(baseInfo);
+			}
+
+			My.SendVerifyCode = function() {
+				var phone = $('#phone').val();
+				if(!DV_MOBILE_PHONE.test(phone)) {
+					layer.open({
+						content: '请输入正确的手机号码格式',
+						skin: 'msg',
+						time: 2 //2秒后自动关闭
+					});
+					return;
+				}
+
+				var parameter = {};
+				parameter.phone = phone;
+				parameter.token = $$.Context.token;
+
+				$.ajax({
+					type: "post",
+					url: "/WeChat/SendVerifyCode.ashx",
+					data: parameter,
+					async: true,
+					success: function(data) {
+						var json = $.parseJSON(data);
+						var msg = json.MESSAGE;
+						layer.open({
+							content: msg,
+							skin: 'msg',
+							time: 2 //2秒后自动关闭
+						});
+					}
+				});
+			}
+
+			/**
+			 * 查询转赠状态
+			 */
+			My.QueryTransferState = function() {
+				// 查询是否转赠中
+				var sql = "SELECT PT0014_ID FROM [PT0014_TRANSFER_OIL_CARD_RECORD] WHERE PT0014_DATA_STATE=1 AND [PT0014_TO_USER]='' AND [PT0014_FROM_USER] = " + Bill.userId;
+				var rst = $$.JSONDB.Query(sql);
+				if(rst && rst.Table.length != 0 && rst.Table[0].PT0014_ID) {
+					My.ApplyRecordId = rst.Table[0].PT0014_ID;
+				}
+
+				// 已申请转赠油卡
+				if(My.ApplyRecordId > 0) {
+					$(".apply-transfer").hide();
+					$(".transfer").css("display", "block");
+				} else {
+					$(".apply-transfer").css("display", "block");
+					$(".transfer").hide();
+				}
+			}
+
+			/**
+			 * 申请转赠油卡
+			 */
+			My.ApplyTransferOilCard = function() {
+				var proc = "申请转赠油卡 " + Bill.userId;
+				var rst = $$.JSONDB.Query(proc);
+				My.QueryTransferState();
+			}
+
+			/**
+			 * 进入油卡转赠页面
+			 */
+			My.GotoTransferPage = function() {
+				if(My.ApplyRecordId > 0) {
+					$$.Goto("zzyk", {
+						TransferRecordId: My.ApplyRecordId
+					});
+				}
+			}
+
+			My.Event = function() {
+				$("#city-picker").cityPicker({
+					toolbarTemplate: '<header class="bar bar-nav">\
+				<button class="button button-link pull-right close-picker">确定</button>\
+				<h1 class="title">选择地址</h1>\
+				</header>'
+				});
+
+				// 补卡流程
+                $(".bklc-title").click(function() {
+					$$.Goto('bklc')
+				});
+			}
+    </script>
+    <style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .wdyk-banner {
+            width: 100%;
+            line-height: 0;
+        }
+
+            .wdyk-banner img {
+                width: 100%;
+            }
+
+        .mode-title {
+            position: initial;
+            line-height: 2.5rem;
+            height: 2.5rem;
+            background: #eee;
+            margin: 0;
+            padding-left: 0.8rem;
+            font-size: 0.8rem;
+            color: #000000;
+        }
+
+        .wdyk-ewm img {
+            width: 35%;
+            margin-top: 1rem;
+        }
+
+        .wdyk-ewm {
+            text-align: center;
+            color: #e4393c;
+            font-size: 0.6rem;
+            margin-bottom: 1rem
+        }
+
+        .item-inner {
+            font-size: 0.7rem;
+            color: #333;
+        }
+
+        .list-block input[type="text"] {
+            font-size: 0.6rem;
+            color: #666;
+        }
+
+        .card-button {
+            margin: 0;
+        }
+
+        .bd-button img {
+            width: 100%;
+        }
+
+        .bd-button {
+            text-align: center;
+            padding: 1rem;
+            padding-bottom: 0;
+        }
+
+        @font-face {
+            font-family: 'iconfont'; /* project id 796516 */
+            src: url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.eot');
+            src: url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.woff') format('woff'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.ttf') format('truetype'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.svg#iconfont') format('svg');
+        }
+
+        .iconfont {
+            font-family: "iconfont" !important;
+            font-size: 16px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .icon-duanxin:before {
+            content: "\e618";
+            color: #ff8200;
+        }
+
+        @font-face {
+            font-family: 'iconfont'; /* project id 795934 */
+            src: url('//at.alicdn.com/t/font_795934_8b63g524jy6.eot');
+            src: url('//at.alicdn.com/t/font_795934_8b63g524jy6.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_795934_8b63g524jy6.woff') format('woff'), url('//at.alicdn.com/t/font_795934_8b63g524jy6.ttf') format('truetype'), url('//at.alicdn.com/t/font_795934_8b63g524jy6.svg#iconfont') format('svg');
+        }
+
+        .icon-wenhao:before {
+            content: "\e674";
+            color: #e4393c;
+            font-size: 0.6rem;
+        }
+
+        .icon-weibiaoti-:before {
+            content: "\e613";
+            color: #e4393c;
+        }
+
+        .icon-weibiaoti- {
+            padding-right: 0.1rem;
+        }
+
+        #PageContent {
+            padding-bottom: 2.5rem;
+        }
+
+        .ykkp {
+            width: 100%;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .ykkp-desc {
+            font-size: 0.6rem;
+            padding-left: 1rem;
+            color: #333;
+        }
+
+        .bklc-title {
+            background: #fff;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            margin: 1rem 0;
+        }
+
+        .icon-right:before {
+            color: #333;
+        }
+
+        #card_cd {
+            top: 0;
+            position: absolute;
+            height: 10rem;
+            line-height: 10rem;
+            color: #fff;
+            text-align: center;
+            width: 100%;
+            font-size: 1.5rem;
+        }
+
+        .kfdh {
+            margin-top: 0.8rem;
+            color: #e4393c;
+            font-size: 0.6rem;
+            text-align: center;
+        }
+
+            .kfdh span {
+                color: #666;
+            }
+
+        .chongzhi-button {
+            background-color: rgba(0, 0, 0, 0) !important;
+            border: 1px solid #ff8200 !important;
+            color: #ff8200 !important;
+        }
+
+        .chaxun-button {
+            background-color: #ff8200 !important;
+            color: #fff !important;
+        }
+
+
+
+        @font-face {
+            font-family: 'iconfont'; /* project id 705767 */
+            src: url('//at.alicdn.com/t/font_705767_wsdw7wzndb.eot');
+            src: url('//at.alicdn.com/t/font_705767_wsdw7wzndb.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.woff') format('woff'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.ttf') format('truetype'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.svg#iconfont') format('svg');
+        }
+
+        .iconfont {
+            font-family: "iconfont" !important;
+            font-size: 16px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+
+
+        .icon-dizhi01:before {
+            content: "\e62c";
+            color: #ffc600;
+        }
+
+        .icon-shouji:before {
+            content: "\e607";
+            color: #a535e9;
+        }
+
+        .icon-yonghudianji:before {
+            content: "\e638";
+            color: #1375ff;
+        }
+
+        .icon-nationaarea:before {
+            content: "\e624";
+            color: #ff9800;
+        }
+
+        .icon-youjian:before {
+            content: "\e62b";
+            color: #ee2683;
+        }
+
+        .icon-shenfenzheng:before {
+            content: "\e696";
+            color: #f94d1b;
+            font-size: 0.5rem;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .list-block {
+            margin: 0;
+            font-size: 0.65rem;
+            color: #333
+        }
+
+            .list-block input[type="text"] {
+                font-size: 0.6rem;
+                color: #999
+            }
+
+            .list-block .item-inner {
+                padding-right: 0;
+            }
+
+            .list-block .item-content {
+                padding-right: 0.75rem;
+            }
+
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .iconfont {
+            width: 2.5rem;
+        }
+
+        .tijiao {
+            background-color: #ff8200;
+            color: #fff;
+            padding: 0 1.4rem;
+            border: none;
+        }
+
+        .jbxx-content {
+            background: url("../Common/image/jbxx/bg_img.png") no-repeat center top;
+            margin-top: 0.5rem;
+            background-size: 100% 100%;
+            padding-bottom: 0.5rem;
+        }
+
+        .fsyzm {
+            position: absolute;
+            right: 0.3rem;
+        }
+
+        .fsyzm-button {
+            background: #ff8200;
+            border: none;
+            color: #fff;
+            height: 1.1rem;
+            line-height: 1rem;
+            font-size: 0.6rem;
+        }
+        .tab-item:active {
+            background: #e7e7e7;
+        }
+    </style>
+</head>
+
+	<body>
+		<div class="page-group">
+            <div id="MainPage" class="page page-current">
+                <header class="bar bar-nav Color_B1">
+                    <a class="icon icon-left  pull-left" style="color: #000;" onclick="$.router.back();"></a>
+                    <h1 id="MainPage_Title" class="title">我的油卡</h1>
+                </header>
+
+                <div id="PageContent" class="content">
+                    <div class="oil-card hide" style="margin-top: 0.5rem;">
+                        <div class="">
+                            <div>
+                                <img src="../Common/image/wdyk/ykkp.png" class="ykkp" />
+                            </div>
+                            <div id="card_cd"></div>
+                            <div class="ykkp-desc">
+                                每月10日是出账单日
+                            </div>
+                        </div>
+                        <div class="content-block-title mode-title bklc-title">
+                            <a class="icon icon-right pull-right" style="margin-right:0.75rem;"></a>补卡流程
+                        </div>
+                        <div class="content-block" style="margin-top:1.8rem;">
+                            <div class="row">
+                                <div class="col-50"><a href="#" onclick="$$.Goto('wycz')" class="button button-big button-fill button-danger chongzhi-button">充值</a></div>
+                                <div class="col-50"><a href="#" onclick="$$.Goto('yczdcx0')" class="button button-big button-fill button-success chaxun-button">查询</a></div>
+                            </div>
+                            <div class="kfdh">
+                                <i class="iconfont icon-wenhao"></i>挂失补卡请拨打客服电话： <a href="tel:400-682-0086">400-680-0086</a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card no-card hide" style="margin:0;">
+
+                        <div class="wdyk-banner"><img src="../Common/image/wdyk/banner_img.png" /></div>
+                        <div class="content-block-title mode-title">领取油卡</div>
+                        <div class="wdyk-ewm">
+                            <img src="../Common/image/wdyk/img_erweima.png" />
+                            <div>
+                                您可以识别二维码或者扫描渠道二维码领取油卡
+                            </div>
+                        </div>
+
+                        <div class="content-block-title mode-title">绑定油卡</div>
+                        <div class="list-block" style="margin:0 auto;">
+                            <ul>
+                                <!-- Text inputs -->
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title label namefont">油卡卡号</div>
+                                            <div class="item-input">
+                                                <input type="text" placeholder="请输入卡号" id="oil_card_cd" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title label namefont">确认卡号</div>
+                                            <div class="item-input">
+                                                <input type="text" placeholder="请再次输入卡号" id="confirm_card_cd" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="card card-button">
+                                <div class="card-content">
+                                    <div class="card-content-inner">
+                                        <span><i class="iconfont icon-weibiaoti-"></i>说明：每月10号为出账单日</span>
+                                        <div class="bd-button">
+                                            <img src="../Common/image/wdyk/btn_bangding.png" alt="Alternate Text" onclick="My.BindCard()" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card jbxx-content  register hide">
+                        <div class="card-content">
+                            <div class="list-block">
+                                <ul>
+                                    <li>
+                                        <div class="item-content">
+                                            <div class="item-inner">
+                                                <i class="iconfont icon-shouji"></i>
+                                                <div class="item-title label namefont">手机号</div>
+                                                <div class="item-input">
+                                                    <input type="text" placeholder="请输入手机号" id="phone" />
+                                                </div>
+                                                <div class="item-after" style="font-size: small; color: #9E9E9E;" id="binded_phone"></div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="unbind">
+                                        <div class="item-content">
+                                            <div class="item-inner">
+                                                <i class="iconfont icon-duanxin"></i>
+                                                <div class="item-title label namefont">手机验证码</div>
+                                                <div class="item-input">
+                                                    <input type="text" placeholder="请输入验证码" id="verify_code" />
+                                                </div>
+                                                <div class="item-after fsyzm">
+                                                    <a class="button fsyzm-button" onclick="My.SendVerifyCode();">发送验证码</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="item-content">
+                                            <div class="item-inner">
+                                                <i class="iconfont icon-yonghudianji"></i>
+                                                <div class="item-title label namefont">姓名</div>
+                                                <div class="item-input">
+                                                    <input type="text" placeholder="请输入姓名" id="name" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="item-content">
+                                            <div class="item-inner">
+                                                <i class="iconfont icon-shenfenzheng"></i>
+                                                <div class="item-title label namefont">身份证号</div>
+                                                <div class="item-input">
+                                                    <input type="text" placeholder="请输入身份证号" id="identity_card" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="item-content">
+                                            <div class="item-inner">
+                                                <i class="iconfont icon-nationaarea"></i>
+                                                <div class="item-title label namefont">地区</div>
+                                                <div class="item-input">
+                                                    <input type="text" id="city-picker" placeholder="请选择地区" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="item-content">
+                                            <div class="item-inner">
+                                                <i class="iconfont icon-dizhi01"></i>
+                                                <div class="item-title label namefont">详细地址</div>
+                                                <div class="item-input">
+                                                    <input type="text" placeholder="请输入详细地址" id="address" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="item-content">
+                                            <div class="item-inner">
+                                                <i class="iconfont icon-youjian"></i>
+                                                <div class="item-title label namefont">电子邮件</div>
+                                                <div class="item-input">
+                                                    <input type="text" placeholder="请输入电子邮件地址" id="mail" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                        <div class="content-block">
+                            <p><a onclick="My.Commit()" class="button tijiao button-big">提交</a></p>
+                        </div>
+
+                    </div>
+                </div>
+                <nav class="bar bar-tab">
+                    <a class="tab-item external " href="#" onclick="$$.Goto('index')">
+                        <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_wode_shouye.png" /></span>
+                        <span class="tab-label">首页</span>
+                    </a>
+                    <a class="tab-item external" href="#" onclick="$$.Goto('dtapi')">
+                        <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_daohang.png" /></span>
+                        <span class="tab-label">导航</span>
+                    </a>
+                    <a class="tab-item external active" href="#" onclick="My.GotoMyCardPage();">
+                        <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_bang_youka.png" /></span>
+                        <span class="tab-label">油卡</span>
+                    </a>
+                    <a class="tab-item external" href="#" onclick="$$.Goto('wdzh')">
+                        <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_wode.png" /></span>
+                        <span class="tab-label">我的</span>
+                    </a>
+                </nav>
+            </div>
+		</div>
+	</body>
+
+	<script>
+	</script>
+
+</html>

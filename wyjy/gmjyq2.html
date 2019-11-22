@@ -1,0 +1,554 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>购买加油券</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <style type="text/css">
+        .content-block-title {
+            margin-top: 0.75rem;
+        }
+
+        .card {
+            background-color: #FFFFFF;
+        }
+
+        .card-header {
+            font-size: 0.7rem;
+            font-weight: normal;
+        }
+
+        .card-header img {
+            width: 25%;
+            vertical-align: middle;
+        }
+
+        #yh {
+            font-weight: bold;
+            color: #E4393C;
+        }
+
+        input[type='number'] {
+            border: none;
+            border-bottom: 1px solid #DDDDDD;
+            width: 90%;
+            box-sizing: border-box;
+            padding-left: 5%;
+            font-size: 0.8rem;
+            padding-bottom: 0.3rem;
+        }
+
+        .button {
+            height: 2rem;
+        }
+
+        .button.button-fill {
+            line-height: 2rem;
+        }
+
+        .code-title {
+            text-align: center;
+            background-color: #FFFFFF;
+            padding: 5% 0;
+        }
+
+        .list-block {
+            margin: 0;
+            font-size: 0.65rem;
+        }
+
+        .price {
+            font-size: 1rem;
+            color: #e4393c;
+            margin-bottom: 1%;
+            margin-top: -3%;
+            font-weight: bold;
+        }
+
+        /*结算*/
+
+        #js {
+            background-color: #E4393C;
+            color: #FFFFFF;
+            font-weight: bold;
+        }
+
+        /*优惠券*/
+
+        .coupon {
+            position: relative;
+            background: #E4393C;
+            color: #fff;
+            height: 5rem;
+            line-height: 25px;
+            overflow: hidden;
+        }
+
+        .coupon:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        /*价格*/
+
+        .coupon-money .sum {
+            font-size: 25px;
+        }
+
+        .coupon-left {
+            float: left;
+            text-align: left;
+            width: 60%;
+            font-size: 0.6rem;
+        }
+
+        .coupon-right {
+            float: right;
+            text-align: center;
+            width: 40%;
+            font-size: 0.7rem;
+        }
+
+        .coupon-inner {
+            padding: 10px 15px;
+            height: 5rem;
+            position: relative;
+        }
+
+        .coupon-right .coupon-inner {
+            border-left: 2px dashed rgba(255, 255, 255, .5);
+        }
+
+        .coupon-money,
+        .coupon-time {
+            margin-top: 0.6rem;
+        }
+
+        .coupon-circle {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #FFFFFF;
+            position: absolute;
+            left: -9px;
+            border-radius: 50%
+        }
+
+        .coupon-circle.top {
+            top: -0.5rem;
+        }
+
+        .coupon-circle.bottom {
+            bottom: -0.55rem;
+        }
+
+        .coupon-light {
+            position: absolute;
+            top: 20px;
+            left: 20%;
+            height: 150px;
+            width: 100%;
+            background: rgba(255, 255, 255, .2);
+            transform: rotate(-30deg);
+            -webkit-transform: rotate(-30deg);
+            -moz-transform: rotate(-30deg);
+        }
+
+        label.label-checkbox input[type="checkbox"]:checked+.item-media i.icon-form-checkbox {
+            background-color: #E4393C;
+        }
+
+        #selPrice,
+        #selNum {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #E4393C;
+        }
+    </style>
+    <script type="text/template" id="couponList_Template">
+        <li>
+            <label class="label-checkbox item-content" style="padding-right: 0.75rem;">
+                <div class="item-inner">
+                    <div class="coupon">
+                        <div class="coupon-left">
+                            <div class="coupon-inner">
+                                <div class="coupon-money">
+                                    <span>¥</span>
+                                    <span class="sum">{{礼品价格}}</span>
+                                </div>
+                                <div class="coupon-condition">{{礼品说明}}</div>
+                            </div>
+                        </div>
+                        <div class="coupon-right">
+                            <div class="coupon-inner">
+                                <div class="coupon-time">
+                                    {{礼品名称}}
+                                    <br> {{发放日期}}
+                                </div>
+                                <i class="coupon-circle top"></i>
+                                <i class="coupon-circle bottom"></i>
+                            </div>
+                        </div>
+                        <div class="coupon-light"></div>
+                    </div>
+                </div>
+                <input type="checkbox" name="my-checkbox" id="{{礼品标识}}" value="{{礼品价格}}">
+                <div class="item-media">
+                    <i class="icon icon-form-checkbox"></i>
+                </div>
+            </label>
+        </li>
+    </script>
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+    <script type="text/javascript" src="../Common/js/utf.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current" id="main">
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left  pull-left" style="color: white;" onclick="window.history.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: white;">购买加油券</h1>
+            </header>
+            <nav class="bar bar-tab">
+                <a class="tab-item external" style="font-weight: bold;">
+                    <span style="font-size: 0.65rem;color: #333;">应支付:</span>
+                    <span id="total" style="color: #E4393C;font-size: 0.85rem;">￥0.00</span>
+                </a>
+                <a class="tab-item external" id="js">结算</a>
+            </nav>
+            <div class="content">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-content-inner" style="padding: 1.5rem 0.75rem;">
+                            <p>加油金额</p>
+                            <p>
+                                <span style="font-size: 1rem;font-weight: bold;">￥</span>
+                                <input type="number" />
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 无优惠券 -->
+                <div class="card" hidden id="no-dyq">
+                    <div class="card-header">
+                        <div>
+                            <img src="../Common/image/no-dyq.png" alt="" />
+                            <span>优惠券</span>
+                        </div>
+                        <div class="color-gray">暂无可使用的优惠券</div>
+                    </div>
+                </div>
+
+                <!-- 有优惠券 -->
+                <div class="card" hidden id="dyq">
+                    <div class="card-header">
+                        <div>
+                            <img src="../Common/image/dyq.png" alt="" />
+                            <span>优惠券</span>
+                        </div>
+                        <div>
+                            <span id="totalCoupon" style="font-size: 0.8rem;font-weight: bold;color: #E4393C;">0</span>&nbsp;张
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="list-block media-list">
+                            <ul id="couponList"></ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <label class="label-checkbox" style="padding-right: 0.75rem;">
+                            <input type="checkbox" name="all-checkbox">
+                            <div class="item-media">
+                                <i class="icon icon-form-checkbox"></i>&nbsp;&nbsp;全选</div>
+                        </label>
+                        <div>已选&nbsp;
+                            <span id="selNum">0</span>&nbsp;张,可抵用&nbsp;
+                            <span id="selPrice">0.00</span>&nbsp;元</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--生成二维码-->
+        <div class="page" id="code">
+            <div class="content">
+                <div style="background-color: #FFFFFF;" class="code-title">
+                    <div id="qrcodeCanvas" style="margin: 5% 23%;"></div>
+                    <div class="price">00.00</div>
+                    <div style="color: #999999;font-size: 0.65rem;">交易成功</div>
+                </div>
+                <div class="list-block" id="details">
+                    <ul>
+                        <li class="item-content">
+                            <div class="item-inner">
+                                <div class="item-title">账单分类</div>
+                                <div class="item-after">加油</div>
+                            </div>
+                        </li>
+                        <li class="item-content">
+                            <div class="item-inner">
+                                <div class="item-title">渠道信息</div>
+                                <div class="item-after">油信宝</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div style="padding: 0.3rem 0.75rem;font-size: 0.7rem;">
+                    <span style="color: #E4393C;">说明：</span>请在加油站向收银员出示此二维码</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var currentQRCode = "";
+
+        // 查询用户购买的加油券
+        function queryCoupon() {
+            var proc = "查询电子卡券 " + Bill.userId;
+            var rst = $$.JSONDB.Query(proc).Table;
+            if (rst.length > 0) {
+                if (currentQRCode == rst[0].卡券码) {
+                    return;
+                }
+                currentQRCode = rst[0].卡券码;
+                $("#main").removeClass("page-current");
+                $("#code").addClass("page-current");
+                $$.Fill("#details", rst[0]);
+                $(".price").text(rst[0].卡券金额.toFixed(2));
+                var codeUrl = rst[0].卡券码;
+                $("#qrcodeCanvas").text("");
+
+                var qrcode = new QRCode("qrcodeCanvas", {
+                    text: codeUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } else {
+                $("#main").addClass("page-current");
+                $("#code").removeClass("page-current");
+                clearInterval(timer);
+            }
+        }
+
+        queryCoupon();
+        var timer = setInterval(function () {
+            queryCoupon();
+        }, 10000);
+
+        // 结算
+        $("#js").click(function () {
+            var num = $("input[type='number']").val();
+            if (!num) {
+                layer.open({
+                    content: '最低金额不能小于0.01元',
+                    skin: 'msg',
+                    time: 4
+                });
+                return;
+            }
+
+            var discountIDs = [];
+            var data = {};
+
+            // 通联支付金额以分为单位
+            data.allAmount = num;
+            var checkBox = $("input[name='my-checkbox']");
+            if (checkBox.length > 0) {
+                for (var i = 0; i < checkBox.length; i++) {
+                    if ($(checkBox[i]).prop("checked")) {
+                        var checkedID = $(checkBox[i]).attr("id");
+                        discountIDs.push(checkedID)
+                    }
+                }
+                data.discountIDs = discountIDs.join(",");
+            } else {
+                data.discountIDs = '';
+            }
+            console.log(data.discountIDs)
+            console.log(Number(num) - Number(selPrice))
+            data.trxamt = (Number(num) - Number(selPrice)) * 100;
+
+            // data.appid = "00016005";
+            data.body = "购买加油劵码";
+            data.remark = "";
+            data.orderType = "SaleCoupon";
+
+            $$.GetWxJsApiParam(data, CallPay);
+        });
+
+        //调用微信JS api 支付
+        var JsApiCall = function (wxJsApiParam) {
+            WeixinJSBridge.invoke(
+                'getBrandWCPayRequest',
+                wxJsApiParam, //josn串
+                function (res) {
+                    WeixinJSBridge.log(res.err_msg);
+                    var msg = "充值成功";
+                    if (res.err_msg == "get_brand_wcpay_request:ok") {
+                        queryCoupon();
+
+                        timer = setInterval(function () {
+                            queryCoupon();
+                        }, 10000);
+                    } else {
+                        msg = "充值失败";
+                    }
+                    layer.open({
+                        content: msg,
+                        skin: 'msg',
+                        time: 3
+                    });
+                });
+        }
+
+        var CallPay = function (wxJsApiParam) {
+            if (typeof WeixinJSBridge == "undefined") {
+                if (document.addEventListener) {
+                    document.addEventListener('WeixinJSBridgeReady', JsApiCall(wxJsApiParam), false);
+                } else if (document.attachEvent) {
+                    document.attachEvent('WeixinJSBridgeReady', JsApiCall(wxJsApiParam));
+                    document.attachEvent('onWeixinJSBridgeReady', JsApiCall(wxJsApiParam));
+                }
+            } else {
+                JsApiCall(wxJsApiParam);
+            }
+        }
+
+        // 全选
+        var isCheckAll = false;
+        var selNum = 0;
+        var selPrice = 0;
+        $("input[name='all-checkbox']").click(function () {
+            var num = Number($("input[type='number']").val());
+            if (!num) {
+                layer.open({
+                    content: "请先输入加油金额",
+                    skin: 'msg',
+                    time: 3
+                });
+                $(this).prop("checked", false);
+                return
+            }
+
+            selNum = 0, selPrice = 0;
+            if (isCheckAll) {
+                $("input[name='my-checkbox']").each(function () {
+                    this.checked = false;
+                });
+                isCheckAll = false;
+            } else {
+                $("input[name='my-checkbox']").each(function () {
+                    this.checked = true;
+                    selNum++;
+                    selPrice += Number(this.value);
+                });
+                isCheckAll = true;
+                if (num <= selPrice) {
+                    layer.open({
+                        content: "优惠金额不能大于等于输入金额",
+                        skin: 'msg',
+                        time: 3
+                    });
+                    selNum = 0, selPrice = 0;
+                    $(this).prop("checked", false);
+                    $("input[name='my-checkbox']").prop("checked", false);
+                    isCheckAll = false;
+                    return
+                }
+            }
+            var total = (num - selPrice).toFixed(2);
+            $("#total").text("￥" + total);
+            $("#selNum").text(selNum);
+            $("#selPrice").text(selPrice.toFixed(2));
+        });
+
+        // 优惠券复选
+        $("#couponList").on("click", "input[name='my-checkbox']", function () {
+            var num = Number($("input[type='number']").val());
+            if (!num) {
+                layer.open({
+                    content: "请先输入加油金额",
+                    skin: 'msg',
+                    time: 3
+                });
+                $(this).prop("checked", false);
+                return
+            }
+
+            var isChecked = $(this).prop("checked");
+            if (isChecked == true) {
+                selNum++;
+                selPrice += Number($(this).val());
+                if (num <= selPrice) {
+                    layer.open({
+                        content: "优惠金额不能大于等于输入金额",
+                        skin: 'msg',
+                        time: 3
+                    });
+                    selNum++;
+                    selPrice -= Number($(this).val());
+                    $(this).prop("checked", false);
+                    return
+                }
+            } else {
+                selNum = selNum == 0 ? 0 : selNum - 1;
+                selPrice -= Number($(this).val());
+            }
+            var total = (num - selPrice).toFixed(2);
+            $("#total").text("￥" + total);
+            $("#selNum").text(selNum);
+            $("#selPrice").text(selPrice.toFixed(2));
+        })
+
+        // 查询优惠券
+        var proc = "支付_可用优惠券列表 " + Bill.userId;
+        var rst = $$.JSONDB.Query(proc).Table;
+        // rst = []
+        if (rst.length > 0) {
+            for (var i = 0; i < rst.length; i++) {
+                rst[i].礼品价格 = rst[i].礼品价格.toFixed(2);
+                var time = rst[i].发放日期;
+                rst[i].发放日期 = time.substr(0, 4) + "-" + time.substr(4, 2) + "-" + time.substr(6, 2)
+            }
+            $$.Fill("#couponList", rst);
+            $("#totalCoupon").text(rst.length);
+            $("#dyq").show();
+        } else {
+            $("#no-dyq").show();
+        }
+        alert(rst.length)
+
+        // 输入框失去焦点
+        $("input[type='number']").bind('input propertychange', function () {
+            var num = $(this).val();
+            var total = Number(num).toFixed(2);
+            $("#total").text("￥" + total);
+        });
+    </script>
+</body>
+
+</html>

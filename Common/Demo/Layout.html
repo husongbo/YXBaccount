@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+		<meta name="misapplication-tap-highlight" content="no"/>
+		<meta name="HandheldFriendly" content="true"/>
+		<meta name="MobileOptimized" content="320"/>
+		<title>DEMO</title>
+		<link type="text/css" href="../../Common/css/common.css" />
+		<script src="../../plugins/jquery/jquery-3.1.1.js" type="text/javascript"></script>
+		<script src="../js/sdk.js" type="text/javascript"></script>
+		
+		<script id="ItemList_Template" type="text/template">
+			<div id="{{val}}" 
+				style="width:100%;background-color: red;" 
+				grid_rows="40,*1,*1,*1" 
+				grid_columns="40,*1,*1,*1">
+				
+				<div style=" margin:auto;background-color: gray;"> {{val}} </div>
+			</div>
+		</script>
+		<script type="text/javascript">
+			$(function(){
+				$$.Log("$Init");
+				$$.Log("$StartTime");
+				
+				$("#grid_test").attr("grid_columns","");
+				//$("#grid_test").attr("grid_rows","");
+				
+				$$.Layout("#grid_test");
+				
+//				alert("123".c("to_int",{'min':5,'max':100}));    
+//				//$$.Log("1,2,3,4".c("to_rect"));
+//				"".t({'val':'zhw'},{'vvv':'ddd'}).c("log"); 
+				$$.Log("$EndTime");
+			
+			}); 
+
+
+		</script>
+	</head>
+	<body style="overflow: hidden;">
+		<div id="grid_test" 
+			style="position:fixed;top: 0px; width: 100%;height: 400px; background-color: red;" 
+			grid_rows="40,*1,*1,*1" 
+			grid_columns="40,*1,*1,*1">
+			
+			<div id="grid_item1" style="background-color: blue;" grid_cell="0,0">
+				<div style="position:absolute; margin:auto;background-color: gray;"> zhw </div>
+			</div>
+			<div id="grid_item2" style="background-color: green;" grid_cell="1,1"></div>
+			<div id="grid_item1" style="background-color: blue;" grid_cell="2,2"></div>
+			<div id="grid_item2" style="background-color: green;" grid_cell="3,3"></div>
+		</div>
+		
+		<script type="text/javascript" src="../js/immersed.js"  ></script>
+	</body>
+</html>
+ 

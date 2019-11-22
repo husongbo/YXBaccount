@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>商品列表</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/iconfont.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+
+		<script src="../Common/js/layer_mobile/layer.js"></script>
+		<style>
+			.layui-m-layercont {
+				padding: 30px;
+			}
+			
+			.card-content-inner {
+				padding: 0.5rem;
+			}
+			
+			.card-header {
+				padding: 0 0.5rem;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<div class="card">
+				<div class="card-header">
+					<span>商品操作</span>
+					<span id="xj" data-id="{{商品标识}}" data-scj="{{市场价}}" data-jsj="{{商品标识}}" class="iconfont icon-iconfontzhizuobiaozhunbduan30" style="font-size: 1.2rem;"></span>
+				</div>
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div class="img">
+							<img src="{{商品图片}}" alt="">
+						</div>
+						<div>
+							<span>{{商品名称}}</span>
+							<span class="pull-right" style="color: #e4393c">￥{{结算价格}}</span>
+						</div>
+						<div class="color-gray">{{商品描述}}</div>
+					</div>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<a class="icon iconfont icon-iconfontzhizuobiaozhunbduan31 pull-right" style="font-size: 1.2rem;" id="sj"></a>
+					<h1 class="title">商品列表</h1>
+				</header>
+				<div class="content">
+					<div id="list" hidden="hidden"></div>
+					<div class="null" style="margin-top: 3rem;">
+						<img src="../Common/image/null.png" alt="" />
+						<div>店铺还没有商品，快去上架吧</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			function plusReady() {
+				var dpID = $$.getParameterValue().dpID;
+
+				// 查询店铺对应的商品列表
+				var proc = "店铺商品列表 " + dpID;
+				var rst = $$.JSONDB.Query(proc).Table;
+				console.log(rst)
+				if(rst.length > 0) {
+					for(var i = 0; i < rst.length; i++) {
+						var arr = rst[i].商品图片.split(",");
+						rst[i].商品图片 = decodeURI(atob(arr[0]));
+						rst[i].结算价格 = rst[i].结算价格.toFixed(2);
+					}
+					$$.Fill("#list", rst);
+					$("#list").show();
+				} else {
+					$(".null").show();
+				}
+
+				// 上架
+				$("#sj").click(function() {
+					plus.webview.create("spsj.html?dpID=" + dpID).show();
+				});
+
+				// 下架
+				$("#list").on("click", "#xj", function() {
+					var spID = $(this).attr("data-id");
+					layer.open({
+						content: '您确定要将该商品下架吗？',
+						btn: ['确定', '取消'],
+						yes: function(index) {
+							layer.close(index);
+							var data = {
+								"商品标识": spID,
+								"店铺标识": dpID,
+								"操作用户": "0"
+							}
+							var tmpl = "{{商品标识}},{{店铺标识}},'{{操作用户}}'";
+							var params = tmpl.t(data);
+							var proc = "商品下架 " + params;
+							var rst = $$.JSONDB.Query(proc).Table;
+							layer.open({
+								content: rst[0].MESSAGE,
+								skin: 'msg',
+								time: 2
+							});
+						}
+					});
+				})
+			}
+			
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

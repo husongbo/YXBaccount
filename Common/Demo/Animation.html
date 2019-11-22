@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+		<meta name="misapplication-tap-highlight" content="no"/>
+		<meta name="HandheldFriendly" content="true"/>
+		<meta name="MobileOptimized" content="320"/>
+		<title>DEMO</title>
+		<link type="text/css" href="../../Common/css/common.css" />
+		<script src="../js/jquery-3.1.1.js" type="text/javascript"></script>
+		<script src="../js/sdk.js" type="text/javascript"></script>
+		
+		<style type="text/css">
+			button{
+				width: 128px;
+				height: 58px;
+			}
+		</style>
+		<script type="text/javascript">
+		
+			$(function(){
+//				$("#action").css("background","red url(Action.jpg) no-repeat -0px 0px scroll;width: 50px;height: 120px;");
+//				$("#action").css("background-size","50px 120px");
+//				$("#action").css("background-repeat","no-repeat");
+//				$("#action").css("background-position","-0px 0px");
+//				$("#action").css("background-attachment","scroll");
+
+				//$("#action").css("background","red url(Action.jpg) no-repeat -50px 0px scroll;");
+				
+			})
+			function btn_click_1(){
+				$$.AddAnimation({
+					'id':"A1",
+					'func':function(data){
+						(Array(10).join(0) + data.RunTime).slice(-10);
+						
+						$("#btn1").text("执行时间：" + (Array(10).join(0) + data.RunTime).slice(-10)); 
+						//$$.Log(data.RunTime);
+					}
+				});
+			}
+			
+			function btn_click_2(){
+				$$.AddAnimation({
+					'id':"A2",
+					'func':function(data){
+						
+						if(data.RunTime < 3000 ){
+							$("#btn2").text("执行时间：" + (Array(10).join(0) + (3000 - data.RunTime)).slice(-10));
+						}
+						else{
+							$("#btn2").text("开始");
+							data.RunFlag = false;
+						}
+						
+						//$$.Log(data.RunTime);
+					}
+				});
+			}
+			
+			function btn_click_3(){
+				var ary = [50,70,65,65,70,70,60,70,48];
+
+				$$.AddAnimation({
+					'id':"A3",
+					'func':function(data){
+										
+						if(data.RunCount == 0){
+							data.Left = 0;
+							data.X = 0;
+							data.Count = 0;
+						} 
+	
+						
+						$("#actionContiner").css("left",(data.X * 18)  + "px");
+						
+						data.X += 1;
+						if(data.X % 2 == 0 ){
+							return;
+						}
+						else {
+							data.StartTime = (new Date()).getTime();
+						}
+						
+						
+						if(data.Count >= 9){
+							data.Count = 0;
+							data.Left = 0;
+							data.X = 0;
+						} 
+						
+						
+						$("#action").css("background-position","-" + data.Left + "px 0px");
+						$("#action").height(120);
+						$("#action").width(ary[data.Count]);
+						
+						data.Left += ary[data.Count];
+						data.Count++;
+						
+						
+					}
+				});
+			}
+			
+			var objCount = 0;
+			function btn_click_4(){
+				var speed = 0;
+				objCount++;
+				var newObj = $("<div id='" + objCount + "'>+1<div>");
+
+				newObj.css("font-size","138");
+				newObj.css("position","fixed");
+				newObj.css("z-index","999");
+				$("body").append(newObj);
+				
+				newObj.width($("#btn4").width() + 12);
+				newObj.css("text-align","center");
+				newObj.css("top",($("#btn4").offset().top - newObj.height()) + "px");
+				 
+				$$.AddAnimation({
+					'id':"A4" + objCount,
+					'func':function(data){
+										
+						if(data.RunCount == 0){
+							data.y = newObj.offset().top;
+						} 
+						
+						newObj.css("top",data.y - speed);
+						newObj.css({'opacity': (50 - speed)/50})
+						speed += 2;
+						if(speed >= 50){
+							newObj.remove();
+							data.RunFlag = false;
+						}
+					}
+				});
+				
+			}
+		</script>
+	</head>
+	<body style="overflow: hidden;">
+		
+		<div>
+			<button id="btn1" onclick="btn_click_1()">开始</button>	
+		</div>
+		<div>
+			<button id="btn2" onclick="btn_click_2()">开始</button>	
+		</div>
+		<div>
+			<button id="btn3" onclick="btn_click_3()">开始</button>	
+		</div>
+		<div id="actionContiner" style="position: relative;left: 0px;">
+			<div id="action" style="background:red url(Action.jpg) no-repeat -0px 0px scroll;width:50px;height: 120px;">1</div>
+		</div>
+		<script type="text/javascript" src="../js/immersed.js"  ></script>
+		
+		<div>
+			<button id="btn4" onclick="btn_click_4()">开始</button>	
+		</div>
+		<div id="temp" style="">temp</div>
+	</body>
+</html>
+ 

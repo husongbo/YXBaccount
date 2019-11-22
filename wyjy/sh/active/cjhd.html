@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>创建活动</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/iconfont.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<style>
+			.switch {
+				width: 15%;
+			}
+			
+			.picLable {
+				display: inline-block;
+				border: 1px solid #ddd;
+				background-color: #eeeeee;
+				width: 3rem;
+				height: 2.8rem;
+				line-height: 2.5rem;
+				text-align: center;
+			}
+			
+			.iconfont {
+				font-size: 1rem;
+			}
+			
+			.img-box {
+				display: inline-block;
+				position: relative;
+				margin-bottom: 0.3rem;
+			}
+			
+			.hd-img {
+				width: 3rem;
+				height: 2.8rem;
+				vertical-align: middle;
+				margin-right: 0.5rem;
+			}
+			
+			.close {
+				display: inline-block;
+				width: 0.8rem;
+				height: 0.8rem;
+				border-radius: 50%;
+				text-align: center;
+				line-height: 0.7rem;
+				background-color: #E4393C;
+				color: #FFFFFF;
+				position: absolute;
+				top: 0;
+				right: 0.5rem;
+			}
+			
+			.list-block .item-title.label {
+				margin: 0;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<li>
+				<label class="label-checkbox item-content">
+					<input type="radio" name="my-radio" data-id="{{商品标识}}">
+					<div class="item-media"><i class="icon icon-form-checkbox"></i></div>
+					<div class="item-inner">
+						<div class="item-title-row">
+							<div class="item-title">{{商品名称}}</div>
+							<div class="item-after" style="color: #E4393C;">￥{{销售价格}}</div>
+						</div>
+						<div class="item-subtitle color-gray">{{商品描述}}</div>
+					</div>
+				</label>
+			</li>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<h1 class="title">创建活动</h1>
+				</header>
+				<div class="content">
+					<!--<div class="list-block">
+							<ul>
+								<li>
+									<div class="item-content">
+										<div class="item-inner">
+											<div class="item-title">公有活动</div>
+											<img src="../Common/image/on.png" alt="" class="switch">
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>-->
+					<div class="content-block-title">活动基本信息</div>
+					<div class="list-block">
+						<ul>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-mingcheng"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">活动名称</div>
+										<div class="item-input">
+											<input type="text" placeholder="请输入活动名称" id="name">
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-kaishishijian"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">开始时间</div>
+										<div class="item-input">
+											<input type="text" placeholder="请选择开始时间" id="startTime">
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-jieshushijian"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">截止时间</div>
+										<div class="item-input">
+											<input type="text" placeholder="请选择结束时间" id="endTime">
+										</div>
+									</div>
+								</div>
+							</li>
+							<li class="align-top">
+								<div class="item-content">
+									<div class="item-media"><i class="iconfont icon-bianjibanbenmiaoshu_bianjibanbenmiaoshu"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">活动描述</div>
+										<div class="item-input">
+											<textarea placeholder="请输入活动描述" id="des"></textarea>
+										</div>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="content-block-title">活动图片</div>
+					<div class="list-block">
+						<ul>
+							<li class="item-content">
+								<div class="item-inner" style="display: block;position: static;">
+									<label for="file" class="picLable">
+										<span class="icon icon-picture" style="font-size: 1rem;"></span>
+									</label>
+									<input type="file" id="file" hidden>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="content-block-title">
+						<span style="display: inline-block;margin-top: 2%;">活动奖品</span>
+						<div class="searchbar" style="float: right;width: 70%;padding: 0;height: 1.5rem;">
+							<div class="search-input">
+								<label class="icon icon-search" for="search"></label>
+								<input type="search" id='search' placeholder='输入关键字...' />
+							</div>
+						</div>
+					</div>
+					<div class="list-block media-list">
+						<ul id="list" hidden="hidden"></ul>
+						<div class="null" style="margin-top: 3rem;">
+							<img src="../Common/image/null.png" alt="" />
+							<div>还没有已经创建活动的哦</div>
+						</div>
+					</div>
+					<div class="content-block">
+						<a id="fabu" class="button button-fill button-success">确认发布</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			function plusReady() {
+				$("#file").change(function() {
+					// 获取file对象
+					var file = this.files[0];
+
+					// 判断file的类型是不是图片类型。
+					if(!/image\/\w+/.test(file.type)) {
+						alert("文件必须为图片！");
+						return false;
+					}
+
+					// 声明一个FileReader实例
+					var reader = new FileReader();
+
+					// 调用readAsDataURL方法来读取选中的图像文件
+					reader.readAsDataURL(file);
+
+					// 最后在onload事件中，获取到成功读取的文件内容，并以插入一个img节点的方式显示选中的图片
+					reader.onload = function(e) {
+						$(".picLable").before("<div class='img-box'>" +
+							"<span class='close'>×</span>" +
+							"<img src='" + this.result + "'class='hd-img' />" +
+							"</div>");
+
+						$(".close").click(function() {
+							$(this).parent().remove();
+						})
+					}
+				});
+
+				var getNowDate = function() {
+					var nowDate = new Date();
+					var myYear = nowDate.getFullYear();
+					var myMonth = nowDate.getMonth() + 1;
+					var nowDate = nowDate.getDate();
+					myMonth = myMonth < 10 ? "0" + myMonth : myMonth;
+					nowDate = nowDate < 10 ? "0" + nowDate : nowDate;
+					return myYear + "-" + myMonth + "-" + nowDate;
+				}
+
+				$("#startTime,#endTime").calendar({
+					value: [getNowDate()],
+					minDate: getNowDate()
+				});
+
+				// 奖品列表
+				var shID = "1";
+				var proc = "商户商品列表 " + shID;
+				var rst = $$.JSONDB.Query(proc).Table;
+				console.log(rst)
+				if(rst.length > 0) {
+					$$.Fill("#list", rst);
+					$("#list").show();
+					$($("input[type='radio']")[0]).attr("checked", true)
+				} else {
+					$(".null").show();
+				}
+
+				$("#fabu").click(function() {
+					var name = $("#name").val();
+					var startT = $("#startTime").val();
+					var endT = $("#endTime").val();
+					var des = $("#des").val();
+					var imgs = $(".hd-img");
+					var imgSrc = [];
+					var goodsId = $("input[type='radio']:checked").attr("data-id");
+					if(!name) {
+						layer.open({
+							content: '请输入活动名称',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!startT) {
+						layer.open({
+							content: '请选择开始时间',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+					startT = startT.replace(/-/g, "");
+
+					if(!endT) {
+						layer.open({
+							content: '请选择结束时间',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+					endT = endT.replace(/-/g, "");
+
+					if(!des) {
+						layer.open({
+							content: '请输入活动描述',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(imgs.length == "0") {
+						layer.open({
+							content: '请选择活动图片',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					} else {
+						for(var i = 0; i < imgs.length; i++) {
+							var item = $(imgs[i]).attr("src");
+							imgSrc.push(btoa(encodeURI(item)));
+						}
+					}
+
+					// 创建活动
+					var data = {
+						"商户标识": shID,
+						"商品标识": goodsId,
+						"活动名": name,
+						"有效期开始": startT,
+						"有效期结束": endT,
+						"有效类别": "0",
+						"活动类别": "1",
+						"活动图片": imgSrc.join(),
+						"活动概述": des,
+						"操作用户": "0"
+					}
+					var tmpl = "{{商户标识}},{{商品标识}},'{{活动名}}',{{有效期开始}},{{有效期结束}},{{有效类别}},{{活动类别}},'{{活动图片}}','{{活动概述}}','{{操作用户}}'";
+					var params = tmpl.t(data);
+					var proc = "活动创建 " + params;
+					var rst = $$.JSONDB.Query(proc);
+					layer.open({
+						content: rst.Table[0].MESSAGE,
+						skin: 'msg',
+						time: 2
+					});
+					console.log(rst)
+					plus.webview.create('active.html').show();
+				});
+			}
+
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>我的推荐订单</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/city/loadings.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script type="text/javascript" src="../Common/js/city/loadings.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			*{font-family: '宋体';}
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.titles,.bodys{display: flex;height: 40px;align-items: center;flex-direction: row;
+			border-bottom: 1px solid rgb(240,240,240);font-size: .7rem;}
+			.bodys div:{height: 40px;line-height: 40px;}
+			.titles div:first-child,.titles div:nth-child(2),.bodys div:first-child,.bodys div:nth-child(2){padding-right: 10px;
+			overflow: hidden;
+			text-overflow:ellipsis;
+			white-space: nowrap;}
+			.titles div:first-child,.bodys div:first-child{width: 50%;}
+			.titles div:nth-child(2),.bodys div:nth-child(2){width: 25%;}
+			.titles div:nth-child(3),.bodys div:nth-child(3){width: 25%;}
+			.titles div:nth-child(4),.bodys div:nth-child(4){width: 20%;}
+			.circles{width: 30px!important;height: 30px!important;}
+			.bodys:active{background: rgb(240,240,240);}
+			.hides{display: none!important;}
+		</style>
+	</head>
+	<body style="background: white;">
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">我的推荐订单</h1>
+			<!-- <span class="icon pull-right election" style="color: #000;font-size: .85rem;">全部</span> -->
+		</header>
+		<div id="Acts">
+			<div class="" style="margin-top: 44px;padding: 0 5px;height: calc(100vh - 100px);background: white;overflow-y: scroll;">
+				<div class="titles">
+					<div>订单号</div>
+					<!-- <div>活动</div> -->
+					<div style="text-align: center;">提现金额</div>
+					<div style="text-align: center;">状态</div>
+				</div>
+				<div class="bodys hides" v-for="(item,index) in list" @click="GotoXX(item)">
+					<div id="Norder">{{item.PM0005_OUT_TRADE_NO}}</div>
+					<div style="text-align: center;">{{item.M9000_TOTAL_AMOUNT}}</div>
+					<div  v-if="item.PM0005_STATE=='0'" style="display: flex;justify-content: center;text-align: center;" class="checkeds" onClick="Checkedss(event,this)" rel="false">
+						<img class="circles" src="../Common/image/grxx/no.png">
+					</div>
+					<div v-if="item.PM0005_STATE=='1'" style="display: flex;justify-content: center;text-align: center;"  rel="false">
+						提现中
+					</div>
+					<div v-if="item.PM0005_STATE=='2'" style="display: flex;justify-content: center;text-align: center;"  rel="false">
+						已提现
+					</div>
+					<div v-if="item.PM0005_STATE=='3'" style="display: flex;justify-content: center;text-align: center;"  rel="false">
+						提现失败
+					</div>
+				</div>
+			</div>
+			<div class="btnss " style="width: 80%;margin-left: 10%;height: 40px;line-height: 40px;background: #ff8200;color: white;text-align: center;border-radius: 10px;display: flex;justify-content: space-around;">总订单数:<span class="nums">{{len}}</span>总金额:<span class="prices">{{sumprice}}</span></div>
+		</div>
+	</body>
+	<script>
+		//const states=window.location.href.split('=')[1]
+		function Checkedss(event,val){
+			event.cancelBubble = true
+			if($(val).attr('rel')=='false'){
+				$(val).find('img').attr('src','../Common/image/grxx/ok.png')
+				$(val).attr('rel','true')
+			}
+			else{
+				$(val).find('img').attr('src','../Common/image/grxx/no.png')
+				$(val).attr('rel','false')
+				$(".election").text('全部')
+			}
+			console.log($(val))
+		}
+		$(function(){
+			
+			$(".election").click(function(e){
+				var val=$(this).text()
+				if(val=='全部'){
+					$(".bodys").each(function(){
+						if($(this).find('img').length!=0){
+							$(this).find('img').attr('src','../Common/image/grxx/ok.png')
+							$(this).find('.checkeds').attr('rel','true')
+						}
+					})
+					$(this).text('取消')
+				}
+				else{
+					$(".bodys").each(function(){
+						if($(this).find('img').length!=0){
+							$(this).find('img').attr('src','../Common/image/grxx/no.png')
+							$(this).find('.checkeds').attr('rel','false')
+						}
+					})
+					$(this).text('全部')
+				}
+			})
+		})
+		
+		var proc = "查询基本信息 " + Bill.userId;
+		var rst = $$.JSONDB.Query(proc);
+		var data = rst.Table[0];
+		var id=data.用户标识;
+		 // var id='2071611150600000001'
+		// if(states==undefined){
+		// 	mui.toact('测试环境中')
+		// }
+		new Vue({
+			el: '#Acts',
+			data: {
+				list:[],
+				OKlist:[],
+				NOlist:[],
+				state:'',
+				orderlist:[],
+				len:0,
+				sumprice:0,
+			},	
+			created(){
+				$(".bodys").removeClass('hides')
+				// if(states==1){
+				// 	$(".btnss").removeClass('hides')
+				// 	$(".election").hide()
+				// }
+				// else{
+				// 	$(".btns").removeClass('hides')
+				// }
+				mui.showLoading("正在加载..","div");
+				setTimeout(()=>{
+					
+					this.getlist()
+					mui.hideLoading()
+				},500)
+			},
+			methods:{
+				getlist(){
+					_this=this
+					$.ajax({
+						type: "post",
+						url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetUserServicePromoteList",user_id:"${id}"}`,
+						data:{},
+						async:false,
+						success: function (res) {
+							if(JSON.parse(res).message=='获取购买服务推广信息列表成功'){
+								JSON.parse(JSON.parse(res).data).forEach((item)=>{
+									if(item.PM0005_STATE!=0){
+										_this.list.push(item)
+									}
+								})
+								_this.len=_this.list.length
+								_this.list.forEach(function(item){
+									var day1=item.PM0005_CREATE_TIME.slice(0,10)
+									var day2=item.PM0005_CREATE_TIME.slice(11,19)
+									item.PM0005_CREATE_TIME=day1+' '+day2
+									item.M9000_TOTAL_AMOUNT=parseFloat(item.M9000_TOTAL_AMOUNT)*parseFloat(item.PM0006_AMOUNT)
+									_this.sumprice+=item.M9000_TOTAL_AMOUNT
+									console.log(day2)
+								})
+								console.log(_this.list)
+							}
+							setTimeout(function() {
+								mui.hideLoading()
+							}, 1000);
+						},
+						error:function(err){
+							console.log(err)
+						}
+					});
+				},
+				withdrawal(){
+					var _this=this
+					this.orderlist=[]
+					var numpice=0//订单价格
+					$(".bodys").each((index,val)=>{
+						if($(val).find('.checkeds').attr('rel')!=undefined && $(val).find('.checkeds').attr('rel')=='true'){
+							this.orderlist.push($(val).children().eq(0).text())
+							numpice+=parseFloat($(val).children().eq(1).text())
+						}
+					})
+					if(this.orderlist.length==0){
+						mui.toast('您还没有选择订单')
+						return
+					}
+					else{
+						var numindex=0//订单数量
+						var numbers=''//订单号
+						if(this.orderlist.length==1){
+							numindex=1
+							numbers=this.orderlist[0]
+						}
+						else{
+							this.orderlist.forEach(function(item,index){
+								numindex++
+								if(_this.orderlist.length==index+1){
+									numbers+=item
+								}
+								else{
+									numbers+=item+","
+								}
+							})
+						}
+						mui.showLoading("正在加载..","div");
+						setTimeout(()=>{
+							var json={
+								ordernum:numindex,
+								orderpice:numpice,
+								orderid:numbers
+							}
+							console.log(json)
+							localStorage.setItem('Order',JSON.stringify(json))
+							window.location.href="./wdtxfls.html"
+							mui.hideLoading()
+						},500)
+					}	
+				},
+				GotoXX(item){
+					console.log(item)
+					//alert(JSON.stringify(item))
+					localStorage.setItem('OrderJSOn',JSON.stringify(item))
+					window.location.href='./wdddxq.html'
+				}
+			}
+		})
+	</script>
+</html>

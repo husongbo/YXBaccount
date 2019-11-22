@@ -1,0 +1,704 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>发票信息</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script id="pInfo_Template" type="text/template">
+        <li>
+            <div class="item-content">
+                <!--<div class="item-media"><i class="icon icon-form-name"></i></div>-->
+                <div class="item-inner">
+                    <div class="item-title label">姓名</div>
+                    <div class="item-input">
+                        <input type="text" placeholder="姓名" value="{{姓名}}" class="xm">
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div class="item-content">
+                <!--<div class="item-media"><i class="icon icon-form-name"></i></div>-->
+                <div class="item-inner">
+                    <div class="item-title label">身份证号</div>
+                    <div class="item-input">
+                        <input type="text" placeholder="身份证号" value="{{身份证号}}" class="sfzh">
+                    </div>
+                </div>
+            </div>
+        </li>
+    </script>
+    <script id="email_Template" type="text/template">
+        <li>
+            <div class="item-content">
+                <!--<div class="item-media"><i class="icon icon-form-name"></i></div>-->
+                <div class="item-inner">
+                    <div class="item-title label">邮箱/手机号</div>
+                    <div class="item-input">
+                        <input type="text" placeholder="请输入接收发票邮箱或手机号" value="{{邮箱}}" name="email">
+                    </div>
+                </div>
+            </div>
+        </li>
+
+    </script>
+    <style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background: #fff;
+        }
+        .calendar {
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            color: #fff;
+            display: inline-block;
+            height: 2.2rem;
+            line-height: 2.2rem;
+            padding-right: 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .card {
+            background-color: #fff;
+            margin: 0;
+            margin-bottom: 0.3rem;
+        }
+
+        .type span {
+            padding: 0.3rem 0.5rem;
+            border: 1px solid #ddd;
+            margin-right: 0.3rem;
+        }
+
+            .type span.normal {
+                color: #ff8200;
+                border-color: #ff8200;
+            }
+
+        .type div {
+            margin-top: 0.7rem;
+            color: #999;
+        }
+
+        .add {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: #ff8200;
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            float: right;
+        }
+
+        .list-block {
+            margin: 0;
+            font-size: 0.7rem;
+        }
+
+
+
+        .button.button-fill {
+            background: #ff8200;
+            background-color: #ff8200;
+        }
+
+        .cInfo {
+            display: none;
+        }
+
+        .look-up .list-block li {
+            display: inline-block;
+            width: 40%;
+        }
+
+        .look-up .list-block .item-inner:after {
+            height: 0;
+        }
+
+        label.label-checkbox input[type="checkbox"]:checked + .item-media i.icon-form-checkbox, label.label-checkbox input[type="radio"]:checked + .item-media i.icon-form-checkbox {
+            background-color: #ff8200;
+        }
+
+        h3 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .invoiceInfo {
+            padding: 0 5%;
+            padding-bottom: 1rem;
+            font-size: 0.7rem;
+            background-color: #fff;
+        }
+
+            .invoiceInfo div {
+                text-indent: 8%;
+            }
+
+        .vInfo {
+            display: none;
+        }
+
+        .text-color {
+            color: #ff8200;
+        }
+
+        .card-header {
+            font-weight: normal;
+            font-size: 0.7rem;
+        }
+
+        .no {
+            width: 1.1rem;
+            height: 0.9rem;
+            position: relative;
+            border-radius: 1.1rem;
+            border: 1px solid #c7c7cc;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+
+         .no:after {
+             content: ' ';
+             position: absolute;
+             left: 50%;
+             margin-left: -0.3rem;
+             top: 50%;
+             margin-top: -0.2rem;
+             width: 0.6rem;
+             height: 0.45rem;
+             background: no-repeat center;
+             background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20x%3D'0px'%20y%3D'0px'%20viewBox%3D'0%200%2012%209'%20xml%3Aspace%3D'preserve'%3E%3Cpolygon%20fill%3D'%23ffffff'%20points%3D'12%2C0.7%2011.3%2C0%203.9%2C7.4%200.7%2C4.2%200%2C4.9%203.9%2C8.8%203.9%2C8.8%203.9%2C8.8%20'%2F%3E%3C%2Fsvg%3E");
+             background-size: 0.6rem 0.45rem;
+         }
+
+        .list-block .item-title.label {
+            width: 30%;
+        }
+
+        .modal {
+            width: 14.5rem;
+            margin-left: -7.25rem;
+        }
+
+        .modal-inner {
+            padding: 0;
+            padding-bottom: 0.75rem;
+        }
+
+        .modal-title {
+            background-color: #ff8200;
+            height: 2rem;
+            line-height: 2rem;
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            border-radius: 0.35rem 0.35rem 0 0;
+        }
+
+            .modal-title + .modal-text {
+                margin-top: 0.75rem;
+            }
+
+        .modal-inner {
+            background-color: #fff;
+            font-size: 0.7rem;
+        }
+
+            .modal-inner span {
+                display: inline-block;
+                width: 24%;
+                text-align: left;
+            }
+
+            .modal-inner input {
+                padding: 2%;
+                border: 1px solid #ddd;
+                font-size: 0.7rem;
+                width: 60%;
+            }
+
+        .modal-button {
+            background-color: #FFFFFF;
+            color: #1c1d1f;
+        }
+
+        .non-normal {
+            color: #ddd;
+        }
+
+        .email-input {
+            float: left;
+            max-width: 70%;
+            border: 1px solid #ddd !important;
+            height: 1.5rem !important;
+        }
+
+        .email-span {
+            height: 1.5rem;
+            float: left;
+            line-height: 1.5rem
+        }
+
+        .list-block input[type="text"] {
+            font-size: 0.7rem;
+        }
+
+        #invoice-type {
+            padding-left: 0rem;
+        }
+
+
+        .select {
+            background-color: #ff8200;
+            border: none;
+        }
+        .has-apply {
+            background-color: #ccc;
+            border: none;
+        }
+
+    </style>
+    <script id="jyjl_Template" type="text/template">
+        <li style="margin: 0.2rem 0;">
+            <div class="item-content" style="border: 0.1rem; background: #FFFFFF;">
+                <span class="no {{开票状态}}" data-value="{{提取码}}" data-id="{{流水号}}" data-amount="{{金额}}"></span>
+                <div style="width: 2.5rem;">
+                    <img src="../Common/image/mx1.png" style="height: auto; width: auto; max-height: 100%; max-width: 100%; padding: 0.5rem;" />
+                </div>
+                <div class="item-inner">
+                    <div class="item-title-row">
+                        <div class="item-title">
+                            <div style="font-size: 60%; line-height: 1rem;">{{商品名称}}</div>
+                            <div style="font-size: 30%" class="item-after">{{购买时间}}</div>
+                        </div>
+                        <div class="item-media">
+                            <div class="item-after money" style="color: #ff8200;">{{金额}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </script>
+</head>
+
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current" style="background:#eee;">
+            <div class="diy-model"></div>
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">发票信息</h1>
+                <a class="icon pull-right" style="color: #333;font-size:0.7rem" onclick="$$.Goto('kpjl');">开票记录</a>
+            </header>
+
+            <div id="PageContent" class="content">
+
+                <!--发票类型-->
+                <div class="card">
+                    <div class="row">
+                        <div class="col-30">
+                            <div class="card-content-inner card-content" style="padding-right:0">
+                                <span>发票类型:</span>
+                            </div>
+                        </div>
+                        <div class="col-70">
+                            <div class="card-content">
+                                <div class="card-content-inner type" id="invoice-type">
+                                    <span class="normal">电子普通发票</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <!--发票抬头-->
+                <div class="card">
+                    <div class="card-header">
+                        <span>发票抬头</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-content-inner look-up">
+                            <div class="list-block media-list">
+                                <ul>
+                                    <li class="personal">
+                                        <label class="label-checkbox item-content">
+                                            <input type="radio" name="my-radio" checked>
+                                            <div class="item-media"><i class="icon icon-form-checkbox"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title-row">
+                                                    <div class="item-title">个人</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </li>
+                                    <li class="company">
+                                        <label class="label-checkbox item-content">
+                                            <input type="radio" name="my-radio">
+                                            <div class="item-media"><i class="icon icon-form-checkbox"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title-row">
+                                                    <div class="item-title">公司</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!--个人-->
+                        <div class="list-block pInfo">
+                            <ul id="pInfo"></ul>
+                        </div>
+
+                        <!--公司-->
+                        <div class="list-block cInfo">
+                            <ul class="cname-group">
+                                <li class="item-content addcomp">
+                                    <div class="item-inner">
+                                        <span>添加公司名称和税号</span>
+                                        <span class="add">+</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="list-block">
+                            <ul id="email"></ul>
+                        </div>
+                    </div>
+                </div>
+                <!--发票信息-->
+                <div class="card vInfo">
+                    <div class="card-header">
+                        <span>公司信息</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <div class="list-block">
+                                <ul>
+                                    <li>
+                                        <div class="item-content">
+                                            <!--<div class="item-media"><i class="icon icon-form-name"></i></div>-->
+                                            <div class="item-inner">
+                                                <div class="item-title label">公司名称</div>
+                                                <div class="item-input">
+                                                    <div class="item-after vName"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="item-content">
+                                            <!--<div class="item-media"><i class="icon icon-form-name"></i></div>-->
+                                            <div class="item-inner">
+                                                <div class="item-title label">税号</div>
+                                                <div class="item-input">
+                                                    <div class="item-after vNumber"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--发票详情-->
+                <div class="card">
+                    <div class="card-header">
+                        <span>未开票记录</span>
+                    </div>
+                    <div class="card-content">
+
+                        <div class="list-block media-list" style="margin-top: 0rem;margin-bottom: 0.5rem;">
+                            <ul id="jyjl" style="background: transparent"></ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-block" style="margin-top:0.7rem">
+                    <div class="row">
+                        <div class="col-100"><a href="#" class="button button-big button-fill button-success button-danger" style="background-color:#ff8200">申请开票</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+<script>
+    $$.Page_Load = function () {
+        $.init();
+        var querySql = '二维码消费账单 ' + Bill.userId;
+        var rst = $$.JSONDB.Query(querySql).Table;
+        $$.Fill("#jyjl", rst);
+     
+    }
+    var invoiceL = 0;
+    //选择开票
+    $("#jyjl").on("click", ".no", function () {
+        $(this).toggleClass("select");
+    });
+
+    $(".look-up li").click(function () {
+        if ($(this).hasClass("personal")) {
+            $(".pInfo").show();
+            $(".cInfo,.vInfo").hide();
+            invoiceL = 0;
+            $(".cname-group").find(".icon").removeClass("text-color");
+        } else {
+            $(".pInfo").hide();
+            $(".cInfo").show();
+            invoiceL = 1;
+        }
+    });
+
+    $(".add").click(function () {
+        $.modal({
+            title: '添加',
+            text: '<span>公司名称</span><input type="text" placeholder="请输入公司全称" class="cnameVal"><br>' +
+            '<span>识别号</span><input type="text" placeholder="请填写纳税人识别号" class="tnumberVal" style="margin-top: 5%">',
+            buttons: [
+                {
+                    text: '取消'
+                },
+                {
+                    text: '确定',
+                    bold: true,
+                    onClick: function () {
+                        var cName = $(".cnameVal").val();
+                        var tNumber = $(".tnumberVal").val().replace(/\s/gi, '');
+                        if (!cName) {
+                            $.toast("公司名称不能为空");
+                            return
+                        }
+
+                        if (!tNumber) {
+                            $.toast("税号不能为空");
+                            return
+                        }
+
+                        var data = {
+                            "用户标识": Bill.userId,
+                            "单位名称": cName,
+                            "纳税人识别号": tNumber
+                        };
+                        var tmpl = "{{用户标识}}, '{{单位名称}}', '{{纳税人识别号}}'";
+                        var params = tmpl.t(data);
+                        var proc = "更新单位发票信息 " + params;
+                        var rst = $$.JSONDB.Query(proc).Table1[0];
+                        if (typeof rst.RESULT != 'undefined') {
+                            if (rst.RESULT = -1) {
+                                $.toast(rst.MSG);
+                                return
+                                }
+                        }else {
+                            $(".addcomp").before('<li class="item-content" cName="' + rst.PT0019_COMPANY_NAME + '" tNumber="' + rst.PT0019_TAX_NUMBER + '" pid="' + rst.PT0019_ID + '">' +
+                                '<div class="item-inner">' +
+                                '<span>' + cName + '</span>' +
+                                '<span class="icon icon-check"></span>' +
+                                '</div>' +
+                                '</li>');
+
+                        }
+                        var len = $(".cname-group li").length;
+                        if (len == 3) {
+                            $(".addcomp").hide();
+                        }
+                    }
+                }
+            ]
+        });
+    });
+
+
+
+    // 点击具体的公司进行具体信息的展示
+    $(".cname-group").on("click", "li:not(.addcomp)", function () {
+        var cName = $(this).attr("cName");
+        var tNumber = $(this).attr("tNumber");
+        var pid = $(this).attr("pid");
+        invoiceL = pid;
+        $(this).find(".icon").addClass("text-color");
+        $(this).siblings().find(".icon").removeClass("text-color");
+
+        // 发票信息展示
+        $(".vInfo").show();
+        $(".vInfo").find(".vName").text(cName);
+        $(".vInfo").find(".vNumber").text(tNumber);
+    });
+
+    // 查询个人信息
+    var proc = "查询个人发票信息 " + Bill.userId;
+    var rst = $$.JSONDB.Query(proc).Table;
+    $$.Fill("#pInfo", rst);
+
+    //查询邮箱是否为空，并将个人信息中的邮箱设为默认
+     var proc = "查询基本信息 " + Bill.userId;
+     var rst = $$.JSONDB.Query(proc).Table;
+    $$.Fill("#email", rst);
+
+    // 查询公司信息
+    var proc = "查询单位发票信息 " + Bill.userId;
+    var rst = $$.JSONDB.Query(proc).Table;
+    if (rst.length > 0) {
+        for (var i = 0; i < rst.length; i++) {
+            $(".addcomp").before('<li class="item-content" cName="' + rst[i].PT0019_COMPANY_NAME + '" tNumber="' + rst[i].PT0019_TAX_NUMBER + '" pid="' + rst[i].PT0019_ID + '">' +
+                '<div class="item-inner">' +
+                '<span>' + rst[i].PT0019_COMPANY_NAME + '</span>' +
+                '<span class="icon icon-check"></span>' +
+                '</div>' +
+                '</li>');
+        }
+    }
+
+    if (rst.length == 2) {
+        $(".addcomp").hide();
+    }
+    // 申请开票
+    $(".button-danger").click(function () {
+        setTimeout(function () {
+            var type = 1;//电子发票
+            var email = $("input[name='email' ] ").val();
+            if (email.length == 0) {
+                $.toast("请输入接收发票邮箱地址或手机号");
+                return
+            } else if (!email.match(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/)) {
+                if (!email.match(/^1\d{10}$/)) {
+                    $.toast("邮箱或手机号不正确！请重新输入");
+                    return
+                }
+            }
+            
+            var cInfo = $(".cname-group li");
+            if ((cInfo.length == 1) && (invoiceL != 0)) {
+                $.toast("请添加公司名称和税号");
+                return
+            }
+
+            if (($(".vInfo").css("display") == "none") && (invoiceL != 0)) {
+                $.toast("请选择申请发票的公司");
+                return
+            }
+
+            var selectTag = $(".select");
+            var selectDate = [];
+            var selectNum = [];
+            var selectAmount = [];
+            if (selectTag.length > 0) {
+                for (var i = 0; i < selectTag.length; i++) {
+                    selectDate.push($(selectTag[i]).attr("data-value"));
+                    selectNum.push($(selectTag[i]).attr("data-id"));
+                    selectAmount.push($(selectTag[i]).attr("data-amount"));
+                }
+            } else {
+                $.toast("清选择开票账单");
+                return
+            }
+            layer.open({type: 2});
+            if (invoiceL != 0) {
+                var vNumber = $(".vNumber").text();
+                var vName = $(".vName").text();
+                var invoiceT = 2;//单位
+            } else {
+                var vNumber = $(".sfzh").val();
+                var vName = $(".xm").val();
+                var invoiceT = 1;//个人
+            }
+                var data = {
+                    "所有发票提取码": selectDate.join(),
+                    "用户标识": Bill.userId,
+                    "邮箱": email,
+                    "开票类型": type,//电子发票
+                    "发票信息标识": invoiceT,
+                    "公司名称": vName,
+                    "公司税号": vNumber
+                };
+
+                var tmpl = "'{{所有发票提取码}}',{{用户标识}},'{{邮箱}}',{{开票类型}},{{发票信息标识}},'{{公司名称}}','{{公司税号}}'";
+                var params = tmpl.t(data);
+                var proc = "申请二维码消费账单发票 " + params;
+                var rst = $$.JSONDB.Query(proc);
+            
+            layer.closeAll();
+            if (!rst.Table1) {
+                for (var i=0; i < selectNum.length;i++) {
+                    var data = {};
+                    data.recordsNum = selectNum[i]
+                    var url = "/App/Common/CSharp/Store/UpdateInvoiceState.ashx";
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: data,
+                        success: function (result) {
+                            if (result) {
+
+                            } else {
+                                console.result;
+                                console(0);
+                            }
+                        },
+                        dataType: 'json'
+                    });
+
+                    //发送微信模板消息
+                    var datawms = {};
+                    datawms.recordsNum = selectNum[i];
+                    datawms.amount = selectAmount[i];
+                    var urlwms = "/App/Common/CSharp/WeChat/InvoiceApplyNotify.ashx";
+                    $.ajax({
+                        type: 'POST',
+                        url: urlwms,
+                        data: datawms,
+                        success: function (result) {
+                            //发送微信通知，成功不做处理
+                        },
+                        dataType: 'json'
+                    });
+                }
+                //提示
+                layer.open({
+                    content: '申请成功'
+                    , skin: 'msg'
+                    , time: 2 //2秒后自动关闭
+                    , end: function () {
+                        $$.Goto('kpjl');
+                    }
+                });
+            } else {
+                //提示
+                layer.open({
+                    content: '申请失败'
+                    , skin: 'msg'
+                    , time: 2 //2秒后自动关闭
+                });
+            }
+        }, 1)
+
+    });
+</script>
+
+</html>

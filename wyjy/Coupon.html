@@ -1,0 +1,501 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>我的电子券</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			.mui-segmented-control.mui-segmented-control-inverted~.mui-slider-progress-bar{
+				background: red;
+			}
+			.mui-segmented-control.mui-segmented-control-inverted .mui-control-item.mui-active{
+				color: red;
+			}
+			.code{
+			}
+			#code-ma{
+				width: 200px;
+				height: 200px;
+			}
+			.Couponlist{
+				height: 50px;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				border-bottom: 1px solid rgb(240,240,240);
+			}
+			.Coupon1{
+				margin-left:5%;
+			}
+		</style>
+		<script type="text/javascript">
+			var My = {
+				
+			};
+			// $$.Page_Load = function () {
+			//     $.init();
+			// }
+		</script>
+	</head>
+	<body>
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">我的电子券</h1>
+		</header>
+		<div id="Coupon">
+			<div class="mui-content" style="margin-top: 50px;">
+				<div id="slider" class="mui-slider">
+					<div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+						<a class="mui-control-item" href="#item1mobile">
+							未使用
+						</a>                                                                                                                                                                                                                                                                                                                                                                                                                                      
+						<a class="mui-control-item" href="#item2mobile">
+							已使用
+						</a>
+						<a class="mui-control-item" href="#item3mobile">
+							已作废
+						</a>
+					</div>
+					<div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-4"></div>
+					<div class="mui-slider-group">
+						<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
+							<div class="Infos" v-if="NoList.length<=0">暂无电子券信息</div>
+							<div v-else class="card" v-for="(item,index) in NoList" :key="index" @click="Goto(item)">
+							    <div class="content-padded grid-demo">
+							        <div class="row">
+							            <div class="row-left">
+							                <span class="fh">￥</span><span class="row-price">{{item.PT2001_L_COUPON_AMOUNT}}</span>
+							            </div>
+							            <div class="row-right">
+							                <div class="title-yxq" style="margin-top: .7rem;">
+							                    <!-- <div class="lp-title">有效期:{{item.PT2001_L_EXPIREDDATE}}</div> -->
+												<div>仅限四川中石油直营加油站（电子券系统）使用，结算时抵扣油费</div>
+							                    <!-- <div class="lp-yxq">{{item.PT2001_L_EXPIREDDATE}}</div> -->
+							                </div>
+							                <div class="lp-bz">
+												有效期:{{item.PT2001_L_EXPIREDDATE}}
+											</div>
+							            </div>
+										<!-- <span style="color: #CCCCCC;position: relative;top: 20px;">未使用</span> -->
+							        </div>
+							    </div>
+							</div>
+						</div>
+						<div id="item2mobile" class="mui-slider-item mui-control-content">
+							<div class="Infos" v-if="OkList.length<=0">暂无电子券信息</div>
+							<div v-else class="cards" v-for="(item,index) in OkList" :key="index" @click="Goto(item)">
+							    <div class="content-padded grid-demo">
+							        <div class="row">
+							            <div class="row-left">
+							                <span class="fh">￥</span><span class="row-price">{{item.PT2001_L_COUPON_AMOUNT}}</span>
+							            </div>
+							            <div class="row-right">
+							                <div class="title-yxq">
+							                    <!-- <div class="lp-title">有效期:{{item.PT2001_L_EXPIREDDATE}}</div> -->
+							                    <div style="width: 65%;font-size: .5rem;">仅限四川中石油直营加油站（电子券系统）使用，结算时抵扣油费</div>
+							                </div>
+							                <div class="lp-bz">有效期:{{item.PT2001_L_EXPIREDDATE}}</div>
+							            </div>
+							        </div>
+							    </div>
+							</div>
+						</div>
+						<div id="item3mobile" class="mui-slider-item mui-control-content">
+							<div class="Infos" v-if="NumList.length<=0">暂无电子券信息</div>
+							<div v-else class="" v-for="(item,index) in NumList" :key="index" @click="Goto(item)">
+							    <div v-if="item.PT2001_L_COUPON_STATE==2" class="content-padded grid-demo cardss">
+							        <div class="row">
+							            <div class="row-left">
+							                <span class="fh">￥</span><span class="row-price">{{item.PT2001_L_COUPON_AMOUNT}}</span>
+							            </div>
+							            <div class="row-right">
+							                <div class="title-yxq">
+							                    <!-- <div class="lp-title">有效期:{{item.PT2001_L_EXPIREDDATE}}</div> -->
+							                    <div style="width: 65%;font-size: .5rem;">仅限四川中石油直营加油站（电子券系统）使用，结算时抵扣油费</div>
+							                </div>
+							                <div class="lp-bz">有效期:{{item.PT2001_L_EXPIREDDATE}}</div>
+							            </div>
+										<!-- <span style="color: #CCCCCC;position: relative;top: 20px;">已作废</span> -->
+							        </div>
+							    </div>
+								<div v-else class="content-padded grid-demo cardsss">
+								    <div class="row">
+								        <div class="row-left">
+								            <span class="fh">￥</span><span class="row-price">{{item.PT2001_L_COUPON_AMOUNT}}</span>
+								        </div>
+								        <div class="row-right">
+								            <div class="title-yxq">
+								                <!-- <div class="lp-title">有效期:{{item.PT2001_L_EXPIREDDATE}}</div> -->
+								                <div style="width: 65%;font-size: .5rem;">仅限四川中石油直营加油站（电子券系统）使用，结算时抵扣油费</div>
+								            </div>
+								            <div class="lp-bz">有效期:{{item.PT2001_L_EXPIREDDATE}}</div>
+								        </div>
+										<!-- <span style="color: #CCCCCC;position: relative;top: 20px;">已作废</span> -->
+								    </div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>		
+		</div>
+		<script>
+			var proc = "查询基本信息 " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+			var data = rst.Table[0];
+			var id=data.用户标识;
+                        alert(id);
+			// var userid="2071611150600000001"
+			// var id='2071611150600000001'
+			new Vue({
+				el: '#Coupon',
+				data: {
+					UserId:id,
+					List:[],
+					NoList:[],//未使用
+					OkList:[],//已使用
+					NumList:[],//已作废
+				},
+				created(){
+					this.getlist()
+				},
+				methods:{
+					Goto(item){
+						localStorage.setItem('CodeNumber',JSON.stringify(item))
+						// window.location.href='code.html'
+						$$.Goto('code')
+					},
+					getlist(){
+						var _this=this
+						var datas=`params={method:"GetUserCouponInfo",user_id:"${this.UserId}"}`
+						console.log(datas)
+alert(`http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetUserCouponInfo",user_id:"${this.UserId}"}`)
+						$.ajax({
+							type: "post",
+							url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetUserCouponInfo",user_id:"${this.UserId}"}`,
+							data: datas,
+							async: true,
+							success: function (res) {
+								if(JSON.parse(res).result!=0){
+									List=[]
+								}
+								else{
+									console.log(JSON.parse(JSON.parse(res).data))
+									_this.List=JSON.parse(JSON.parse(res).data)
+									_this.List.forEach((item)=>{
+										if(item.PT2001_L_DATA_TYPE==0){
+											item.PM0001_NAME='油信宝'
+										}
+										var day=(item.PT2001_L_EXPIREDDATE.toString()).slice(0,10)
+										day=_this.dateAdd(day)
+										var mon=item.PT2001_L_DATA_CREATE.slice(11,19)
+										console.log(day+' '+mon)
+										item.PT2001_L_EXPIREDDATE=day+' '+mon
+										if(item.PT2001_L_COUPON_STATE==0){
+											_this.NoList.push(item)
+										}
+										else if(item.PT2001_L_COUPON_STATE==1){
+											_this.OkList.push(item)
+										}
+										else{
+											_this.NumList.push(item)
+										}
+									})
+								}
+								console.log(_this.NumList)
+								// console.log(JSON.parse(JSON.parse(res).coupon_list))
+							},
+							error:function(err){
+								console.log(err)
+							}
+						});
+					},
+					dateAdd(startDate) {
+				        startDate = new Date(startDate);
+				        startDate = +startDate + 1000*60*60*24;
+				        startDate = new Date(startDate);
+						var month=startDate.getMonth()+1
+						var day=startDate.getDate()
+						if(month<10){
+							month='0'+month
+						}
+						if(day<10){
+							day='0'+day
+						}
+				        var nextStartDate = startDate.getFullYear()+"-"+month+"-"+day;
+				        return nextStartDate;
+				    }
+				}
+			})
+			mui.init({
+				swipeBack: false
+			});			
+		</script>
+		<style>
+			#item1mobile,#item2mobile,#item3mobile{
+				overflow-y: scroll;
+				padding: 0 10px;
+			}
+			.mui-control-content {
+				background-color: white;
+				min-height: 215px;
+			}
+			.mui-control-content .mui-loading {
+				margin-top: 50px;
+			}
+			.mui-content{
+				height: calc(100vh);
+			}
+			.Infos{
+				text-align: center;
+				margin-top: 30%;
+				color: #CCCCCC;
+			}
+			.mui-slider{
+				height: calc(100vh - 44px);
+				background: white;
+			}
+			.mui-slider-group{
+				height: calc(100vh - 88px);
+				/* overflow-y: scroll; */
+			}
+			.Summary-right{display: flex;align-items: center;}
+			.Summary-lefttops{margin-bottom:10px;}
+			.Summary{background: white;padding: 25px;display: flex;justify-content: space-between;}
+			.circle{
+				width:75px;
+				height:75px;
+				border-radius: 50%;
+				border: 1px solid #ccc;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.Summary-bom{
+				height: 300px;
+				background: white;
+				padding: 25px;
+			}
+			.itemtwobtn{
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 20px;
+			}
+			.itemtwobtn button{
+				width: 50%;
+				margin-top: 20px;
+			}
+			.Noactive{
+				display: none;
+			}
+			.select-company-left{
+				text-align: center;
+				width: 90%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				/* background: -webkit-linear-gradient(linear,top bottom,rgb(253,253,253),rgb(206,206,206)); */
+				background:-webkit-linear-gradient(top,rgb(253,253,253),rgb(206,206,206));	
+			}
+			.select-company-right{
+				width: 10%;
+				background:-webkit-linear-gradient( top,rgb(253,253,253) , rgb(222,222,222));
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				line-height: 30px;
+			}
+			.select-company-right image{
+				width: 20px;
+				height: 20px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.select-company{
+				height: 40px;
+				line-height: 40px;
+				border: 1px solid #CCCCCC;
+				margin-top: 20px;
+				border-radius: 3px;
+				display: flex;justify-content: space-between;
+			}
+			.select-price{
+				background:-webkit-linear-gradient( top,rgb(182,212,243) , rgb(140,188,235));
+			}
+			.mui-slider .mui-segmented-control.mui-segmented-control-inverted~.mui-slider-group .mui-slider-item{
+				border: 0;
+			}
+		</style>
+		 <style>
+		    .title {
+		        background-color: #ffffff;
+		        color: #000;
+		    }
+		
+		    .bar-nav ~ .content {
+		        top: 2.3rem;
+		    }
+		
+		    .buttons-tab .button.active {
+		        color: #C8141E;
+		        border-bottom: none;
+		    }
+		
+			.buttons-tab .button.active .i-title {
+				border-bottom: 2px solid #C8141E;
+				padding-bottom: 1px;
+			}
+		
+		    .r-border {
+		        width: 3px;
+		        background-color: #eee;
+		        height: 0.9rem;
+		        margin-top: 0.55rem;
+		    }
+		
+		    .card {
+		        margin: 0;
+		        box-shadow: none;
+		        background: url("../Common/image/lplq/img_lijilingqu_quan.png") no-repeat center top;
+		        background-size: 100% 100%;
+		    }
+			.cards{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_yishiyong_bg.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+			.cardss{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_yishiyong_bgs.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+			.cardsss{
+				margin: 0;
+				box-shadow: none;
+				background: url("../Common/image/lplq/img_bg.png") no-repeat center top;
+				background-size: 100% 100%;
+			}
+		    .content-padded {
+		        margin: 0.25rem 0;
+		        padding-top: 0.2rem;
+		    }
+		
+		    .row {
+		        margin-left: 0;
+				position: relative;
+		    }
+		
+		    .row-left {
+		        width: 30.7%;
+		        float: left;
+		        text-align: center;
+		        height: 4rem;
+		        line-height: 4rem;
+		        color: #fff;
+		    }
+		
+		    .row-right {
+		        width: 69.3%;
+		        margin-left: 30%;
+		        padding-left: 1rem;
+		    }
+		
+		    .row-price {
+		        font-size: 1.5rem;
+		        font-weight: 600;
+		    }
+		    .fh {
+		        font-weight: 600;
+		    }
+		    .card {
+		        font-size: 0.6rem;
+		    }
+		
+		    .lp-title {
+				padding-top: 0.2rem;
+		        /* padding: 0.3rem 0; */
+		        font-size: 0.6rem;
+		        font-weight: 600;
+		        color:#333;
+		    }
+		    .title-yxq {
+		        width: 100%;
+		        float: left;
+		        color:#666;
+		    }
+		    .lp-bz {
+		        bottom: 0.15rem;
+		        position: absolute;
+		        color: #999;
+				display: flex;
+				justify-content: space-between;
+		    }
+		
+		    
+		
+		    .ljlq {
+		        width: 30%;
+		        float: left;
+		        padding-top: 1.6rem;
+		    }
+		
+		        .ljlq img {
+		            width: 80%;
+		        }
+		
+		    @font-face {
+		        font-family: 'iconfont'; /* project id 705790 */
+		        src: url('//at.alicdn.com/t/font_705790_6ijubsornlw.eot');
+		        src: url('//at.alicdn.com/t/font_705790_6ijubsornlw.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.woff') format('woff'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.ttf') format('truetype'), url('//at.alicdn.com/t/font_705790_6ijubsornlw.svg#iconfont') format('svg');
+		    }
+		  .iconfont {
+		            font-family: "iconfont" !important;
+		            font-size: 16px;
+		            font-style: normal;
+		            -webkit-font-smoothing: antialiased;
+		            -moz-osx-font-smoothing: grayscale;
+		        }
+		    .icon-wenhao:before {
+		        content: "\e725";
+		        color: #000;
+		        font-size: 0.8rem;
+		    }
+		    .shuoming-close {
+		        width:2.2rem;
+		        float:right;
+		        padding-top:0.6rem;
+		    }
+		    .shuoming-close img {
+		        width:0.9rem;
+		    }
+		 
+		</style>
+	</body>
+
+</html>

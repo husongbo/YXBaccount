@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>提取码申请发票</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/gVerify.js?v=1"></script>
+    <script type="text/javascript">
+        $$.Page_Load = function () {
+            $.init();
+        }
+    </script>
+    <style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+        #MainPage {
+            background-color: #fff;
+        }
+
+        .Color_B1 {
+            background-color: #f57c59;
+        }
+
+
+        .button.button-fill {
+            background: #ff8200;
+            background-color: #ff8200;
+        }
+
+
+        .content-padded {
+            padding-top: 2.2rem;
+        }
+
+        .tqm-title {
+            margin-top: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .searchbar {
+            height: 3.2rem;
+        }
+
+        .search-input input {
+            height: 2.2rem !important;
+            font-size: 0.9rem;
+        }
+
+        #code {
+            width: 55%;
+            float: left
+        }
+
+        .code-prompt {
+            color: #ff8200;
+            font-size: 0.5rem;
+            text-decoration: underline;
+            padding-left: 1.2rem;
+        }
+
+        .list-block input[type="text"], .list-block {
+            font-size: 0.7rem !important;
+        }
+        #vCode {
+            display: block;
+            height: 1.4rem;
+            padding-left: 0.8rem;
+            width: 5rem
+        }
+        .button.button-fill:hover {
+            background-color: #ff8200;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">提取码申请发票</h1>
+                <a class="icon pull-right" style="color: #333;font-size:0.7rem" onclick="$$.Goto('kpjl');">开票记录</a>
+            </header>
+
+            <div class="content-padded">
+                <div class="tqm-title">发票提取码</div>
+                <div class="searchbar">
+                    <div class="search-input">
+                        <input type="search" id='search' placeholder='输入提取码...' />
+                    </div>
+                </div>
+                <div class="tqm-title">验证码</div>
+                <div class="searchbar int-widthXX">
+                    <div class="search-input">
+                        <input type="number" id='code' placeholder='输入验证码...' />
+                        <div calss="code-img" style="float: left;width: 45%">
+                            <div id="vCode"></div>
+                            <span class="code-prompt" onclick="verifyCode.refresh()">看不起，换一张</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-block">
+                <div class="row">
+                    <div class="col-100"><a href="#" class="button button-big button-fill button-success button-danger">开票</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var verifyCode = new GVerify("vCode");
+        $(".button-success").click(function () {
+            var code = $("#search").val();
+            if (!code) {
+                $.toast("请输入发票提取码");
+                return
+            }
+            //var verifyCode = new GVerify("vCode");
+            var verification  = verifyCode.validate($("#code").val());
+            if (!verification){
+                $.toast("验证码错误");
+                return
+            }
+
+            
+
+
+            var data = {};
+            data.code = code
+            var url = "/App/Common/CSharp/Store/GetOrderDetail.ashx";
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: function (result) {
+                    if (result) {
+                        if (result.开票状态 == 1) {
+                            $.toast("该发票已经申请开票");
+                            return
+                        } else if (result.开票状态 == 0) {
+                            var codesql = "查询POS开票信息 '" + code;
+                            var coderes = $$.JSONDB.Query(codesql).Table;
+                            var status = 1;//没有申请
+                            if (typeof coderes != 'undefined') {
+                                if (coderes[0].PT0023_APPLY_STATE == 1) {
+                                    status = 0;// 已经申请过了
+                                }
+                            } 
+
+                            /*
+                             这里接收数据，如果返回的状态status为0,那么已经申请过了
+                              */
+                            if (status == 0) {
+                                $.toast("该发票已经申请开票");
+                                return
+                            }
+                            else {
+                                var data = {
+                                    'code': code
+                                };
+                                $$.Goto('tqmapply', data);
+                            }
+                        } else {
+                            $.toast("提取码错误");
+                            return
+                        }
+                    } else {
+                        $.toast("提取码错误");
+                        return
+                    }
+                },
+                dataType: 'json'
+            });
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,510 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>个人中心</title>
+    <link rel="stylesheet" href="../Common/css/sm.css?v=20181010" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script type="text/javascript" src="http://map.qq.com/api/js?v=2.exp"></script>
+
+    <script type="text/javascript">
+        var My = {
+            citylocation: new qq.maps.CityService({
+                complete: function (results) {
+                    var location = results.detail.detail.split(",");
+                    if (location.length > 3) {
+                        My.location.province = location[2];
+                    }
+                    My.location.city = location[1];
+
+                    My.GetCityInfo();
+                }
+            })
+        };
+        $$.Page_Load = function () {
+            $.init();
+
+            var proc = "GetOilPoints " + Bill.userId;
+            var rst = $$.JSONDB.Query(proc);
+            $("#oil_points").text(rst.Table[0].油点);
+
+            My.GetUserRegisterInfo();
+
+            var cities = ["成都市", "自贡市", "攀枝花市", "泸州市", "德阳市", "绵阳市", "广元市", "遂宁市", "内江市", "乐山市", "南充市", "宜宾市",
+                "广安市", "达州市", "眉山市", "雅安市", "巴中市", "资阳市", "阿坝州", "甘孜州", "凉山州  "
+            ];
+            $("#city-picker").picker({
+                toolbarTemplate: '<header class="bar bar-nav">\
+                        <button class="button button-link pull-right close-picker">确定</button>\
+                        <h1 class="title">请选择城市</h1>\
+                        </header>',
+                cols: [{
+                    textAlign: 'left',
+                    values: cities
+                }],
+                onClose: function (obj) {
+                    My.SetCity(obj.value[0]);
+                }
+            });
+
+            // return;
+            My.LoadWxApi();
+            wx.ready(function () {
+                My.GetLocation();
+            });
+
+            My.Event();
+        }
+        My.GotoMyCardPage = function () {
+            if ($$.Context.Parameter.CardCD) {
+                var param = {};
+                param.CardCD = $$.Context.Parameter.CardCD
+            }
+
+            $$.Goto('wdyk', param);
+        };
+        My.ShowMap = function () {
+            if (!My.city) {
+                My.SetCity("成都市");
+            }
+            // My.city = "绵阳市";
+            var proc = "查询城市油站信息 " + "'" + My.city + "'";
+            var rst = $$.JSONDB.Query(proc).Table;
+            if (rst.length > 0) {
+                $$.Goto("dtapi");
+            } else {
+                var mapUrl = "http://apis.map.qq.com/uri/v1/search?keyword=加油站&center=" + My.location.latitude +
+                    "," + My.location.longitude + "&radius=1000&referer=myapp";
+                window.location.href = mapUrl;
+            }
+        };
+
+        My.LoadWxApi = function () {
+            var signPackage = $$.GetJSSDKParameter();
+
+            wx.config({
+                debug: false,
+                appId: signPackage["AppId"],
+                timestamp: signPackage["Timestamp"],
+                nonceStr: signPackage["Noncestr"],
+                signature: signPackage["Signature"],
+                jsApiList: [
+                    // 所有要调用的 API 都要加到这个列表中
+                    'checkJsApi',
+                    'openLocation',
+                    'getLocation'
+                ]
+            });
+        };
+
+        My.GetLocation = function () {
+            wx.getLocation({
+                success: function (res) {
+                    My.location = {};
+                    My.location.latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    My.location.longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    My.location.speed = res.speed; // 速度，以米/每秒计
+                    My.location.accuracy = res.accuracy; // 位置精度
+                    //设置经纬度信息
+                    var latLng = new qq.maps.LatLng(My.location.latitude, My.location.longitude);
+                    //调用城市经纬度查询接口实现经纬查询
+                    My.citylocation.searchCityByLatLng(latLng);
+                },
+                cancel: function (res) {
+                    //alert('用户拒绝授权获取地理位置');
+                }
+            });
+        };
+
+        My.GetCityInfo = function () {
+            //				My.city = $.fn.cookie("city");
+            //				if(!My.city) {
+            My.province = My.location.province;
+            My.city = My.location.city;
+            //					$.fn.cookie("province", My.prototype);
+            //					$.fn.cookie("city", My.city);
+            //				}
+            My.SetCity(My.city);
+        };
+
+        My.SetCity = function (city) {
+            //				$.fn.cookie("city", city);
+            My.city = city;
+            $("#city").text(city);
+        };
+        My.CloseAd = function () {
+            layer.closeAll();
+        };
+
+        My.IsManager = function () {
+            var querySql = "SELECT [PT0006_ID] FROM [M0001_USER_INFO] WHERE M0001_ID=" + Bill.userId;
+
+            var rst = $$.JSONDB.Query(querySql);
+
+            return rst.Table[0].PT0006_ID;
+        }
+        My.IsManagerOrAdminUser = function () {
+            //return -1;
+            var querySql = "SELECT [PT0006_ID] FROM [M0001_USER_INFO] WHERE M0001_ID=" + Bill.userId;
+
+            var rst = $$.JSONDB.Query(querySql);
+
+            var userId = "SELECT '" + Bill.userId + "' AS M0001_ID";
+            var userIdRst = $$.JSONDB.Query(userId);
+            var thisUserId = userIdRst.Table[0].M0001_ID;
+
+            var tqyhsql = "SELECT M0001_ID FROM YHGL_特权用户列表";
+            var restqyh = $$.JSONDB.Query(tqyhsql).Table;
+            var UserIDArr = new Array();
+            for (var t = 0; t < restqyh.length; t++) {
+                UserIDArr.push(restqyh[t].M0001_ID.toString());
+            }
+            if (UserIDArr.indexOf(thisUserId) >= 0) {
+                return 0;
+            } else if (rst.Table[0].PT0006_ID > 0) {
+                return rst.Table[0].PT0006_ID;
+            } else {
+                return -1;
+            }
+
+        }
+        My.Event = function () {
+            $(".card-sales").hide();
+            if (My.IsManager()) {
+                $(".card-sales").show();
+            }
+
+            $(".place-manage").hide();
+
+            if (My.IsManagerOrAdminUser() >= 0) {
+                $(".place-manage").show();
+            }
+
+        }
+        My.GetUserRegisterInfo = function () {
+            var proc = "查询基本信息 " + Bill.userId;
+            var rst = $$.JSONDB.Query(proc);
+           
+            if (!rst) {
+                return;
+            }
+            var data = rst.Table[0];
+
+            
+            
+            if (!data) {
+                return;
+            }
+
+            if (!data.手机) {
+                My.ShowRegisterInfo();
+            }
+            var merchant_data = "merchant_id=1&user_name=" + data.标识;
+            var sign = $$.GetMerchantSign(merchant_data);
+            var coupon_href = "http://fp.youxinbao.com.cn/app/wyjy/fpxx.html?merchant_id=1&user_name=" + data.标识 + "&sign=" + sign;
+	    $("#coupon_ticket").attr({ "href": coupon_href });
+            $("#phone").text(data.手机);
+        }
+        My.ShowRegisterInfo = function () {
+            var param = {};
+            param.back = 1;
+            $$.Goto("jbxx", param);
+        }
+    </script>
+    <style>
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .list-block.media-list .item-title {
+            position: relative;
+            padding-left: 1.45rem;
+            font-size: 0.8rem;
+        }
+
+            .list-block.media-list .item-title img {
+                width: 1.2rem;
+                position: absolute;
+                left: 0px;
+                top: 0;
+            }
+
+        .sui-bottom-text {
+            color: #666666;
+            margin: 0;
+            padding: 0.4rem 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .wd-header {
+            /*background: url("../Common/image/wdzh/img_touxiang.png") no-repeat center top;
+            background-size: 100% 100%;*/
+        }
+
+            .wd-header img {
+                width: 100%;
+                border-bottom: 3px solid #eee;
+            }
+
+        .wd-header {
+            margin: 0;
+        }
+
+        #phone-box {
+            top: 0;
+            position: absolute;
+            font-size: 1.3rem;
+            height: 2.2rem;
+            line-height: 2.2rem;
+            left: 20%;
+            color: #fff;
+        }
+
+        .card2 .col-50 {
+            text-align: center;
+            padding: 0.15rem;
+        }
+
+            .card2 .col-50 span {
+                /*font-weight: bold;*/
+                color: #000;
+                font-size: 0.65rem;
+                display: inline-block;
+                width: 100%;
+            }
+
+        .num {
+            font-size: 1.2rem !important;
+            font-weight: bold;
+            line-height: 1.2rem;
+        }
+
+        .yb-xyed {
+            padding: 0;
+        }
+
+        .row .col-50:first-child {
+            width: 50%;
+            margin-left: 0;
+        }
+
+        .list-block.media-list .item-inner {
+            padding-top: 0.9rem;
+            padding-bottom: 0.85rem;
+        }
+
+        .list-block ul:before {
+            height: 3px;
+        }
+
+        .item-title span {
+            padding-left: 0.3rem;
+        }
+
+        .tab-item:active {
+            background: #e7e7e7;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left pull-left" style="color: #000;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title">个人中心</h1>
+            </header>
+
+            <div id="PageContent" class="content" style="padding-bottom:2.5rem;">
+                <div class="card wd-header">
+                    <img src="../Common/image/wdzh/img_touxiang.png" />
+                    <div class="card-content" id="phone-box">
+                        <div class="card-content-inner" id="phone">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card card2">
+                    <div class="card-content">
+                        <div class="card-content-inner yb-xyed">
+                            <div class="row" style="height:2.3rem">
+                                <div class="col-50 col-50-width-50" style="border-right: 1px solid rgba(231, 231, 231, 0.96);">
+                                    <span id="oil_points" class="num">0</span>
+                                    <span>油币</span>
+                                </div>
+                                <div class="col-50 col-50-width-50">
+                                    <span class="num">0.00</span>
+                                    <span>信用额度</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-block media-list" style="margin-top: 0.5rem;margin-bottom: 0.5rem;">
+                    <ul>
+                        <li class="card-sales">
+                            <a class="item-link item-content" onclick="$$.Goto('../manager/index')">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">
+                                            <img src="../Common/image/ykxs.png?v=1" />
+                                            <span>油卡管理</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="place-manage">
+                            <a class="item-link item-content" onclick="$$.Goto('../manager/placemanager')">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">
+                                            <img src="../Common/image/qdgl.png?v=1" />
+                                            <span>渠道管理</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="item-link item-content" onclick="$$.Goto('grxx')">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">
+                                            <img src="../Common/image/wdzh/icon_wode.png" />
+                                            <span>个人信息</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="item-link item-content" id="coupon_ticket">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">
+                                            <img src="../Common/image/wdzh/icon_fapiao.png" />
+                                            <span>电子券发票</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="item-link item-content" onclick="$$.Goto('fpxx')">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">
+                                            <img src="../Common/image/wdzh/icon_fapiao.png" />
+                                            <span>我的发票</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="item-link item-content" onclick="$$.Goto('bzfk')">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">
+                                            <img src="../Common/image/wdzh/icon_fankui.png" />
+                                            <span>帮助与反馈</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="item-link item-content" onclick="$$.Goto('help/yhxy')">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">
+                                            <img src="../Common/image/wdzh/icon_xieyi.png" />
+                                            <span>用户协议</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="item-link item-content" onclick="$$.Goto('tqmsqfp')">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+
+                                        <div class="item-title">
+                                            <img src="../Common/image/wdzh/icon_tiquma.png" />
+                                            <span>提取码申请发票</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="item-link item-content" onclick="$$.Goto('gywm')">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+
+                                        <div class="item-title">
+                                            <img src="../Common/image/wdzh/icon_guanyuwomen.png" />
+                                            <span>关于我们</span>
+                                        </div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <nav class="bar bar-tab">
+                <a class="tab-item external " href="#" onclick="$$.Goto('index')">
+                    <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_wode_shouye.png" /></span>
+                    <span class="tab-label">首页</span>
+                </a>
+                <a class="tab-item external" href="#" onclick="My.ShowMap()">
+                    <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_daohang.png" /></span>
+                    <span class="tab-label">导航</span>
+                </a>
+                <a class="tab-item external" href="#" onclick="My.GotoMyCardPage();">
+                    <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_youka.png" /></span>
+                    <span class="tab-label">油卡</span>
+                </a>
+                <a class="tab-item external active" href="#" onclick="$$.Goto('wdzh')">
+                    <span class="icon icon-img-box"> <img src="../Common/image/pub/tab_icon_wode_wode.png" /></span>
+                    <span class="tab-label">我的</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>

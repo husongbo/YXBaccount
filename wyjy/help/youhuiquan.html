@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>优惠券</title>
+    <link rel="stylesheet" href="../../Common/css/sm.css" />
+    <link rel="stylesheet" href="../../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../../Common/js/sm-city-picker.js"></script>    
+	<style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+        .card {
+            background: #fff;
+            box-shadow: 0 0 0.6rem rgba(136, 130, 129, 0.3);
+            margin: 0.5rem;
+            position: relative;
+            border-radius: 0.4rem;
+            font-size: 0.7rem;
+        }
+		.card-content-inner {
+			text-indent:2em;
+		}
+	</style>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+            	<a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">优惠券</h1>
+            </header>
+
+			<div class="content">
+				<div class="card explain" style="margin-top: 0.5rem;">
+					<div class="card-header">
+						优惠券使用规则
+					</div>
+					<div class="card-content">
+						<div class="card-content-inner" style="text-indent:0em;">
+							优惠券分三种：<br />
+							<div style="text-indent: 1rem;">
+								一种是消费返利抵用电子券，有效期是一年（即客户消费返利的抵用券）<br />
+				            </div>
+							<div style="text-indent: 1rem;">
+				            	一种是平台上营销活动赠送的抵用券（比如平台上的活动是：新用户首冲200，立返1-50元，有效期是根据用户参与活动后获取抵用券的时间后一年有效<br />
+				            </div>
+							<div style="text-indent: 1rem;">
+							            一种是平台合作的第三方平台电子券/积分兑换油卷，有效期为一年（例如：联通“沃支付”平台上的电子券兑换“油信宝”平台的加油抵用券）
+				            </div>
+						</div>
+					</div>
+				</div>
+				<div class="card explain" style="margin-top: 0.5rem;">
+					<div class="card-header">
+						怎么样获得优惠券
+					</div>
+					<div class="card-content">
+						<div class="card-content-inner">
+							用户通过“油信宝”平台定期、不定期的营销活动获得优惠券，并且平台会根据不同类型的活动发放不同的优惠券，用户在加油的过程中，通过平台，参与加油满减、首冲立返等活动，领取优惠券
+						</div>
+					</div>
+				</div>
+				<div class="card explain" style="margin-top: 0.5rem;">
+					<div class="card-header">
+						优惠券如何使用？
+					</div>
+					<div class="card-content">
+						<div class="card-content-inner" style="text-indent:0em;">
+							1、优惠券是目前只能充油款<br />
+							2、不可提现、不设找零不可兑换现金<br />
+							3、多张优惠券不能同时使用，每次加油可使用一张优惠券<br />
+							4、每张优惠券都有使用期限没有使用站点，只能在注明的使用期限内使用，逾期作废<br />
+							5、每张加油券面值最高金额为50元<br />
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>        
+    </div>
+</body>
+</html>

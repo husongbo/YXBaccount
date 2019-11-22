@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>渠道售卡消费详情</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript">
+        $$.Page_Load = function () {
+            $.init();
+        }
+    </script>
+
+    <script type="text/template" id="PlaceList_Template">
+        <li>
+            <a class="item-link item-content" onclick="GotoDetail({{渠道标识}})">
+                <div class="item-inner">
+                    <div class="item-title-row">
+                        <div class="item-title">
+                            <span class="managerName">{{渠道名称}}</span>
+                        </div>
+                        <div class="item-after"></div>
+                    </div>
+                </div>
+            </a>
+        </li>
+    </script>
+    <style>
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .page, .page-group {
+            background: #fff;
+        }
+        #MainPage {
+            background-color: #f5f5f5;
+        }
+
+        .Color_B1 {
+            background-color: #f57c59;
+        }
+
+        .list-block.media-list .item-title {
+            position: relative;
+            padding-left: 1.45rem;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+            .list-block.media-list .item-title img {
+                width: 1.2rem;
+                height: 1.2rem;
+                position: absolute;
+                left: 0px;
+                top: 0;
+            }
+
+        .sui-bottom-text {
+            color: #666666;
+            margin: 0;
+            padding: 0.4rem 0.6rem;
+            margin-bottom: 1rem;
+        }
+        .row {
+            text-align: center;
+        }
+
+            .row .col-33 {
+                padding: 0.75rem;
+                border: 1px solid #BBB;
+                border-top: hidden;
+                border-right: hidden;
+            }
+        .col-25 {
+            border: 1px solid #BBB;
+            border-top: hidden;
+            border-right: hidden;
+            line-height:2rem;
+            height:2rem;
+        }
+        .column-title {
+            padding-left:0.7rem;
+            font-size: 1rem
+        }
+    </style>
+    <script type="text/template" id="total_Template">
+        <div class="col-33">{{已售}}</div>
+        <div class="col-33">{{未售}}</div>
+        <div class="col-33">{{合计}}</div>
+    </script>
+    <script type="text/template" id="monthstatistics_Template">
+        <div class="row no-gutter" style="border-right: 1px solid #BBB">
+            <div class="col-25">{{售卡月份}}</div>
+            <div class="col-25">{{发卡数}}</div>
+            <div class="col-25">{{消费总金额}}</div>
+            <div class="col-25">{{返利}}</div>
+        </div>
+    </script>
+    <script type="text/template" id="qudaotitle_Template">
+        <h1 id="" class="title" style="color: #333;">{{渠道名称}}</h1>
+    </script>
+</head>
+<body>
+    <div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left  pull-left" style="color: #333;" onclick="$.router.back();"></a>
+                <div id="qudaotitle"></div>
+            </header>
+            <div class="content">
+                <div class="content-padded grid-demo">
+                    <div class="column-title">售卡合计:</div>
+                    <div class="row  no-gutter"  style="border-right: 1px solid #BBB;border-top: 1px solid #BBB;" >
+                        <div class="col-33">已售卡</div>
+                        <div class="col-33">剩余卡数</div>
+                        <div class="col-33">合计</div>
+                    </div>
+                    <div class="row no-gutter" id="total" style="border-right: 1px solid #BBB" >
+                    </div>
+ 
+                    <div class="column-title" style="padding-top:0.5rem">月售卡详情:</div>
+                    <div class="row  no-gutter" style="border-right: 1px solid #BBB;border-top: 1px solid #BBB;">
+                        <div class="col-25">月份</div>
+                        <div class="col-25">已售卡数</div>
+                        <div class="col-25">消费总数</div>
+                        <div class="col-25">返利</div>
+                    </div>
+                    <div id="monthstatistics">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $$.Page_Load = function () {
+            var placeId = $$.Context.Parameter.placeId;
+            var proc = '渠道售卡汇总 ' + placeId;
+            var rst = $$.JSONDB.Query(proc).Table;
+            $$.Fill("#qudaotitle", rst);
+            $$.Fill("#total", rst);
+            console.log(rst)
+            var procMonth = '渠道月售卡消费汇总 ' + placeId;
+            var cardInfo = $$.JSONDB.Query(procMonth).Table;
+            var cosumeInfo = $$.JSONDB.Query(procMonth).Table1;
+            if (cardInfo.length > 0) {
+                cardMinMonth = cardInfo[0].售卡月份;
+                cardMaxMonth = cardInfo[cardInfo.length - 1].售卡月份;
+            } else {
+                cardMinMonth = 0;
+                cardMaxMonth = 0;
+            }
+            if (cosumeInfo.length > 0) {
+                cosumeMinMonth = cosumeInfo[0].消费月份;
+                cosumeMaxMonth = cosumeInfo[cosumeInfo.length - 1].消费月份;
+            } else {
+                cosumeMinMonth = 0;
+                cosumeMaxMonth = 0;
+            }
+            if (cardMinMonth > 0 && cosumeMinMonth > 0) {
+                minMonth = Math.min(cardMinMonth, cosumeMinMonth);
+                maxMonth = Math.max(cardMaxMonth, cosumeMaxMonth);
+            } else if (cardMinMonth > 0 && cosumeMinMonth == 0) {
+                minMonth = cardMinMonth;
+                maxMonth = cardMaxMonth;
+            } else if (cardMinMonth == 0 && cosumeMinMonth > 0) {
+                minMonth = cosumeMinMonth;
+                maxMonth = cosumeMaxMonth;
+            } else {
+                minMonth = 0;
+                maxMonth = 0;
+            }
+             if (minMonth>0){
+                var monthRes = new Array();
+                var a = 0;
+                for (var month = minMonth; month <= maxMonth; month++) {
+                    if (month % 100 > 12) {
+                        month += 100 - 12;
+                    }
+                    monthRes[a] = new Array();
+                    if (cardInfo.length > 0) {
+                        for (var ci = 0; ci < cardInfo.length; ci++) {
+                            if (cardInfo[ci].售卡月份 == month) {
+                                monthRes[a]['售卡月份'] = month;
+                                monthRes[a]['发卡数'] = cardInfo[ci].发卡数;
+                                break;
+                            } else {
+                                monthRes[a]['售卡月份'] = month;
+                                monthRes[a]['发卡数'] = '0';
+                            }
+                        }
+                    } else {
+                        monthRes[a]['售卡月份'] = 0;
+                        monthRes[a]['发卡数'] = 0;
+                    }
+                    if (cosumeInfo.length > 0) {
+                        for (var csi = 0; csi < cosumeInfo.length; csi++) {
+                            if (cosumeInfo[csi].消费月份 == month) {
+                                monthRes[a]['消费月份'] = month;
+                                monthRes[a]['消费总金额'] = cosumeInfo[csi].消费总金额;
+                                monthRes[a]['返利'] = cosumeInfo[csi].返利;
+                                break;
+                            } else {
+                                monthRes[a]['消费月份'] = month;
+                                monthRes[a]['消费总金额'] = '0.00';
+                                monthRes[a]['返利'] = '0.00';
+                            }
+                        }
+                    } else {
+                        monthRes[a]['消费月份'] = 0;
+                        monthRes[a]['消费总金额'] = '0.00';
+                        monthRes[a]['返利'] = '0.00';
+                    }
+                    a++;
+                }
+            } else {
+                var monthRes = new Array();
+                monthRes[0] = new Array();
+                monthRes[0]['售卡月份'] = 0;
+                monthRes[0]['发卡数'] = 0;
+                monthRes[0]['消费总金额'] = 0.00;
+                monthRes[0]['返利'] = 0.00;
+            }
+        
+            monthRes.reverse()
+            $$.Fill("#monthstatistics", monthRes);
+        }
+    </script>
+</body>
+
+</html>

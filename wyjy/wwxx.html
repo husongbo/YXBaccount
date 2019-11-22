@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+    <title>完善信息</title>
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+    <link rel="stylesheet" href="../Common/css/sm-extend.css" />
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+    <script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="../Common/js/Bill.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/javascript">
+		$$.Page_Load = function(){
+			$.init();
+			
+			My.back = $$.Context.Parameter.back;
+			if (My.back) {
+				document.title="完善信息"; 
+				$(".page-name").text("完善信息");
+			}
+			
+			$$.AsyncCall(My.GetBaseInfo);
+			
+			My.Event();
+		}
+		
+		var My = {
+			bregisted: false,
+			back: 0
+		};
+		
+		My.GetBaseInfo = function () {
+			var proc = "查询基本信息 " + Bill.userId;
+			var rst = $$.JSONDB.Query(proc);
+
+			if (!rst) {
+				return 0;
+			}
+			var data = rst.Table[0];
+			if (!data) {
+				return 0;
+			}
+			
+			if (data.手机) {
+				My.bregisted = true;
+				$("#phone").val(data.手机);
+				$("#phone").attr("readonly", "readonly");
+				$("#binded_phone").text("已绑定");
+				$(".unbind").hide();
+			}
+			
+			$("#name").val(data.姓名);
+			$("#identity_card").val(data.身份证号);
+			var cityArea = data.省.trim() + ' ' + data.市.trim() + ' ' + data.区.trim();
+			if (cityArea != "  ") {
+				$('#city-picker').val(cityArea);
+			}
+			$('#address').val(data.详细地址);
+			$('#mail').val(data.邮箱);
+		}
+		
+		My.CheckInputInfo = function() {		
+			var data = {};
+			// data.标识 = Bill.userId;
+			// 
+			// if (My.bregisted) {
+			// 	data.手机 = "";
+			// } else {
+			// 	data.手机 = $('#phone').val();
+			// 	if (!DV_MOBILE_PHONE.test(data.手机)) {
+			// 		layer.open({
+			// 			content: '请输入正确的手机号码格式'
+			// 			,skin: 'msg'
+			// 			,time: 2 //2秒后自动关闭
+			// 		});
+			// 		return;
+			// 	}
+			// }
+			
+			data.name= $('#name').val();
+			if (data.姓名 == "") {
+				layer.open({
+					content: '请输入姓名'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;
+			}
+			
+			data.sheng  = $('#identity_card').val();
+			if (data.身份证号 == "") {
+				layer.open({
+					content: '请输入身份证号'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;
+			}
+			
+			var cArea = $('#city-picker').val();
+			if (cArea == "") {
+				layer.open({
+					content: '请选择地区'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;				
+			}
+			cityArea = cArea.split(' ');
+			data.guo = '中国'
+			data.shen = cityArea[0];
+			data.shi = cityArea[1];
+			data.qu = cityArea[2];
+			
+			if (data.省  == '' || data.市 == '') {
+				layer.open({
+					content: '请选择地区'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;
+			}
+			
+			data.address = $('#address').val();
+			if (data.详细地址  == "") {
+				layer.open({
+					content: '请输入详细地址'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;						
+			}
+			
+			data.email = $('#mail').val();
+//			if (!DV_EMAIL.test(data.邮箱)) {
+//				layer.open({
+//					content: '请输入正确的电子邮箱地址'
+//					,skin: 'msg'
+//					,time: 2 //2秒后自动关闭
+//				});
+//				return;							
+//			}
+			
+			if (!My.bregisted) {
+				data.code = $('#verify_code').val();
+				if (data.code == "") {
+					layer.open({
+						content: '请输入手机验证码'
+						,skin: 'msg'
+						,time: 2 //2秒后自动关闭
+					});
+					return;				
+				}
+			}
+			
+			My.baseInfo = data;
+			return data;
+		}
+		
+		My.UpdateBaseInfo = function() {
+			var baseInfo = My.CheckInputInfo();
+			console.log(baseInfo)
+			// $$.Log(JSON.stringify(baseInfo));
+			// 
+			// var procTmpl = "更新基本信息 {{标识}}, N'{{姓名}}', N'{{身份证号}}', '{{手机}}', '{{邮箱}}', N'{{国家}}', N'{{省}}', N'{{市}}', N'{{区}}',  N'{{详细地址}}' ";
+			// var proc = procTmpl.t(baseInfo);
+			// 
+			// $$.JSONDB.Query(proc);
+			// 
+			// if (My.back) {
+			// 	$.router.back();
+			// } else {
+			// 	My.GetBaseInfo();
+			// }
+			
+		}
+
+		My.Commit = function () {
+				var proc = "查询基本信息 " + Bill.userId;
+				var rst = $$.JSONDB.Query(proc);
+				
+				if (!rst) {
+					return 0;
+				}
+				var data = rst.Table[0];
+				if (!data) {
+					return 0;
+				}
+				var userids=data.用户标识
+				var baseInfo = My.CheckInputInfo();
+				console.log(baseInfo)
+				var userphone=localStorage.getItem("Phone")
+				// var userphone="13881387003"
+				// $$.AsyncCall(My.UpdateBaseInfo);
+				var datass=`params={method:"UpdateUserInfo",user_id:"${userids}",real_name:"${baseInfo.name}",card_id:"${baseInfo.sheng}",contry:"${baseInfo.guo}",province:"${baseInfo.shen}",city:"${baseInfo.shi}",conuty:"${baseInfo.qu}",address:"${baseInfo.address}",email:"${baseInfo.email}",phone:"${userphone}"}`;
+				console.log(datass)
+				$.ajax({
+				    type: "post",
+				    url: "http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx",
+				    data: datass,
+				    async: true,
+				    success: function (data) {
+				       layer.open({
+				            content: "保存成功"
+				            ,skin: 'msg'
+				            ,time: 2 //2秒后自动关闭
+				       });
+					   setTimeout(function(){$.router.back(); }, 3000);
+				    }
+				});
+// 				if ($$.Context.Parameter.state){
+//                     layer.open({
+//                         content: '恭喜您成为客户经理，请关注油信宝公众号'
+//                         ,btn: '去关注'
+//                         ,yes: function(index){
+// 							$$.Goto("gzh");
+//                             layer.close(index);
+//                         }
+//                     });
+// 				}else {
+//                     layer.open({
+//                         content: "保存成功"
+//                         ,skin: 'msg'
+//                         ,time: 2 //2秒后自动关闭
+//                     });
+// 				// }
+// 
+// 			}
+		};
+		
+		My.CheckVerifyCode = function(baseInfo) {
+			var layerId = layer.open({type:2});
+			var parameter = {};
+			parameter.phone = baseInfo.手机;
+			parameter.code = baseInfo.code;
+			
+			$.ajax({
+		        type: "post",
+		        url: "/App/Common/CSharp/CheckVerifyCode.ashx",
+		        data: parameter,
+		        async: true,
+		        success: function (data) {
+		            var json = $.parseJSON(data);
+		            var msg = json.MESSAGE;
+					if (json.RESULT == 0) {
+						My.UpdateBaseInfo();
+						msg = '保存成功'
+					}
+					layer.close(layerId);
+					
+					layer.open({
+						content: msg
+						,skin: 'msg'
+						,time: 2 //2秒后自动关闭
+					});
+		        }
+		    });
+		}
+		    
+	    My.SendVerifyCode = function() {
+			var phone = $('#phone').val();
+			if (!DV_MOBILE_PHONE.test(phone)) {
+				layer.open({
+					content: '请输入正确的手机号码格式'
+					,skin: 'msg'
+					,time: 2 //2秒后自动关闭
+				});
+				return;
+			}
+			
+			var parameter = {};
+			parameter.phone = phone;
+			parameter.token = $$.Context.token;
+		
+			$.ajax({
+		        type: "post",
+		        url: "/WeChat/SendVerifyCode.ashx",
+		        data: parameter,
+		        async: true,
+		        success: function (data) {
+		            var json = $.parseJSON(data);
+		            var msg = json.MESSAGE;
+					layer.open({
+						content: msg
+						,skin: 'msg'
+						,time: 2 //2秒后自动关闭
+					});
+		        }
+		    });		    	
+	    }
+		
+		My.Event = function () {
+			$("#city-picker").cityPicker({
+				toolbarTemplate: '<header class="bar bar-nav">\
+				<button class="button button-link pull-right close-picker">确定</button>\
+				<h1 class="title">选择地址</h1>\
+				</header>'
+			});
+		}
+	</script>
+	<style>
+        @font-face {
+            font-family: 'iconfont'; /* project id 705767 */
+            src: url('//at.alicdn.com/t/font_705767_wsdw7wzndb.eot');
+            src: url('//at.alicdn.com/t/font_705767_wsdw7wzndb.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.woff') format('woff'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.ttf') format('truetype'), url('//at.alicdn.com/t/font_705767_wsdw7wzndb.svg#iconfont') format('svg');
+        }
+        .iconfont {
+            font-family: "iconfont" !important;
+            font-size: 16px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        @font-face {
+            font-family: 'iconfont'; /* project id 796516 */
+            src: url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.eot');
+            src: url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.woff') format('woff'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.ttf') format('truetype'), url('//at.alicdn.com/t/font_796516_0sil0vqv2a5j.svg#iconfont') format('svg');
+        }
+        .icon-duanxin:before {
+            content: "\e618";
+            color: #ff8200;
+        }
+        .icon-dizhi01:before {
+            content: "\e62c";
+            color: #ffc600;
+        }
+
+        .icon-shouji:before {
+            content: "\e607";
+            color: #a535e9;
+        }
+
+        .icon-yonghudianji:before {
+            content: "\e638";
+            color: #1375ff;
+        }
+
+        .icon-nationaarea:before {
+            content: "\e624";
+            color: #ff9800;
+        }
+
+        .icon-youjian:before {
+            content: "\e62b";
+            color: #ee2683;
+        }
+
+        .icon-shenfenzheng:before {
+            content: "\e696";
+            color: #f94d1b;
+            font-size:0.5rem;
+        }
+        .title {
+            background-color: #ffffff;
+            color: #000;
+        }
+        .list-block {
+            margin: 0;
+            font-size: 0.65rem;
+            color: #333
+        }
+       .list-block input[type="text"] {
+           font-size: 0.6rem;
+           color:#999
+       }
+       .list-block .item-inner {
+            padding-right:0;
+       }
+       .list-block .item-content {
+           padding-right: 0.75rem;
+       }
+        .page, .page-group {
+            background:#fff;
+        }
+      
+        .iconfont {
+            width: 2.5rem;
+        }
+        .tijiao {
+            background-color: #ff8200;
+            color: #fff;
+            padding: 0 1.4rem;
+            border:none;
+        }
+        .jbxx-content {
+            background: url("../Common/image/jbxx/bg_img.png") no-repeat center top;
+            margin-top:0.5rem;
+            background-size:100% 100%;
+            padding-bottom:0.5rem;
+        }
+        .fsyzm {
+            position:absolute;  
+            right:0.3rem;
+        }
+        .fsyzm-button {
+            background: #ff8200;
+            border:none;
+            color:#fff;
+            height:1.1rem;
+            line-height:1rem;
+            font-size:0.6rem;
+        }
+        a:active {
+            color: #fff ;
+            text-decoration:none; 
+        }
+
+	</style>
+</head>
+<body>
+	<div class="page-group">
+        <div id="MainPage" class="page page-current">
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left  pull-left" style="color: black;" onclick="$.router.back();"></a>
+                <h1 id="MainPage_Title" class="title page-name">完善信息</h1>
+            </header>
+            <div id="PageContent" class="content">
+                <div class="card jbxx-content">
+                    <div class="card-content">
+                        <div class="list-block">
+                            <ul>
+                                <!-- <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <i class="iconfont icon-shouji"></i>
+                                            <div class="item-title label namefont">手机号</div>
+                                            <div class="item-input">
+                                                <input type="text" placeholder="请输入手机号" id="phone" />
+                                            </div>
+                                            <div class="item-after" style="font-size: small; color: #9E9E9E;" id="binded_phone"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="unbind">
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <i class="iconfont icon-duanxin"></i>
+                                            <div class="item-title label namefont">手机验证码</div>
+                                            <div class="item-input">
+                                                <input type="text" placeholder="请输入验证码" id="verify_code" />
+                                            </div>
+                                            <div class="item-after fsyzm">
+                                                <a class="button fsyzm-button" onclick="My.SendVerifyCode();">发送验证码</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li> -->
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <i class="iconfont icon-yonghudianji"></i>
+                                            <div class="item-title label namefont">姓名</div>
+                                            <div class="item-input">
+                                                <input type="text" placeholder="请输入姓名" id="name" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <i class="iconfont icon-shenfenzheng"></i>
+                                            <div class="item-title label namefont">身份证号</div>
+                                            <div class="item-input">
+                                                <input type="text" placeholder="请输入身份证号" id="identity_card" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <i class="iconfont icon-nationaarea"></i>
+                                            <div class="item-title label namefont">地区</div>
+                                            <div class="item-input">
+                                                <input type="text" id="city-picker" placeholder="请选择地区" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <i class="iconfont icon-dizhi01"></i>
+                                            <div class="item-title label namefont">详细地址</div>
+                                            <div class="item-input">
+                                                <input type="text" placeholder="请输入详细地址" id="address" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <i class="iconfont icon-youjian"></i>
+                                            <div class="item-title label namefont">电子邮件</div>
+                                            <div class="item-input">
+                                                <input type="text" placeholder="选填" id="mail" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                    <div class="content-block">
+                        <p><span onclick="My.Commit()" class="button tijiao button-big" style="  color: #fff !important;">完成</span></p>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+</script>
+</html>

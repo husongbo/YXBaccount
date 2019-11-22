@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>收货地址</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<link rel="stylesheet" href="Common/css/iconfont.css" />
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<style>
+			.iconfont {
+				font-size: 20px;
+			}
+			
+			.list-block .item-content {
+				padding-left: 0.5rem;
+			}
+			
+			.bar .button-link {
+				color: #FFFFFF;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<div class="list-block">
+				<ul>
+					<li>
+						<div class="item-content">
+							<div class="item-media">
+								<i class="iconfont icon-mingcheng"></i>
+							</div>
+							<div class="item-inner">
+								<div class="item-title label">收货人</div>
+								<div class="item-input">
+									<input id="name" type="text" placeholder="请输入姓名" value="{{M0006_TRANS_CONSIGNEE}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media">
+								<i class="iconfont icon-1322shengshiqu"></i>
+							</div>
+							<div class="item-inner">
+								<div class="item-title label">省市区</div>
+								<div class="item-input">
+									<input id="city" type="text" placeholder="请选择省市区" value="{{M0006_TRANS_PROVINCE}} {{M0006_TRANS_CITY}} {{M0006_TRANS_AREA}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media">
+								<i class="iconfont icon-xiangxidizhi"></i>
+							</div>
+							<div class="item-inner">
+								<div class="item-title label">详细地址</div>
+								<div class="item-input">
+									<input id="detail" type="text" placeholder="请输入详细地址" value="{{M0006_TRANS_ADDRESS}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media">
+								<i class="iconfont icon-jiatingyoubian-copy"></i>
+							</div>
+							<div class="item-inner">
+								<div class="item-title label">邮政编码</div>
+								<div class="item-input">
+									<input id="code" type="number" placeholder="请输入邮政编码" value="{{M0006_TRANS_ZIPCODE}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media">
+								<i class="iconfont icon-phone"></i>
+							</div>
+							<div class="item-inner">
+								<div class="item-title label">联系电话</div>
+								<div class="item-input">
+									<input id="tel" type="tel" placeholder="请输入联系电话" value="{{M0006_TRANS_PHONE}}">
+								</div>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="item-content">
+							<div class="item-media">
+								<i class="iconfont icon-moren"></i>
+							</div>
+							<div class="item-inner">
+								<div class="item-title label">设为默认</div>
+								<div class="item-input" style="text-align: right;">
+									<label class="label-switch">
+                                    <input id="default" type="checkbox" data-type="{{M0006_TRANS_TYPE}}">
+                                    <div class="checkbox"></div>
+                                </label>
+								</div>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="content-block">
+				<a id="confirm" class="button button-fill button-success">确定</a>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<h1 class="title">收货地址</h1>
+				</header>
+				<div class="content" id="list" hidden="hidden"></div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.js' charset='utf-8'></script>
+		<script type="text/javascript" src="//g.alicdn.com/msui/sm/0.6.2/js/sm-city-picker.min.js" charset="utf-8"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script>
+			function plusReady() {
+				var addrID = $$.getParameterValue().addrID;
+				var hyID = "{{CurrentMerchantID}}";
+				if(addrID) {
+					var data = {
+						"会员标识": hyID,
+						"配送地址标识": addrID
+					}
+					var tmpl = "{{会员标识}},{{配送地址标识}}";
+					var parmars = tmpl.t(data);
+					var proc = "配送地址列表 " + parmars;
+					var rst = $$.JSONDB.Query(proc).Table;
+					$$.Fill("#list", rst);
+					$("#list").show();
+					if($("#default").attr("data-type") == "默认配送地") {
+						$("#default").prop("checked", true);
+					}
+				} else {
+					addrID = "0";
+					var addrData = [{
+						"M0006_TRANS_CONSIGNEE": "",
+						"M0006_TRANS_ADDRESS": "",
+						"M0006_TRANS_ZIPCODE": "",
+						"M0006_TRANS_PHONE": ""
+					}];
+					$$.Fill("#list", addrData);
+					$("#city").val("");
+					$("#list").show();
+				}
+
+				// 地址选择
+				$("#list").on("focus", "#city", function() {
+					$(this).cityPicker({
+						toolbarTemplate: '<header class="bar bar-nav" style="background-color:#e4393c">' +
+							'<button class="button button-link pull-right close-picker" style="color:#fff">确定</button>' +
+							'<h1 class="title">选择收货地址</h1>' +
+							'</header>'
+					});
+				})
+
+				// 默认地址开关
+				var isDefault = $("#default").attr("checked");
+				$(".checkbox").click(function() {
+					var isDefault = $("#default").attr("checked");
+				});
+
+				// 确定
+				$("#confirm").click(function() {
+					var name = $("#name").val();
+					var city = $("#city").val();
+					var detail = $("#detail").val();
+					var code = $("#code").val();
+					var tel = $("#tel").val();
+					var isDefault = $("#default").attr("checked");
+					console.log(isDefault)
+					if(!name) {
+						layer.open({
+							content: '请输入姓名',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!city) {
+						layer.open({
+							content: '请选择省市区',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					} else {
+						city = city.split(" ");
+					}
+
+					if(!detail) {
+						layer.open({
+							content: '请输入详细地址',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!code) {
+						layer.open({
+							content: '请输入邮政编码',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(!tel) {
+						layer.open({
+							content: '请输入联系电话',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					if(isDefault == false) {
+						isDefault = "0";
+					} else {
+						isDefault = "1";
+					}
+
+					var data = {
+						"会员标识": hyID,
+						"配送收货人": name,
+						"配送省": city[0],
+						"配送市": city[1],
+						"配送区": city[2],
+						"配送地址": detail,
+						"配送邮编": code,
+						"配送电话": tel,
+						"是默认配送地址": isDefault,
+						"配送地址标识": addrID
+					}
+					var tmpl =
+						"{{会员标识}},'{{配送收货人}}','{{配送省}}','{{配送市}}','{{配送区}}','{{配送地址}}','{{配送邮编}}','{{配送电话}}',{{是默认配送地址}},{{配送地址标识}}"
+					var params = tmpl.t(data);
+					var proc = "配送地址创建 " + params;
+					var rst = $$.JSONDB.Query(proc);
+					if(rst) {
+						var msg = addrID == "0" ? "创建成功" : "修改成功";
+						layer.open({
+							content: msg,
+							skin: 'msg',
+							time: 2
+						});
+						plus.webview.create('index.html').show();
+					}
+				})
+			}
+			
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

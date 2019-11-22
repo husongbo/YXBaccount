@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>历史奖券</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css">
+		
+		<style>
+			.coupon {
+				position: relative;
+				background: #50ADD3;
+				color: #fff;
+				width: 94%;
+				height: 5rem;
+				line-height: 25px;
+				overflow: hidden;
+				left: 3%;
+				margin-top: 0.5rem;
+			}
+			
+			.coupon-diabled {
+				background: #c3c3c3;
+				color: #666;
+			}
+			
+			.coupon:after {
+				content: ".";
+				display: block;
+				height: 0;
+				clear: both;
+				visibility: hidden;
+			}
+			/*价格*/
+			
+			.coupon-money .sum {
+				font-size: 1.1rem;
+			}
+			
+			.coupon-left {
+				float: left;
+				text-align: left;
+				width: 60%;
+				font-size: 12px;
+			}
+			
+			.coupon-right {
+				float: right;
+				text-align: center;
+				width: 40%;
+				font-size: 0.7rem;
+			}
+			
+			.coupon-inner {
+				padding: 0.5rem 0.75rem;
+				height: 5rem;
+				position: relative;
+			}
+			
+			.coupon-right .coupon-inner {
+				border-left: 2px dashed rgba(255, 255, 255, .5);
+			}
+			
+			.coupon-money,
+			.coupon-time {
+				margin-top: 0.6rem;
+			}
+			
+			.coupon-circle {
+				display: inline-block;
+				width: 0.8rem;
+				height: 0.8rem;
+				background: hsl(240, 19%, 95%);
+				position: absolute;
+				left: -9px;
+				border-radius: 50%
+			}
+			
+			.coupon-circle.top {
+				top: -0.5rem;
+			}
+			
+			.coupon-circle.bottom {
+				bottom: -0.55rem;
+			}
+			
+			.coupon-light {
+				position: absolute;
+				top: 1rem;
+				left: 20%;
+				height: 7.5rem;
+				width: 100%;
+				background: rgba(255, 255, 255, .2);
+				transform: rotate(-30deg);
+				-webkit-transform: rotate(-30deg);
+				-moz-transform: rotate(-30deg);
+			}
+			
+			.list-block {
+				margin: 0;
+				margin-bottom: 1rem;
+				font-size: 0.65rem;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a class="icon icon-left pull-left back"></a>
+					<h1 class="title">历史奖券</h1>
+				</header>
+				<div class="content">
+					<div class="coupon">
+						<div class="coupon-left">
+							<div class="coupon-inner">
+								<div class="coupon-money">
+									<span>¥</span>
+									<span class="sum">100.00</span>
+									<span>加油券</span>
+								</div>
+								<div class="coupon-condition">
+									<p>花荄加油站</p>
+								</div>
+							</div>
+						</div>
+						<div class="coupon-right">
+							<div class="coupon-inner">
+								<div class="coupon-time">
+									已中奖 已兑奖<br> 2216-12-31
+								</div>
+								<i class="coupon-circle top"></i>
+								<i class="coupon-circle bottom"></i>
+							</div>
+						</div>
+						<div class="coupon-light"></div>
+					</div>
+
+					<!--不可用-->
+					<div class="coupon coupon-diabled">
+						<div class="coupon-left">
+							<div class="coupon-inner">
+								<div class="coupon-money">
+									<span>¥</span>
+									<span class="sum">100.00</span>
+									<span>加油券</span>
+								</div>
+								<div class="coupon-condition">
+									<p>花荄加油站</p>
+								</div>
+							</div>
+						</div>
+						<div class="coupon-right">
+							<div class="coupon-inner">
+								<div class="coupon-time">
+									未中奖<br> 2016-12-31
+								</div>
+								<i class="coupon-circle top"></i>
+								<i class="coupon-circle bottom"></i>
+							</div>
+						</div>
+						<div class="coupon-light"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+	</body>
+
+</html>

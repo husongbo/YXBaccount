@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>店铺管理</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/iconfont.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<style>
+			.card-content-inner {
+				padding: 0.5rem;
+			}
+			
+			.card-header {
+				padding: 0 0.5rem;
+			}
+			
+			p {
+				margin: 0;
+				margin-bottom: 0.1rem;
+			}
+			
+			.img {
+				height: 8.5rem;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<div class="card">
+				<div class="card-header">
+					<span>{{店铺名}}</span>
+					<span class="iconfont icon-shezhi" data-id="{{店铺标识}}" style="font-size: 20px"></span>
+				</div>
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div class="img">
+							<img src="{{店铺图片}}" data-id="{{店铺标识}}">
+						</div>
+						<div>{{店铺名}}</div>
+						<div class="color-gray">{{店铺描述}}</div>
+					</div>
+				</div>
+			</div>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<a class="icon iconfont icon-icon_album_add pull-right" id="create"></a>
+					<h1 class="title">店铺管理</h1>
+				</header>
+				<div class="content">
+					<div id="list" hidden="hidden"></div>
+					<div class="null" style="margin-top: 3rem;">
+						<img src="../Common/image/null.png" alt="" />
+						<div>还没有店铺，快去创建吧</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			function plusReady() {
+				// 店铺列表查询 
+				var shID = "{{CurrentMerchantID}}"
+				var proc = "店铺列表 " + shID;
+				var rst = $$.JSONDB.Query(proc).Table;
+				if(rst.length > 0) {
+					for(var i = 0; i < rst.length; i++) {
+						var arr = rst[i].店铺图片.split(",");
+						rst[i].店铺图片 = decodeURI(atob(arr[0]));
+					}
+					$$.Fill("#list", rst);
+					$("#list").show();
+				} else {
+					$(".null").show();
+				}
+
+				// 店铺预览
+				$(".card img").click(function() {
+					var dpID = $(this).attr("data-id");
+					plus.webview.create("dpspyl.html?dpID=" + dpID).show();
+				})
+
+				// 创建店铺
+				$("#create").click(function() {
+					plus.webview.create("cjdp.html").show();
+				});
+
+				// 店铺相关操作
+				$(".icon-shezhi").click(function() {
+					var dpID = $(this).attr("data-id");
+					var buttons1 = [{
+							text: '请选择',
+							label: true
+						},
+						{
+							text: '店铺编辑',
+							onClick: function() {
+								plus.webview.create("cjdp.html?dpID=" + dpID).show();
+							}
+						},
+						{
+							text: '商品上下架',
+							onClick: function() {
+								plus.webview.create("dpsp.html?dpID=" + dpID).show();
+							}
+						}
+					];
+					var buttons2 = [{
+						text: '取消',
+						bg: 'danger'
+					}];
+					var groups = [buttons1, buttons2];
+					$.actions(groups);
+				});
+			}
+
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>选择提现类型</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="../Common/css/mui.min.css">
+		<link rel="stylesheet" href="../Common/css/city/loadings.css">
+		<link rel="stylesheet" href="../Common/css/sm.css" />
+		<link rel="stylesheet" href="../Common/css/sm-extend.css" />
+		<script type="text/javascript" src="../Common/js/zepto.js"></script>
+		<script type="text/javascript" src="../Common/js/mui.js"></script>
+		<script type="text/javascript" src="../Common/js/sm.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/sm-extend.js"></script>
+		<script type="text/javascript" src="../Common/js/sm-city-picker.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/Bill.js"></script>
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+		<script type="text/javascript" src="../Common/js/vue.min.js"></script>
+		<script type="text/javascript" src="../Common/js/qrcode.min.js"></script>
+		<script type="text/javascript" src="../Common/js/city/loadings.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style type="text/css">
+			*{font-family: '宋体';}
+			.title {
+			    background-color: #ffffff;
+			    color: #000;
+			}
+			img{
+				width: 20px;height: 20px;
+			}
+			.mui-img{display: flex!important;align-items: center;}
+			.mui-table-view-cell span{margin-left: 10px;font-size: .8rem;}
+			.btn{position: fixed;bottom:20px;left:0;width: 60%;height: 40px;margin-left: 20%;background:#ff8200;
+			color: white;border-radius:35px;text-align: center;line-height: 40px;}
+			.form{padding: 0 20px;margin-top: 10%;}
+			.hiddens{display: none;}
+			.mui-cell{
+				position: relative;
+				    overflow: hidden;
+				    padding: 11px 15px;
+				border-bottom: 1px solid rgb(240,240,240);
+			}
+			.mui-cell>a:not(.mui-btn) {
+			    position: relative;
+			    display: block;
+			    overflow: hidden;
+			    margin: -11px -15px;
+			    padding: inherit;
+			    white-space: nowrap;
+			    text-overflow: ellipsis;
+			    color: inherit;
+				}
+		</style>
+	</head>
+	<body style="background: white;">
+		<header class="bar bar-nav Color_B1">
+		    <a class="icon icon-left pull-left" style="color: #000;" onclick="history.back(-1)"></a>
+		    <h1 id="MainPage_Title" class="title">提现类型</h1>
+		</header>
+		<div class="" style="margin-top: 44px;">
+			<div onclick="types('微信转账')" rel='微信转账' class="mui-cell" style="display: flex;justify-content: space-between;margin-top:10px;">
+				<a style="display: flex;flex-direction: row;height: 40px;align-items: center;">
+					<img src="../Common/image/grxx/weixin.png" >
+					<span style="margin-left: 10px;">微信转账</span>
+				</a>
+				<img src="../Common/image/grxx/oks.png" >
+			</div>
+			<div onclick="types('支付宝转账')" rel='支付宝转账' class="mui-cell" style="display: flex;justify-content: space-between;">
+				<a style="display: flex;flex-direction: row;height: 40px;align-items: center;">
+					<img  src="../Common/image/grxx/zhifubao.png" >
+					<span  style="margin-left: 10px;">支付宝转账</span>
+				</a>
+				<img class="hiddens" src="../Common/image/grxx/oks.png" >
+			</div>
+			<div onclick="types('话费充值')" rel='话费充值' class="mui-cell " style="display: flex;justify-content: space-between;">
+				<a style="display: flex;flex-direction: row;height: 40px;align-items: center;">
+					<img src="../Common/image/grxx/huafei.png" >
+					<span  style="margin-left: 10px;">话费充值</span>
+				</a>
+				<img class="hiddens" src="../Common/image/grxx/oks.png" >
+			</div>
+		</div>
+		<div class="form">
+			<div class="Phone">
+				<div style="margin-bottom: 10px;">请输入您的手机号码</div>
+				<div class="mui-input-row mui-text-center">
+					<input type="text" class="mui-input-clear userczname" placeholder="请输入您的号码" style="border-radius: 5px;border-color:#1296db;">
+				</div>	
+			</div>
+		</div>
+		<div class="btn mui-input-clear" onclick="withdrawal()">提现</div>
+	</body>
+	<script>
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+		var type=0
+		var typetext='微信'
+		function types(val){
+			if(val=='微信转账'){
+				type=0
+				typetext='微信转账'
+			}
+			if(val=='支付宝'){
+				type=1
+				typetext='支付宝'
+			}
+			if(val=='话费充值'){
+				type=2
+				typetext='话费充值'
+			}
+			$(".mui-cell").each(function(){
+				if($(this).attr('rel')==val){
+					$(this).children().eq(1).removeClass('hiddens')
+				}
+				else{
+					$(this).children().eq(1).addClass('hiddens')
+				}
+			})
+		}
+		var proc = "查询基本信息 " + Bill.userId;
+		var rst = $$.JSONDB.Query(proc);
+		var data = rst.Table[0];
+		var id=data.用户标识;
+		$(".userczname").val(data.手机)
+		// var id="2071611150600000001"
+		var list=[]
+		var proid=[]
+		var price=0
+		var proidstring=''
+		$.ajax({
+			type: "post",
+			url: `http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"GetUserServicePromoteList",user_id:"${id}"}`,
+			data:{},
+			async:false,
+			success: function (res) {
+				if(JSON.parse(res).message=='获取购买服务推广信息列表成功'){
+					JSON.parse(JSON.parse(res).data).forEach((item)=>{
+						if(item.PM0005_STATE==0){
+							list.push(item)
+						}
+					})
+					list.forEach(function(item){
+						proid.push(item.PM0005_OUT_TRADE_NO)
+						price+=parseFloat(item.M9000_TOTAL_AMOUNT)*parseFloat(item.PM0006_AMOUNT)
+					})
+					console.log(proid)
+					console.log(list)
+					proid.forEach((item,index)=>{
+						proidstring+=item+','
+					})
+					proidstring=proidstring.substr(0, proidstring.length - 1); 
+					console.log(proidstring)
+				}
+			},
+			error:function(err){
+				console.log(err)
+			}
+		});
+		function withdrawal(){
+			var cash_reveive=''
+			var testphone=/^1[3456789]\d{9}$/
+			cash_reveive=$(".userczname").val()
+			if(cash_reveive==''||cash_reveive==null){
+				mui.toast('手机号不能不空哟')
+				return
+			}
+			if(!testphone.test(cash_reveive)){
+				mui.toast('请输入正确的手机号')
+				return
+			}
+			var url=`http://smstest.youxinbao.com.cn/App/Common/CSharp/app/user/UserInfo.ashx?params={method:"ApplayPromoteInfo",user_id:"${id}",cash_amount:"${price}",promote_list:"${proidstring}",cash_type:"${type}",cash_reveive:"${cash_reveive}"}`			
+			console.log(url)
+			var btnArray = ['取消', '确定'];
+			mui.confirm(`共计￥${price}`, `当前提现类型是${typetext},请确认您的手机号码:${cash_reveive}`, btnArray, function(e) {
+				if (e.index == 1) {
+					$.ajax({
+						type: "post",
+						url: url,
+						data:{},
+						success: function (res) {
+							console.log(res)
+							mui.showLoading("提交中...","div");
+							setTimeout(function(){
+								mui.hideLoading()
+								if(JSON.parse(res).result==1&&JSON.parse(res).message=='提现申请成功'){									
+									mui.toast(JSON.parse(res).message)
+									setTimeout(()=>{
+										history.back(-1)
+									},500)
+								}
+								else{
+									mui.toast(JSON.parse(res).message)	
+								}
+							},1000)
+						},
+						error:function(err){
+							console.log(err)
+						}
+					});
+				} else {
+					return
+				}
+			})
+		}
+	</script>
+</html>

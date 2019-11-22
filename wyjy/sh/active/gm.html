@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>购买</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="../Common/css/common.css" />
+		<script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a onclick="closeme()" class="icon icon-left pull-left"></a>
+					<h1 class="title  popup-manage">购买抽奖券</h1>
+				</header>
+				<div class="content">
+					<div class="content-block-title">购买抽奖券</div>
+					<div class="list-block">
+						<ul>
+							<li>
+								<div class="item-content">
+									<div class="item-media"><i class="icon icon-form-name"></i></div>
+									<div class="item-inner">
+										<div class="item-title label">数量</div>
+										<div class="item-input">
+											<input type="number" placeholder="请输入需要奖券数量">
+										</div>
+									</div>
+								</div>
+							</li>
+							<li>
+						</ul>
+					</div>
+					<div class="content-block" style="margin-top: 3rem;">
+						<p>
+							<a href="#" class="button button-fill button-success" id="buy">购买</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript" src="../Common/js/common-plus.js"></script>
+		<script type="text/javascript">
+			function plusReady() {
+				$("#buy").click(function() {
+					var num = $("input").val();
+					if(!num) {
+						layer.open({
+							content: '请输入需要购买的数量',
+							skin: 'msg',
+							time: 2
+						});
+						return
+					}
+
+					// 存储过程
+					var shID = "1";
+					var hyID = "1";
+					var data = {
+						"抽奖卷张数": num,
+						"商户标识": shID,
+						"操作用户": hyID
+					}
+					var tmpl = "{{抽奖卷张数}},{{商户标识}},'{{操作用户}}'"
+					var params = tmpl.t(data);
+					var proc = "抽奖卷购买 " + params;
+					var rst = $$.JSONDB.Query(proc);
+					console.log(rst)
+					layer.open({
+						content: '购买成功',
+						skin: 'msg',
+						time: 2
+					});
+				})
+			}
+
+			if(window.plus) {
+				plusReady();
+			} else {
+				document.addEventListener('plusready', plusReady, false);
+			}
+		</script>
+	</body>
+
+</html>

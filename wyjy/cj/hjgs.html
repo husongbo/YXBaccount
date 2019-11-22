@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>中奖名单</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css">
+		<style>
+			.number {
+				color: #e4393c;
+				font-size: 0.8rem;
+			}
+		</style>
+		<script type="text/template" id="list_Template">
+			<li class="item-content">
+				<div class="item-media"><i class="icon icon-f7"></i></div>
+				<div class="item-inner">
+					<div>
+						用户136****6547在2014-03-24 03:24 在花荄加油站获得<span class="number">100</span>元加油券
+					</div>
+				</div>
+			</li>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a class="icon icon-left pull-left back"></a>
+					<h1 class="title">中奖名单</h1>
+				</header>
+				<div class="content">
+					<div class="list-block">
+						<ul id="list">
+							<li class="item-content" style="padding-left: 0.5rem;">
+								<div class="item-media">
+									<img src="Common/image/hjgs.png" alt="" />
+								</div>
+								<div class="item-inner">
+									<div>
+										用户136****6547在2014-03-24 03:24 在花荄加油站获得<span class="number">100</span>元加油券
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../Common/js/sdk_db.js?1=1"></script>
+		<script type="text/javascript">
+			var proc = "获奖公示详情 ";
+			var rst = $$.JSONDB.Query(proc);
+			console.log(rst)
+		</script>
+	</body>
+
+</html>

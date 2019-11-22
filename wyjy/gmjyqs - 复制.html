@@ -1,0 +1,567 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>购买加油券</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="misapplication-tap-highlight" content="no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Cache" content="no-cache" />
+
+    <link rel="stylesheet" href="../Common/css/sm.css" />
+
+    <script type="text/javascript" src="../Common/js/zepto.js"></script>
+    <script type="text/javascript" src="../Common/js/sdk.js"></script>
+    <script type="text/javascript" src="../Common/js/layer_mobile/layer.js"></script>
+    <script type="text/template" id="couponList_Template">
+        <div class="yhq-list">
+            <div class="card card-list">
+                <div class="content-padded grid-demo">
+                    <div class="row">
+                        <div class="row-left">
+                            <span class="fh">￥</span><span class="row-price">{{礼品价格}}</span>
+                        </div>
+                        <div class="row-right">
+                            <div class="title-yxq">
+                                <div class="lp-title">油信宝加油券</div>
+                                <div class="lp-yxq">领券日期：{{发放日期}}</div>
+                            </div>
+
+                            <div class="lp-bz">支付时抵扣</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <label class="label-checkbox item-content">
+                <input type="checkbox" name="my-checkbox" id="{{礼品标识}}" value="{{礼品价格}}" class="checkbox-money" />
+                <div class="item-media checkbox-div">
+                    <i class="icon icon-form-checkbox"></i>
+                </div>
+            </label>
+
+        </div>
+
+    </script>
+    <style>
+        .page, .page-group {
+            background: #fff;
+        }
+
+        .title {
+            background: #fff;
+        }
+
+        input[type='number'] {
+            border: none;
+            width: 90%;
+            box-sizing: border-box;
+            padding-left: 5%;
+            font-size: 0.6rem;
+            padding-bottom: 0.3rem;
+        }
+
+        .content-block-title {
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+
+        .checkbox-money {
+            height: 4rem;
+            line-height: 4rem;
+        }
+
+        label.label-checkbox input[type="checkbox"]:checked + .item-media i.icon-form-checkbox {
+            background-color: #ff8200;
+        }
+
+        .yh-yhjts img {
+            height: 0.7rem;
+        }
+
+        .yh-yhjts {
+            font-size: 0.6rem;
+            height: 0;
+            min-height: 0rem;
+            padding-left: 0.3rem;
+        }
+
+        .row {
+            margin: 0;
+        }
+
+        .row-left {
+            width: 30.7%;
+            float: left;
+            text-align: center;
+            height: 4rem;
+            line-height: 4rem;
+            color: #fff;
+        }
+
+        .row-right {
+            width: 69.3%;
+            margin-left: 30%;
+            padding-left: 1rem;
+        }
+
+        .row-price {
+            font-size: 1rem;
+            font-family: DIN-Bold;
+        }
+
+        .ljlq {
+            width: 25%;
+            float: left;
+            padding-top: 1.6rem;
+        }
+
+            .ljlq img {
+                width: 80%;
+            }
+
+        .lp-yxq {
+            font-size: 0.6rem;
+        }
+
+        .content-padded {
+            margin: 0 auto;
+        }
+
+        .lp-title {
+            padding: 0.3rem 0;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .title-yxq {
+            width: 100%;
+            float: left;
+            color: #666;
+        }
+
+        .lp-bz {
+            bottom: 0.15rem;
+            position: absolute;
+            color: #999;
+            font-size: 0.6rem;
+        }
+
+        .content-padded {
+            padding-top: 0.2rem;
+            width: 100%;
+        }
+
+        #couponList .card {
+            margin: 0;
+            box-shadow: none;
+            background: url("../Common/image/wycz/img_diyongquan.png") no-repeat left top;
+            background-size: 100% 100%;
+            width: 85%;
+            float: left;
+            height: 4.3rem;
+        }
+
+        .color-gray {
+            color: #e4393c;
+        }
+
+        yhq-list {
+            padding-bottom: 0.5rem;
+        }
+
+        .card-footer {
+            margin-top: 1rem;
+            padding: 0;
+        }
+
+        #cz {
+            background-color: #ff8200;
+            color: #FFFFFF;
+            font-weight: bold;
+            -- border-radius:0.3rem;
+        }
+
+        .js-button {
+            background-color: rgba(0,0,0,0);
+        }
+
+        .bar-tab:before {
+            background-color: rgba(0,0,0,0);
+        }
+
+        .content-block-title {
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+
+        .card-header:after {
+            background-color: rgba(0, 0, 0, 0);
+        }
+
+        label.label-checkbox i.icon-form-checkbox {
+            border: 1px solid #ff8200;
+        }
+
+        .checkbox-div {
+            height: 4.3rem;
+            line-height: 4.3rem;
+        }
+
+        .icon-form-checkbox {
+            left: 5%;
+        }
+
+        .price {
+            font-size: 1rem;
+            color: #e4393c;
+            margin-bottom: 1%;
+            margin-top: -3%;
+            font-weight: bold;
+        }
+
+        .list-block {
+            margin: 0.75rem 0;
+        }
+
+        .shuoming-box {
+            background: url("../Common/image/gmjyq/xflf.png") no-repeat center top;
+            background-size: 100% auto;
+            text-align: center;
+            display: none;
+            position: absolute;
+            top: 14%;
+            z-index: 999;
+            border-radius: 0.3rem;
+            width: 100%;
+        }
+
+        .shuoming-content {
+            padding: 15% 6% 0 6%;
+            color: #FFFFFF;
+            font-size: 0.8rem;
+        }
+
+            .shuoming-content div {
+                color: #ffffff;
+                font-size: 1.2rem;
+                padding: 1rem 0;
+            }
+
+        .quxiao {
+            background-color: rgba(0, 0, 0, 0);
+            height: 12%;
+            width: 36%;
+            position: absolute;
+            bottom: 14%;
+            left: 14%;
+        }
+
+        .quding {
+            background-color: rgba(0, 0, 0, 0);
+            height: 12%;
+            width: 36%;
+            position: absolute;
+            bottom: 14%;
+            right: 14%;
+        }
+
+
+        .huojiang-box {
+            background: url("../Common/image/gmjyq/huojiang.png") no-repeat center top;
+            background-size: 100% auto;
+            text-align: center;
+            display: none;
+            width: 100%;
+            position: absolute;
+            top: 14%;
+            z-index: 999;
+            border-radius: 0.3rem;
+        }
+
+        .huojiang-content {
+            padding: 5% 6% 0 6%;
+            color: #FFFFFF;
+            font-size: 2rem;
+            padding-top: 46%;
+            padding-right: 18%;
+        }
+
+            .huojiang-content span {
+                color: #ffffff;
+                font-size: 1rem;
+                padding: 1rem 0;
+            }
+
+        .huojiang-guanbi {
+            background-color: rgba(0, 0, 0, 0);
+            height: 2rem;
+            width: 2rem;
+            position: absolute;
+            bottom: 0.1rem;
+            right: 44%;
+        }
+
+
+        .weihuojiang-box {
+            background: url("../Common/image/gmjyq/weihuojiang.png") no-repeat center top;
+            background-size: 100% auto;
+            text-align: center;
+            display: none;
+            width: 100%;
+            position: absolute;
+            top: 14%;
+            z-index: 999;
+            border-radius: 0.3rem;
+        }
+
+        .weihuojiang-guanbi {
+            background-color: rgba(0, 0, 0, 0);
+            height: 2rem;
+            width: 2rem;
+            position: absolute;
+            bottom: 6%;
+            right: 44%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current" id="main">
+            <!-- 遮罩层 -->
+            <div id="cover" style="background: #000; position: absolute; left: 0px; top: 0px; width: 100%; filter: alpha(opacity=30); opacity: 0.7; display: none; z-index: 102 "></div>
+            <!-- 弹窗 -->
+            <div class="shuoming-box">
+                <!--   <div class="shuoming-close close-shuoming"> <img src="../Common/image/gmjyq/btn_guanbi.png" /> </div>-->
+                <div class="shuoming-content">
+                </div>
+                <div class="quxiao"></div>
+                <div class="quding"></div>
+            </div>
+
+            <!-- 弹窗 -->
+            <div class="huojiang-box">
+                <div class="huojiang-content">
+                </div>
+                <div class="huojiang-guanbi"></div>
+
+            </div>
+
+            <!-- 弹窗 -->
+            <div class="weihuojiang-box">
+                <div class="weihuojiang-guanbi"></div>
+
+            </div>
+
+            <header class="bar bar-nav Color_B1">
+                <a class="icon icon-left pull-left back" style="color: #333;" onclick="window.history.back()"></a>
+                <h1 id="MainPage_Title" class="title" style="color: #333;">购买加油券</h1>
+                <a class="icon pull-right" style="color: #333;font-size:0.7rem" onclick="$$.Goto('ewmjyjl');">交易记录</a>
+            </header>
+            <nav class="bar bar-tab js-button">
+                <a class="tab-item external" style="font-weight: bold;">
+                    <span style="font-size: 0.65rem;color: #333;">应支付:</span>
+                    <span id="total" style="color: #ff8200;font-size: 0.85rem;">￥0.00</span>
+                </a>
+                <a class="tab-item external" id="cz">结算</a>
+            </nav>
+
+            <div id="PageContent" class="content">
+                <div class="card margin-zero">
+                    <div class="card-content czje">
+                        <div class="card-content-inner">
+                            <p class="cz-czje">加油金额</p>
+                            <p style="border-bottom: 1px solid #DDDDDD;margin-top:1.7rem" class="je">
+                                <span style="font-size: 0.6rem;font-weight: normal;">￥</span>
+                                <input type="number" />
+                                <div class="container"></div>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="border"></div>
+
+
+                <div class="content-block-title mode-title bklc-title yjy-title">
+                    <a class="icon pull-right" style="color:#333;"></a>优惠券
+                </div>
+                <div class="yhq-list-box">
+                    <div class="card" hidden id="no-dyq">
+
+                        <div class="card-header yh-yhjts">
+                            <div class="yhjts-img">
+                                <img src="../Common/image/wycz/no-dyq.png" alt="" />
+                                <span>优惠券</span>
+                            </div>
+                            <div class="color-gray">无抵用券使用</div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="dyq">
+
+                        <div class="card-header yh-yhjts">
+                            <div class="yhjts-img">
+                                <img src="../Common/image/wycz/no-dyq.png" alt="" />
+                                <span>优惠券</span>
+                            </div>
+                            <div class="color-gray" id="totalCoupon"></div>
+                        </div>
+                        <div class="card-content">
+                            <div id="couponList"> </div>
+                        </div>
+                        <div class="card-footer">
+                            <label class="label-checkbox" style="padding-right: 0.75rem;">
+                                <input type="checkbox" name="all-checkbox">
+                                <div class="item-media">
+                                    <i class="icon icon-form-checkbox"></i>&nbsp;&nbsp;全选
+                                </div>
+                            </label>
+                            <div>
+                                已选&nbsp;
+                                <span id="selNum">0</span>&nbsp;张,可抵用&nbsp;
+                                <span id="selPrice">0.00</span>&nbsp;元
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!--生成二维码-->
+        <div class="page" id="code">
+            <div class="content">
+                <div style="background-color: #FFFFFF;text-align:center;" class="code-title">
+                    <div id="qrcodeCanvas" style="margin: 5% 33%;"></div>
+                    <div class="price">00.00</div>
+                    <div style="color: #999999;font-size: 0.65rem;">交易成功</div>
+                </div>
+                <div class="list-block" id="details">
+                    <ul>
+                        <li class="item-content">
+                            <div class="item-inner">
+                                <div class="item-title">账单分类</div>
+                                <div class="item-after">加油</div>
+                            </div>
+                        </li>
+                        <li class="item-content">
+                            <div class="item-inner">
+                                <div class="item-title">渠道信息</div>
+                                <div class="item-after">油信宝</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div style="padding: 0.3rem 0.75rem;font-size: 0.7rem;">
+                    <span style="color: #ff8200;">说明：</span>请在加油站向收银员出示此二维码
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        // 结算
+        $("#cz").click(function () {
+            var num = $("input[type='number']").val();
+            if (!num) {
+                layer.open({
+                    content: '最低金额不能小于0.01元',
+                    skin: 'msg',
+                    time: 4
+                });
+                return;
+            }
+
+            var discountIDs = [];
+            var data = {};
+
+            // 通联支付金额以分为单位
+            data.allAmount = num;
+            var checkBox = $("input[name='my-checkbox']");
+            if (checkBox.length > 0) {
+                for (var i = 0; i < checkBox.length; i++) {
+                    if ($(checkBox[i]).prop("checked")) {
+                        var checkedID = $(checkBox[i]).attr("id");
+                        discountIDs.push(checkedID)
+                    }
+                }
+                data.discountIDs = discountIDs.join(",");
+            } else {
+                data.discountIDs = '';
+            }
+            data.trxamt = (Number(num) - Number(selPrice))*100;
+            data.body = "购买加油劵码";
+            data.remark = "";
+            data.orderType = "SaleCoupon";
+            GetWxJsApiParam(data);
+        });
+        GetWxJsApiParam = function (pData) {
+            var url = "/App/Common/CSharp/Pay/Fuiou/GetFuiouApi.ashx";
+            var data = "";
+            data = JSON.stringify(pData);
+            var layerId = layer.open({
+                type: 2
+            });
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: function (result) {
+                    if (result.result_msg == "SUCCESS") {
+                        var payInfo = JSON.parse(result.reserved_pay_info);
+                        CallPay(payInfo);
+                    } else {
+                        result = JSON.stringify(result);
+                    }
+                },
+                complete: function () {
+                    layer.close(layerId);
+                },
+                dataType: 'json'
+            });
+        }
+        //调用微信JS api 支付
+        var JsApiCall = function (wxJsApiParam) {
+            WeixinJSBridge.invoke(
+                'getBrandWCPayRequest',
+                wxJsApiParam, //josn串
+                function (res) {
+                    WeixinJSBridge.log(res.err_msg);
+                    var msg = "购买成功";
+                    if (res.err_msg == "get_brand_wcpay_request:ok") {
+                        queryCoupon();
+
+                        timer = setInterval(function () {
+                            queryCoupon();
+                        }, 2000);
+                    } else {
+                        msg = "购买失败";
+                    }
+                    layer.open({
+                        content: msg,
+                        skin: 'msg',
+                        time: 3
+                    });
+                });
+        }
+
+        var CallPay = function (wxJsApiParam) {
+            if (typeof WeixinJSBridge == "undefined") {
+                if (document.addEventListener) {
+                    document.addEventListener('WeixinJSBridgeReady', JsApiCall(wxJsApiParam), false);
+                } else if (document.attachEvent) {
+                    document.attachEvent('WeixinJSBridgeReady', JsApiCall(wxJsApiParam));
+                    document.attachEvent('onWeixinJSBridgeReady', JsApiCall(wxJsApiParam));
+                }
+            } else {
+                JsApiCall(wxJsApiParam);
+            }
+        };
+    </script>
+</body>
+
+</html>

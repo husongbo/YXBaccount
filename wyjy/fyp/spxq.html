@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<title>商品详情</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/common.css" />
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm-extend.min.css">
+		<style>
+			.card-content-inner {
+				padding: 0.5rem;
+			}
+			
+			.txtColor {
+				color: #e4393c;
+				font-weight: bold;
+			}
+			
+			p {
+				margin: 0.1rem 0;
+			}
+			
+			.content {
+				padding-bottom: 3rem;
+			}
+			
+			.button {
+				height: 2rem;
+				width: 90%;
+				margin-left: 5%;
+			}
+			
+			.button.button-fill {
+				line-height: 2rem;
+			}
+			
+			.swiper-container{
+				padding-bottom: 0;
+			}
+		</style>
+		<script type="text/template" id="spLlist_Template">
+			<!--商品图片-->
+			<div class="swiper-container" data-space-between='10'>
+				<div class="swiper-wrapper" id="pic"></div>
+				<div class="swiper-pagination"></div>
+			</div>
+			
+			<!--商品信息-->
+			<div class="card">
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div>{{商品名称}}</div>
+						<div style="color: #e4393c;font-size: 0.85rem;font-weight: bold;">￥{{市场价格}}</div>
+						<div class="color-gray">{{商品描述}}</div>
+					</div>
+				</div>
+			</div>
+
+			<!--可提货加油站列表-->
+			<div class="card">
+				<div class="card-header">
+					<span>可提货加油站</span>
+					<div style="color: #999999">
+						<span style="font-size: 0.65rem">查看更多</span>
+						<span class="icon icon-right" style="font-size: 0.6rem"></span>
+					</div>
+				</div>
+				<div class="card-content">
+					<div class="card-content-inner">
+						<div class="list-block media-list" style="width: 99%">
+							<ul id="thList" style="padding: 5px 0;"></ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</script>
+
+		<!--商品图片-->
+		<script type="text/template" id="pic_Template">
+			<div class="swiper-slide">
+				<img src="{{商品图片}}" alt="">
+			</div>
+		</script>
+		
+		<!--可提货加油站-->
+		<script type="text/template" id="thList_Template">
+			<li>
+				<div class="item-content">
+					<div class="item-media">
+						<img src="Common/image/station.jpg" style='width: 2.2rem;'>
+					</div>
+					<div class="item-inner">
+						<div class="item-title-row">
+							<div class="item-title">{{名称}}</div>
+						</div>
+						<div class="item-subtitle" style="color: #999999">{{地区}}，距离我{{距离}}</div>
+					</div>
+				</div>
+			</li>
+		</script>
+	</head>
+
+	<body>
+		<div class="page-group">
+			<div class="page page-current">
+				<header class="bar bar-nav">
+					<a class="icon icon-left pull-left back"></a>
+					<h1 class="title">商品详情</h1>
+				</header>
+				<nav class="bar bar-tab" style="color: #FFFFFF;height: 3rem">
+					<p style="margin-top: 0.15rem">
+						<a href="#" class="button button-fill button-danger">立即购买</a>
+					</p>
+				</nav>
+				<div class="content" id="spLlist"></div>
+			</div>
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm-extend.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="../../Common/js/sdk.js"></script>
+		<script type="text/javascript" src="../../Common/js/sdk_data_validation.js"></script>
+		<script type="text/javascript" src="../../Common/js/sdk_db.js?1=1"></script>
+		<script>
+			var argument = $$.getParameterValue();
+
+			$(".button").click(function() {
+				window.location.href = "qrdd.html?spID=" + argument.spID + "&dpID=" + argument.dpID;
+			});
+
+			var data = {
+				"店铺标识": argument.dpID,
+				"商品标识": argument.spID
+			}
+			var tmpl = "{{店铺标识}},{{商品标识}}";
+			var params = tmpl.t(data);
+			var proc = "店铺商品详情 " + params;
+			var rst = $$.JSONDB.Query(proc).Table;
+			if(rst.length > 0) {
+				var arr;
+				var picArr = [];
+				for(var i = 0; i < rst.length; i++) {
+					rst[i].市场价格 = rst[i].市场价格.toFixed(2);
+					arr = rst[i].商品图片.split(",");
+				}
+
+				for(var k = 0; k < arr.length; k++) {
+					var obj = {
+						"商品图片": decodeURI(atob(arr[k]))
+					}
+					picArr.push(obj)
+				}
+				
+				$$.Fill("#spLlist", rst);
+				$$.Fill("#pic", picArr);
+			}
+
+			var thList = [{
+				"名称": "花荄加油站便利店",
+				"地区": "安州区",
+				"距离": "0.8km"
+			}, {
+				"名称": "花园加油站便利店",
+				"地区": "培城区",
+				"距离": "1.2km"
+			}, {
+				"名称": "梓潼加油站便利店",
+				"地区": "培城区",
+				"距离": "2.3km"
+			}];
+			$$.Fill("#thList", thList);
+
+			$.init();
+		</script>
+	</body>
+
+</html>

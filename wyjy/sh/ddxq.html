@@ -1,0 +1,371 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>订单详情</title>
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+    <link rel="stylesheet" href="Common/css/common.css" />
+    <link rel="stylesheet" href="Common/css/iconfont.css" />
+    <script type="text/javascript" src="Common/js/layer_mobile/layer.js"></script>
+    <style type="text/css">
+        .content {
+            padding-bottom: 0.5rem;
+        }
+
+        .layui-m-layercont {
+            padding: 30px;
+        }
+
+        .orderPrompt {
+            height: 5rem;
+        }
+
+        .orderPrompt img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .orderPrompt div {
+            position: absolute;
+            z-index: 100;
+            top: 40%;
+            left: 15%;
+            color: #fff;
+            font-size: 0.8rem;
+        }
+
+        #btn {
+            margin-left: 5%;
+            width: 90%;
+            margin-top: 1%;
+        }
+
+        .list-block {
+            margin-bottom: 0.4rem;
+        }
+
+        .bar:after {
+            height: 0;
+        }
+    </style>
+
+    <!--数据展示-->
+    <script type="text/template" id="orderDetails_Template">
+        <header class="bar bar-nav">
+            <a onclick="closeme()" class="icon icon-left pull-left"></a>
+            <h1 class="title">确认订单</h1>
+        </header>
+        <nav class="bar bar-tab" style="height: 3rem;">
+            <a id="btn" class="button button-fill button-danger">{{btnText}}</a>
+        </nav>
+        <div class="content">
+            <div class="card">
+                <div class="card-content orderPrompt">
+                    <img src="{{promptImg}}" />
+                    <div>{{promptText}}</div>
+                </div>
+            </div>
+
+            <!--订单号-->
+            <div class="list-block" id="orderNum" style="display:none">
+                <ul>
+                    <li>
+                        <div class="item-content">
+                            <div class="item-media">
+                                <span class="iconfont icon-fa-truck-copy"></span>
+                            </div>
+                            <div class="item-inner">
+                                <div class="item-title label">物流单号</div>
+                                <div class="item-input">
+                                    <input type="number" placeholder="请输入物流单号" style="text-align: right;">
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!--发货地址-->
+            <div class="card" style="display: {{fhAddr}};" id="fhAddr">
+                <div class="card-header">发货地址</div>
+                <div class="card-content">
+                    <div class="list-block media-list">
+                        <ul>
+                            <li style="display: {{selectAddr}};">
+                                <a href="#" class="item-link item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title-row">
+                                            <div class="item-title">请选择发货地址</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="item-content" style="display: {{showAddr}};" data-id="{{地址标识}}" id="showAddr">
+                                <div class="item-media">
+                                    <img src="Common/image/fh.png" width="25px">
+                                </div>
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">{{发货人}}</div>
+                                        <div class="item-after">{{电话}}</div>
+                                    </div>
+                                    <div class="item-text" style="height: 1.65rem;line-height: 1.65rem;">
+                                        {{地址}}
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!--收货地址-->
+            <div class="card">
+                <div class="card-header">收货地址</div>
+                <div class="card-content">
+                    <div class="list-block media-list">
+                        <ul>
+                            <li class="item-content">
+                                <div class="item-media">
+                                    <img src="Common/image/sh.png" width="25px">
+                                </div>
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">{{配送收货人}}</div>
+                                        <div class="item-after">{{配送电话}}</div>
+                                    </div>
+                                    <div class="item-text" style="height: 1.65rem;line-height: 1.65rem;">
+                                        {{配送省}}{{配送市}}{{配送区}}{{配送地址}}
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!--商品信息-->
+            <div class="card">
+                <div class="card-header">{{店铺名称}}</div>
+                <div class="card-content">
+                    <div class="list-block media-list">
+                        <ul>
+                            <li class="item-content">
+                                <div class="item-media">
+                                    <img src="{{商品图片}}" style="width: 3rem;height: 3rem;">
+                                </div>
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">{{商品名称}}</div>
+                                        <div class="itme-after">￥{{实付金额}}</div>
+                                    </div>
+                                    <div class="item-text color-gray">{{商品描述}}</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!--结算信息-->
+            <div class="list-block">
+                <ul>
+                    <li class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">商品价格</div>
+                            <div class="item-after">￥{{实付金额}}</div>
+                        </div>
+                    </li>
+                    <li class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">总金额</div>
+                            <div class="item-after">￥{{实付金额}}</div>
+                        </div>
+                    </li>
+                    <li class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">订单编号</div>
+                            <div class="item-after">{{订单ID}}</div>
+                        </div>
+                    </li>
+                    <li class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">下单时间</div>
+                            <div class="item-after">{{DATA_CREATE_TIME}}</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </script>
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current" id="orderDetails"></div>
+    </div>
+    <script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+    <script type="text/javascript" src="Common/js/sdk.js"></script>
+    <script type="text/javascript" src="Common/js/sdk_data_validation.js"></script>
+    <script type="text/javascript" src="Common/js/sdk_db.js?1=1"></script>
+    <script type="text/javascript" src="Common/js/common-plus.js"></script>
+    <script type="text/javascript">
+        function plusReady() {
+            var hyID = "{{CurrentMerchantID}}";
+            var argument = $$.getParameterValue();
+            var orderID = argument.orderID;
+            var type = "";
+            var state = "";
+
+            var proc = "订单详情 " + orderID;
+            var rst = $$.JSONDB.Query(proc).Table;
+            console.log(rst);
+            for (var i = 0; i < rst.length; i++) {
+                rst[i].实付金额 = rst[i].实付金额.toFixed(2);
+                var arr = rst[i].商品图片.split(",");
+                rst[i].商品图片 = decodeURI(atob(arr[0]));
+                state = rst[i].订单状态;
+                type = rst[i].订单类别;
+                switch (rst[i].订单状态) {
+                    case 0:
+                        rst[i].promptImg = "Common/image/payment.png";
+                        rst[i].promptText = "等待买家付款";
+                        rst[i].btnText = "返回";
+                        rst[i].fhAddr = "none";
+                        break;
+                    case 1:
+                        rst[i].promptImg = "Common/image/deliver.png";
+                        if (type == 1) {
+                            rst[i].promptText = "待发货";
+                            rst[i].btnText = "去发货";
+                            rst[i].fhAddr = "block";
+                            var addrData = queryAddr();
+                            console.log(addrData)
+                            for (var k = 0; k < addrData.length; k++) {
+                                rst[i].发货人 = addrData[0].M0006_TRANS_CONSIGNEE;
+                                rst[i].电话 = addrData[0].M0006_TRANS_PHONE;
+                                rst[i].省 = addrData[0].M0006_TRANS_PROVINCE;
+                                rst[i].市 = addrData[0].M0006_TRANS_CITY;
+                                rst[i].区 = addrData[0].M0006_TRANS_AREA = "undefined" ? "" : addrData[0].M0006_TRANS_AREA;
+                                rst[i].详细 = addrData[0].M0006_TRANS_ADDRESS;
+                                rst[i].地址 = rst[i].省 + rst[i].市 + rst[i].区 + rst[i].详细;
+                                rst[i].地址标识 = addrData[0].M0006_ID;
+                            }
+                            if (addrData.length == 0) {
+                                rst[i].selectAddr = "block";
+                                rst[i].showAddr = "none"
+                            } else {
+                                rst[i].selectAddr = "none";
+                                rst[i].showAddr = "flex"
+                            }
+                        } else {
+                            rst[i].promptText = "待提货";
+                            rst[i].btnText = "返回";
+                            rst[i].fhAddr = "none";
+                        }
+
+                        break;
+                    case 2:
+                        rst[i].promptImg = "Common/image/wating.png";
+                        rst[i].promptText = "等待买家收货";
+                        rst[i].btnText = "返回";
+                        rst[i].fhAddr = "none";
+                        break;
+                    case 3:
+                        rst[i].promptImg = "Common/image/finish.png";
+                        rst[i].promptText = "交易成功";
+                        rst[i].btnText = "返回";
+                        rst[i].fhAddr = "none";
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            $$.Fill("#orderDetails", rst);
+            if ((state == 1) && (type == 1)) {
+                $("#orderNum").show();
+            }
+
+            // 操作按钮
+            $("#btn").click(function () {
+                if ((state == 1) && (type == 1)) {
+                    var trackNum = $("input").val();
+                    var addrID = "";
+                    if (!trackNum) {
+                        layer.open({
+                            content: '请输入物流单号',
+                            skin: 'msg',
+                            time: 2
+                        });
+                        return
+                    }
+
+                    var showAddr = $("#showAddr");
+                    if (showAddr.length == 0) {
+                        layer.open({
+                            content: '请选择发货地址',
+                            skin: 'msg',
+                            time: 2
+                        });
+                        return
+                    } else {
+                        addrID = $("#showAddr").attr("data-id");
+                    }
+
+                    var data = {
+                        "订单ID": orderID,
+                        "物流单号": trackNum,
+                        "发货人地址标识": addrID,
+                        "操作用户": hyID
+                    }
+                    var tmpl = "'{{订单ID}}','{{物流单号}}',{{发货人地址标识}},'{{操作用户}}'";
+                    var params = tmpl.t(data);
+                    var proc = "订单已发货 " + params;
+                    var rst = $$.JSONDB.Query(proc).Table;
+                    console.log(rst)
+                    layer.open({
+                        content: rst[0].MESSAGE,
+                        skin: 'msg',
+                        time: 2
+                    });
+                    plus.webview.create('qbdd.html?callbackType=dfh').show();
+                }else{
+                    closeme()
+                }
+               
+            });
+
+            // 地址查询
+            function queryAddr() {
+                var addrID = argument.addrID;
+                addrID = addrID == undefined ? "0" : addrID;
+                var data = {
+                    "会员标识": hyID,
+                    "配送地址标识": addrID
+                }
+                var tmpl = "{{会员标识}},{{配送地址标识}}";
+                var parmars = tmpl.t(data);
+                var proc = "配送地址列表 " + parmars;
+                var rst = $$.JSONDB.Query(proc).Table;
+                return rst
+            }
+
+            // 地址选择
+            $(".page").on("click", "#fhAddr li", function () {
+                plus.webview.create('addr/index.html?selectID=000&orderID=' + orderID).show();
+            })
+        }
+
+        if (window.plus) {
+            plusReady();
+        } else {
+            document.addEventListener('plusready', plusReady, false);
+        }
+    </script>
+</body>
+
+</html>

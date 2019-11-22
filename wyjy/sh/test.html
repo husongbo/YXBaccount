@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>图片裁剪</title>
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+		<link rel="stylesheet" href="Common/css/cropper.css">
+		<script src="Common/js/jquery.min.js"></script>
+		<script src="Common/js/cropper.js"></script>
+		<style>
+			img {
+				width: 100%;
+			}
+			
+			.bar:after {
+				height: 0;
+			}
+		</style>
+
+		<body>
+			<div class="page-group">
+				<div class="page page-current">
+					<header class="bar bar-nav" style="background-color: #000;;">
+						<a class="icon icon-left pull-left back" style="color: #FFFFFF;"></a>
+						<a class="icon pull-right finish" style="color: #FFFFFF;font-size: 0.7rem;">完成</a>
+					</header>
+					<div class="content">
+						<img id="image" src="Common/image/timg.jpg">
+					</div>
+				</div>
+			</div>
+			<script>
+				var name, value;
+				var str = location.href; //取得整个地址栏
+				var num = str.indexOf("?");
+				str = str.substr(num + 1); //取得所有参数   stringvar.substr(start [, length ]
+
+				var arr = str.split("&"); //各个参数放到数组里
+				console.log(arr);
+				for(var i = 0; i < arr.length; i++) {
+					num = arr[i].indexOf("=");
+					if(num > 0) {
+						name = arr[i].substring(0, num);
+						value = arr[i].substr(num + 1);
+						this[name] = value;
+					}
+				}
+				// $("#image").attr("src", decodeURIComponent(value));
+				var sWidth = screen.width;
+				var sHeight = screen.height;
+				$('#image').cropper({
+					aspectRatio: 4 / 3,
+					viewMode: 1,
+					dragMode: 'none',
+					guides: false,
+					background: false,
+					cropBoxResizable: false,
+					zoomOnTouch: false,
+					movable: false,
+					minCropBoxWidth: sWidth,
+					crop: function(e) {
+						console.log(e);
+					}
+				});
+
+				$(".finish").click(function() {
+					// 得到裁剪之后的图片的src
+					var cas = $('#image').cropper('getCroppedCanvas');
+					var base64url = cas.toDataURL('image/jpeg');
+					$(".a").attr("src", base64url);
+					console.log(base64url)
+				})
+			</script>
+		</body>
+
+</html>
